@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ürün Toplam Hesaplayıcı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+    }
+    button.add-btn, button.remove-btn {
+      padding: 6px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.add-btn {
+      background: #007bff;
+      color: #fff;
+    }
+    button.add-btn:hover {
+      background: #0056b3;
+    }
+    button.remove-btn {
+      background: #ccc;
+    }
+    button.remove-btn:hover {
+      background: #999;
+    }
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      align-items: center;
+    }
+    .product-row div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input#calcName {
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      border:1px solid #ccc;
+      border-radius:8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ürün Hesaplama</h1>
+    <div class="category" id="categories"></div>
+    <div class="total">Toplam: <span id="totalPrice">0</span> ₺</div>
+    <input id="calcName" type="text" placeholder="Hesaplama adı">
+    <button onclick="saveCalculation()">Hesaplamayı Kaydet</button>
+    <h2>Kayıtlı Hesaplamalar</h2>
+    <ul id="calcList"></ul>
+  </div>
+<script>
+const products = {
+  "Pizza": [
+    { name: 'Margherita', price: 35 },
+    { name: 'Pepperoni', price: 30 },
+    { name: 'Spicy Arrabbiata', price: 20 }
+  ],
+  "Spesiyal Makarna": [
+    { name: 'Trufa al Maretti', price: 25 },
+    { name: 'Mare', price: 29 },
+    { name: 'Shrimp Fra Diavolo', price: 26 },
+    { name: 'Penne San Remo', price: 20 }
+  ],
+  "Ana Yemek": [
+    { name: 'Rosso', price: 25 },
+    { name: 'Dolce Agnello', price: 24 },
+    { name: 'Mozzarella Caprese', price: 23 },
+    { name: 'Fried Calamari', price: 22 }
+  ],
+  "Tatlılar": [
+    { name: 'Tiramì', price: 25 },
+    { name: 'Panna', price: 20 },
+    { name: 'Cannolì', price: 30 }
+  ],
+  "İçecekler": [
+    { name: 'Arancìa', price: 25 },
+    { name: 'Sprìtz', price: 20 },
+    { name: 'Fresco', price: 19 },
+    { name: 'Grappa', price: 16 }
+  ],
+  "Salatalar": [
+    { name: 'Capres', price: 18 },
+    { name: 'Arugula', price: 20 },
+    { name: 'Insalata di Mare', price: 15 },
+    { name: 'Panzanella', price: 10 }
+  ]
+};
+
+function loadProducts() {
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  for (const category in products) {
+    const group = document.createElement('div');
+    group.style.marginBottom = '22px';
+    group.innerHTML = `<h3>${category}</h3>`;
+    products[category].forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'product-row';
+      row.dataset.price = item.price;
+      row.innerHTML = `
+        <span>${item.name} — <b>${item.price} ₺</b></span>
+        <div>
+          <button class="remove-btn" onclick="decrease(this)">-</button>
+          <span class="count">0</span>
+          <button class="add-btn" onclick="increase(this)">+</button>
+          <span class="row-total">0</span> ₺
+        </div>`;
+      group.appendChild(row);
+    });
+    container.appendChild(group);
+  }
+}
+
+function increase(btn) {
+  const row = btn.closest('.product-row');
+  if (!row) return;
+  const countEl = row.querySelector('.count');
+  if (!countEl) return;
+  countEl.innerText = Number(countEl.innerText || 0) + 1;
+  const price = Number(row.dataset.price || 0);
+  updateRowTotal(row, price);
+}
+
+function decrease(btn) {
+  const row = btn.closest('.product-row');
+  if (!row) return;
+  const countEl = row.querySelector('.count');
+  if (!countEl) return;
+  if (Number(countEl.innerText || 0) > 0) {
+    countEl.innerText = Number(countEl.innerText) - 1;
+    const price = Number(row.dataset.price || 0);
+    updateRowTotal(row, price);
+  }
+}
+
+function updateRowTotal(row, price) {
+  if (!row) return;
+  const countEl = row.querySelector('.count');
+  const totalSpan = row.querySelector('.row-total');
+  if (!countEl || !totalSpan) return;
+  const qty = Number(countEl.innerText || 0);
+  totalSpan.innerText = (qty * price).toFixed(2).replace(/\.00$/, '');
+  calculateTotal();
+}
+
+function calculateTotal() {
+  let total = 0;
+  document.querySelectorAll('.row-total').forEach(t => {
+    const val = Number(t.innerText || 0);
+    total += val;
+  });
+  document.getElementById('totalPrice').innerText = total % 1 === 0 ? total : total.toFixed(2);
+}
+
+function saveCalculation() {
+  const name = document.getElementById('calcName').value.trim();
+  if (!name) return alert('Hesaplamaya bir isim ver.');
+  const total = document.getElementById('totalPrice').innerText;
+  const li = document.createElement('li');
+  const breakdown = Array.from(document.querySelectorAll('.product-row'))
+    .map(r => {
+      const countEl = r.querySelector('.count');
+      if (!countEl) return null;
+      const qty = Number(countEl.innerText || 0);
+      if (qty === 0) return null;
+      const name = r.querySelector('span')?.innerText.split(' — ')[0] || 'Ürün';
+      return `${name} x${qty}`;
+    })
+    .filter(Boolean)
+    .join(', ');
+  li.innerText = `${name}: ${total} ₺` + (breakdown ? ` — (${breakdown})` : '');
+  document.getElementById('calcList').appendChild(li);
+  document.getElementById('calcName').value = '';
+  document.querySelectorAll('.product-row .count').forEach(c => c.innerText = '0');
+  document.querySelectorAll('.row-total').forEach(c => c.innerText = '0');
+  document.getElementById('totalPrice').innerText = '0';
+}
+
+loadProducts();
+</script>
+</body>
+</html>
