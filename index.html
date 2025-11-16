@@ -14,8 +14,8 @@
       text-align: center;
     }
     .container {
-      max-width: 600px;
-      margin: 0 auto;
+      max-width: 500px;
+      margin: 0  auto;
       background: #fff;
       padding: 20px;
       border-radius: 12px;
@@ -35,6 +35,17 @@
     }
     button.add-btn {
       background: #007bff;
+      color: #fff;
+    }
+    #saveButton {
+      margin-top: 10px;
+      padding: 10px 15px;
+      margin-left: 33%;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #28a745;
       color: #fff;
     }
     button.add-btn:hover {
@@ -72,7 +83,7 @@
     <div class="category" id="categories"></div>
     <div class="total">Toplam: <span id="totalPrice">0</span> $</div>
     <input id="calcName" type="text" placeholder="Hesaplama adı">
-    <button onclick="saveCalculation()">Hesaplamayı Kaydet</button>
+    <button id="saveButton" onclick="saveCalculation()">Hesaplamayı Kaydet</button>
     <h2>Kayıtlı Hesaplamalar</h2>
     <ul id="calcList"></ul>
   </div>
