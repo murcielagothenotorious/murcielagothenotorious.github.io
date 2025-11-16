@@ -70,7 +70,7 @@
   <div class="container">
     <h1>Ürün Hesaplama</h1>
     <div class="category" id="categories"></div>
-    <div class="total">Toplam: <span id="totalPrice">0</span> ₺</div>
+    <div class="total">Toplam: <span id="totalPrice">0</span> $</div>
     <input id="calcName" type="text" placeholder="Hesaplama adı">
     <button onclick="saveCalculation()">Hesaplamayı Kaydet</button>
     <h2>Kayıtlı Hesaplamalar</h2>
@@ -126,12 +126,12 @@ function loadProducts() {
       row.className = 'product-row';
       row.dataset.price = item.price;
       row.innerHTML = `
-        <span>${item.name} — <b>${item.price} ₺</b></span>
+        <span>${item.name} — <b>${item.price} $</b></span>
         <div>
           <button class="remove-btn" onclick="decrease(this)">-</button>
           <span class="count">0</span>
           <button class="add-btn" onclick="increase(this)">+</button>
-          <span class="row-total">0</span> ₺
+          <span class="row-total">0</span> $
         </div>`;
       group.appendChild(row);
     });
@@ -196,7 +196,7 @@ function saveCalculation() {
     })
     .filter(Boolean)
     .join(', ');
-  li.innerText = `${name}: ${total} ₺` + (breakdown ? ` — (${breakdown})` : '');
+  li.innerText = `${name}: ${total} $` + (breakdown ? ` — (${breakdown})` : '');
   document.getElementById('calcList').appendChild(li);
   document.getElementById('calcName').value = '';
   document.querySelectorAll('.product-row .count').forEach(c => c.innerText = '0');
