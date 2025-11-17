@@ -12,7 +12,7 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyC17G-mWb_z2xIHBo7s4rrcQkeyHqv51KA",
   authDomain: "casacarmaretti.firebaseapp.com",
-  databaseURL: "https://casacarmaretti-default-rtdb.firebaseio.com",
+  databaseURL: "https://casacarmaretti-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "casacarmaretti",
   storageBucket: "casacarmaretti.firebasestorage.app",
   messagingSenderId: "1078474886220",
