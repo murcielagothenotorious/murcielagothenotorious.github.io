@@ -46,6 +46,9 @@ let savedCalculations = [];
 let editingId = null;
 let unsubscribeOrders = null;
 let waiterModalInstance = null;
+let receiptFontPromise = null;
+
+const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
 
 const selectors = {
   categories: document.getElementById("categories"),
@@ -591,101 +594,204 @@ function resetCounts() {
     .forEach((c) => (c.textContent = ""));
 }
 
-function downloadReceipt(calc) {
+function ensureReceiptFont() {
+  if (receiptFontPromise) return receiptFontPromise;
+  if (document.fonts?.load) {
+    receiptFontPromise = document.fonts.load(`16px ${RECEIPT_FONT_FAMILY}`);
+  } else {
+    receiptFontPromise = Promise.resolve();
+  }
+  return receiptFontPromise;
+}
+
+async function downloadReceipt(calc) {
+  await ensureReceiptFont();
+
   const canvas = selectors.receiptCanvas;
   const ctx = canvas.getContext("2d");
 
-  const width = 600;
-  const lineHeight = 30;
-  const padding = 40;
-  const headerHeight = 120;
-  const itemsHeight = calc.items.length * lineHeight + 60;
-  const footerHeight = 100;
+  const width = 480;
+  const padding = 32;
+  const lineHeight = 26;
+  const headerHeight = 220;
+  const itemsHeight = calc.items.length * lineHeight + 40;
+  const footerHeight = 140;
   const height = headerHeight + itemsHeight + footerHeight;
 
   canvas.width = width;
   canvas.height = height;
 
-  ctx.fillStyle = "#ffffff";
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = "#fdfaf3";
   ctx.fillRect(0, 0, width, height);
 
-  const weights = [1, 1, 1];
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-  const boxWidth = (i) => width * (weights[i] / totalWeight);
+  const sideNotch = (x) => {
+    ctx.strokeStyle = "#d6d3d1";
+    ctx.lineWidth = 1.2;
+    for (let y = 10; y < height - 10; y += 12) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 6, y + 2);
+      ctx.stroke();
+    }
+  };
 
-  let x = 0;
-  ctx.fillStyle = "#00CC00";
-  ctx.fillRect(x, 0, boxWidth(0), 50);
-  x += boxWidth(0);
+  sideNotch(8);
+  sideNotch(width - 14);
 
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(x, 0, boxWidth(1), 50);
-  x += boxWidth(1);
+  const drawSeparator = (yPos) => {
+    ctx.strokeStyle = "#d1d5db";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(padding, yPos);
+    ctx.lineTo(width - padding, yPos);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  };
 
-  ctx.fillStyle = "#FF0000";
-  ctx.fillRect(x, 0, boxWidth(2), 50);
+  let yPos = padding + 12;
 
-  ctx.fillStyle = "#333333";
-  ctx.font = "bold 32px Arial";
+  ctx.fillStyle = "#0f172a";
+  ctx.font = `700 26px ${RECEIPT_FONT_FAMILY}`;
   ctx.textAlign = "center";
-  ctx.fillText("CASA CARMARETTI", width / 2, 40);
+  ctx.fillText("CASA CARMARETTI", width / 2, yPos);
+  yPos += 30;
 
-  ctx.fillStyle = "#333";
-  ctx.font = "bold 20px Arial";
+  ctx.font = `600 16px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#1f2937";
+  ctx.fillText("Osteria & Bar", width / 2, yPos);
+  yPos += 22;
+
+  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#4b5563";
+  ctx.fillText("Via Roma 21 - Milano", width / 2, yPos);
+  yPos += 18;
+  ctx.fillText("Tel: +39 02 555 1234", width / 2, yPos);
+
+  yPos += 26;
+  drawSeparator(yPos);
+  yPos += 22;
+
   ctx.textAlign = "left";
-  ctx.fillText(calc.name, padding, 110);
+  ctx.font = `600 15px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#111827";
+  ctx.fillText(`Fiş: ${calc.name}`, padding, yPos);
+  yPos += 22;
+  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#374151";
+  ctx.fillText(`Tarih: ${calc.date}`, padding, yPos);
+  yPos += 20;
+  ctx.fillText(`Garson: ${calc.waiterName || "-"}`, padding, yPos);
 
-  ctx.font = "14px Arial";
-  ctx.fillStyle = "#666";
-  ctx.fillText(calc.date, padding, 135);
+  yPos += 26;
+  drawSeparator(yPos);
+  yPos += 30;
 
-  ctx.strokeStyle = "#ddd";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(padding, 150);
-  ctx.lineTo(width - padding, 150);
-  ctx.stroke();
+  const colName = padding;
+  const colQty = width - padding - 190;
+  const colPrice = width - padding - 110;
+  const colTotal = width - padding;
 
-  let yPos = 180;
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#333";
+  ctx.font = `600 14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#111827";
+  ctx.textAlign = "left";
+  ctx.fillText("Ürün", colName, yPos);
+  ctx.textAlign = "center";
+  ctx.fillText("Adet", colQty, yPos);
+  ctx.textAlign = "right";
+  ctx.fillText("Birim", colPrice, yPos);
+  ctx.fillText("Ara Toplam", colTotal, yPos);
+
+  yPos += 14;
+  drawSeparator(yPos);
+  yPos += 18;
+
+  let subtotal = 0;
+  let serviceFee = 0;
+
+  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#111827";
 
   calc.items.forEach((item) => {
     const itemTotal = item.qty * item.price;
+    const isService = item.name.toLowerCase().includes("servis");
+    if (isService) {
+      serviceFee += itemTotal;
+    } else {
+      subtotal += itemTotal;
+    }
 
     ctx.textAlign = "left";
-    ctx.fillText(item.name, padding, yPos);
-    ctx.fillText(`x${item.qty}`, padding + 250, yPos);
+    ctx.fillText(item.name, colName, yPos);
+
+    ctx.textAlign = "center";
+    ctx.fillText(`x${item.qty}`, colQty, yPos);
 
     ctx.textAlign = "right";
-    ctx.fillText(`${item.price} $`, width - padding - 100, yPos);
-    ctx.fillText(`${itemTotal} $`, width - padding, yPos);
+    ctx.fillText(`${item.price} $`, colPrice, yPos);
+    ctx.fillText(`${itemTotal} $`, colTotal, yPos);
 
     yPos += lineHeight;
   });
 
-  yPos += 10;
-  ctx.strokeStyle = "#ddd";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(padding, yPos);
-  ctx.lineTo(width - padding, yPos);
-  ctx.stroke();
+  yPos -= 6;
+  drawSeparator(yPos);
+  yPos += 28;
 
-  yPos += 40;
-  ctx.font = "bold 24px Arial";
-  ctx.fillStyle = "#28a745";
+  ctx.font = `600 15px ${RECEIPT_FONT_FAMILY}`;
   ctx.textAlign = "left";
-  ctx.fillText("TOPLAM:", padding, yPos);
-
+  ctx.fillStyle = "#374151";
+  ctx.fillText("Ara toplam", colName, yPos);
   ctx.textAlign = "right";
-  ctx.fillText(`${calc.total} $`, width - padding, yPos);
+  ctx.fillText(`${subtotal.toFixed(2)} $`, colTotal, yPos);
 
-  yPos += 50;
-  ctx.font = "12px Arial";
-  ctx.fillStyle = "#999";
+  yPos += 22;
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#374151";
+  ctx.fillText("Servis", colName, yPos);
+  ctx.textAlign = "right";
+  ctx.fillText(`${serviceFee.toFixed(2)} $`, colTotal, yPos);
+
+  yPos += 26;
+  ctx.font = `700 17px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#0f172a";
+  ctx.fillText("TOPLAM", colName, yPos);
+  ctx.fillStyle = "#111827";
+  ctx.fillText(`${calc.total.toFixed(2)} $`, colTotal, yPos);
+
+  yPos += 32;
+  drawSeparator(yPos);
+  yPos += 28;
+
+  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#1f2937";
+  ctx.textAlign = "left";
+  ctx.fillText("Ödeme yöntemi: Kart", colName, yPos);
+  yPos += 20;
+  ctx.fillText(`Fiş No: ${calc.timestamp || Date.now()}`, colName, yPos);
+  yPos += 20;
+  ctx.fillText("Vergi dahil edilmiştir.", colName, yPos);
+
+  yPos += 32;
   ctx.textAlign = "center";
-  ctx.fillText("Bizi tercih ettiğiniz için teşekkür ederiz!", width / 2, yPos - 10);
+  ctx.fillStyle = "#111827";
+  ctx.font = `600 14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillText("Bizi tercih ettiğiniz için teşekkür ederiz!", width / 2, yPos);
+  yPos += 20;
+  ctx.font = `13px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#4b5563";
+  ctx.fillText("En iyi deneyim için yakında tekrar görüşelim.", width / 2, yPos);
+
+  const barcodeY = height - 60;
+  ctx.fillStyle = "#111827";
+  for (let i = 0; i < 40; i++) {
+    const barWidth = Math.random() * 3 + 1;
+    const barHeight = Math.random() * 20 + 30;
+    const x = padding + i * 8;
+    ctx.fillRect(x, barcodeY - barHeight, barWidth, barHeight);
+  }
 
   const link = document.createElement("a");
   link.download = `${calc.name.replace(/[^a-z0-9]/gi, "_")}_${Date.now()}.png`;
