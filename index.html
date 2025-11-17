@@ -4,76 +4,168 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ürün Toplam Hesaplayıcı</title>
-  <style>
+<style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: Arial, sans-serif;
       background: #f5f5f5;
-      padding: 20px;
+      padding: 10px;
+      min-height: 100vh;
     }
     h1 {
       text-align: center;
+      font-size: clamp(20px, 5vw, 28px);
+      margin-bottom: 15px;
+      color: #333;
+    }
+    h2 {
+      font-size: 18px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #555;
     }
     .container {
-      max-width: 600px;
-      margin: 0  auto;
+      max-width: 800px;
+      margin: 0 auto;
       background: #fff;
-      padding: 20px;
+      padding: 15px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .sticky-footer {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      padding: 15px;
+      border-top: 2px solid #e0e0e0;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+      z-index: 10;
     }
     .total {
-      font-size: 20px;
+      font-size: clamp(18px, 4vw, 24px);
       font-weight: bold;
       text-align: right;
+      margin-bottom: 12px;
+      color: #28a745;
     }
     button.add-btn, button.remove-btn {
-      padding: 6px 10px;
-      font-size: 14px;
+      padding: 8px 12px;
+      font-size: 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
+      min-width: 36px;
+      transition: all 0.2s;
     }
     button.add-btn {
       background: #007bff;
       color: #fff;
     }
     #saveButton {
-      margin-top: 10px;
-      padding: 10px 15px;
-      margin-left: 33%;
+      width: 100%;
+      padding: 12px;
       font-size: 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       background: #28a745;
       color: #fff;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    #saveButton:hover {
+      background: #218838;
     }
     button.add-btn:hover {
       background: #0056b3;
     }
     button.remove-btn {
-      background: #ccc;
+      background: #dc3545;
+      color: #fff;
     }
     button.remove-btn:hover {
-      background: #999;
+      background: #c82333;
     }
     .product-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 10px 0;
       align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 10px;
     }
-    .product-row div {
+    .product-row:last-child {
+      border-bottom: none;
+    }
+    .product-name {
+      flex: 1;
+      font-size: 14px;
+    }
+    .product-row .controls {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
+    }
+    .count {
+      min-width: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .row-total {
+      min-width: 50px;
+      text-align: right;
+      font-weight: bold;
+      color: #007bff;
     }
     input#calcName {
-      width:100%;
-      padding:10px;
-      margin:10px 0;
-      border:1px solid #ccc;
-      border-radius:8px;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .category {
+      margin-bottom: 20px;
+    }
+    .category > div {
+      margin-bottom: 20px;
+    }
+    #calcList {
+      list-style: none;
+      padding: 0;
+    }
+    #calcList li {
+      padding: 10px;
+      margin: 8px 0;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 14px;
+      word-wrap: break-word;
+    }
+    @media (max-width: 600px) {
+      .product-name {
+        font-size: 13px;
+      }
+      button.add-btn, button.remove-btn {
+        padding: 6px 10px;
+        font-size: 14px;
+        min-width: 32px;
+      }
+      .controls {
+        gap: 6px !important;
+      }
     }
   </style>
 </head>
