@@ -672,9 +672,11 @@ async function downloadReceipt(calc) {
   }));
 
   const itemsHeight =
-    preparedItems.reduce((total, item) => total + item.lines.length * lineHeight, 0) +
+    preparedItems
+      .filter(item => !item.name.toLowerCase().includes("servis"))
+      .reduce((total, item) => total + item.lines.length * lineHeight, 0) +
     40;
-  const footerHeight = 140;
+  const footerHeight = 200;
   const height = headerHeight + itemsHeight + footerHeight;
 
   canvas.height = height;
@@ -833,7 +835,6 @@ async function downloadReceipt(calc) {
   yPos += 20;
   ctx.fillText(`Fiş No: ${calc.timestamp || Date.now()}`, colName, yPos);
   yPos += 20;
-  ctx.fillText("Vergi dahil edilmiştir.", colName, yPos);
 
   yPos += 32;
   ctx.textAlign = "center";
