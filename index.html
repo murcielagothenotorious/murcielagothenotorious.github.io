@@ -2,747 +2,168 @@
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="script.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Ürün Toplam Hesaplayıcı</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: Arial, sans-serif;
-        background: #f5f5f5;
-        padding: 10px;
-        padding-bottom: 180px;
-        min-height: 100vh;
-      }
-      h1 {
-        text-align: center;
-        font-size: clamp(20px, 5vw, 28px);
-        margin-bottom: 20px;
-        color: #333;
-      }
-      h3 {
-        font-size: 18px;
-        margin-bottom: 12px;
-        color: #555;
-        padding: 10px 0;
-        border-bottom: 2px solid #007bff;
-      }
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-      .category-group {
-        margin-bottom: 30px;
-      }
-      .product-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-      }
-      .product-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 2px solid #e0e0e0;
-        min-height: 150px;
-        transition: all 0.2s;
-      }
-      .product-card:hover {
-        border-color: #007bff;
-        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
-        transform: translateY(-2px);
-      }
-      .product-name {
-        font-size: 14px;
-        text-align: center;
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 8px;
-      }
-      .product-price {
-        font-size: 16px;
-        font-weight: bold;
-        color: #28a745;
-        margin-bottom: 10px;
-      }
-      .controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
-      button.add-btn,
-      button.remove-btn {
-        padding: 8px 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        min-width: 36px;
-        transition: all 0.2s;
-        font-weight: bold;
-      }
-      button.add-btn {
-        background: #007bff;
-        color: #fff;
-      }
-      button.add-btn:hover {
-        background: #0056b3;
-      }
-      button.remove-btn {
-        background: #dc3545;
-        color: #fff;
-      }
-      button.remove-btn:hover {
-        background: #c82333;
-      }
-      .count {
-        min-width: 30px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-      }
-      .row-total {
-        text-align: center;
-        font-weight: bold;
-        color: #007bff;
-        font-size: 15px;
-        min-height: 20px;
-      }
-      .sticky-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        padding: 15px;
-        border-top: 2px solid #e0e0e0;
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-        z-index: 100;
-      }
-      .footer-content {
-        max-width: 900px;
-        margin: 0 auto;
-      }
-      .total {
-        font-size: clamp(18px, 4vw, 24px);
-        font-weight: bold;
-        text-align: right;
-        margin-bottom: 10px;
-        color: #28a745;
-      }
-      input#calcName {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 16px;
-      }
-      #saveButton {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        background: #28a745;
-        color: #fff;
-        font-weight: bold;
-        transition: all 0.2s;
-      }
-      #saveButton:hover {
-        background: #218838;
-      }
-      .saved-section {
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 2px solid #e0e0e0;
-      }
-      .saved-section h2 {
-        font-size: 20px;
-        margin-bottom: 15px;
-        color: #333;
-      }
-      #calcList {
-        list-style: none;
-        padding: 0;
-      }
-      #calcList li {
-        padding: 12px;
-        margin: 8px 0;
-        background: #f8f9fa;
-        border-radius: 6px;
-        font-size: 14px;
-        word-wrap: break-word;
-        border-left: 4px solid #007bff;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-      }
-      .calc-info {
-        flex: 1;
-      }
-      .calc-actions {
-        display: flex;
-        gap: 8px;
-        flex-shrink: 0;
-      }
-      .calc-actions button {
-        padding: 6px 12px;
-        font-size: 13px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 500;
-      }
-      .btn-edit {
-        background: #ffc107;
-        color: #000;
-      }
-      .btn-edit:hover {
-        background: #e0a800;
-      }
-      .btn-download {
-        background: #17a2b8;
-        color: #fff;
-      }
-      .btn-download:hover {
-        background: #138496;
-      }
-      .btn-delete {
-        background: #dc3545;
-        color: #fff;
-      }
-      .btn-delete:hover {
-        background: #c82333;
-      }
-      #receiptCanvas {
-        display: none;
-      }
-      @media (max-width: 768px) {
-        .product-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-        .calc-actions {
-          flex-direction: column;
-        }
-        .calc-actions button {
-          width: 80px;
-        }
-      }
-      @media (max-width: 500px) {
-        .product-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-        }
-        .product-card {
-          padding: 12px;
-          min-height: 140px;
-        }
-        .product-name {
-          font-size: 13px;
-        }
-        button.add-btn,
-        button.remove-btn {
-          padding: 6px 10px;
-          font-size: 14px;
-          min-width: 32px;
-        }
-        .controls {
-          gap: 8px;
-        }
-        #calcList li {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .calc-actions {
-          width: 100%;
-          flex-direction: row;
-          justify-content: flex-end;
-        }
-      }
-    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body>
-    <div class="container">
-      <h1>Ürün Hesaplama</h1>
-      <div id="categories"></div>
-      <div class="saved-section">
-        <h2>Kayıtlı Hesaplamalar</h2>
-        <ul id="calcList"></ul>
+  <body class="bg-body text-body">
+    <header class="bg-gradient position-relative overflow-hidden">
+      <div class="container py-4">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+          <div>
+            <p class="hero-eyebrow mb-2">Casa Carmaretti</p>
+            <h1 class="fw-bold display-6 mb-1 text-white">Ürün Toplam Hesaplayıcı</h1>
+            <p class="text-light mb-0">Hızlıca seç, kaydet ve canlı sipariş akışını izle.</p>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
+              <span class="status-dot me-2"></span>Canlı Firebase
+            </span>
+            <span class="badge bg-dark-subtle text-dark-emphasis rounded-pill px-3 py-2">
+              Servis ücreti dahil edilir
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <div class="sticky-footer">
-      <div class="footer-content">
-        <div class="total">Toplam: <span id="totalPrice">0</span> $</div>
-        <input id="calcName" type="text" placeholder="Hesaplama adı girin..." />
-        <button id="saveButton" onclick="saveCalculation()">
-          Hesaplamayı Kaydet
-        </button>
+    <main class="container py-5">
+      <div class="row g-4 g-xl-5 align-items-start">
+        <div class="col-12 col-lg-7">
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-xl-6">
+              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+                <div class="card-body p-4 d-flex flex-column gap-3">
+                  <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
+                      <h2 class="h5 mb-1">Adını kaydet, siparişlerde göster</h2>
+                      <p class="text-secondary mb-0">İsim tarayıcıda saklanır, sayfa yenilense bile kaybolmaz.</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Aktif</span>
+                  </div>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-light">👤</span>
+                    <input
+                      id="waiterNameInput"
+                      type="text"
+                      class="form-control"
+                      placeholder="Garson adı"
+                      autocomplete="name"
+                    />
+                    <button class="btn btn-primary" id="saveWaiterButton" type="button">Kaydet</button>
+                  </div>
+                  <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Aktif garson</span>
+                      <strong id="activeWaiterName">-</strong>
+                    </div>
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Toplam sipariş</span>
+                      <strong id="waiterOrderCount">0</strong>
+                    </div>
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Servis payı (20%)</span>
+                      <strong id="waiterServiceShare">0 $</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <div class="col-12 col-xl-6">
+              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div>
+                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Liderlik</p>
+                      <h2 class="h5 mb-0">Garson sıralaması</h2>
+                    </div>
+                    <span class="badge bg-info-subtle text-info-emphasis rounded-pill">Canlı</span>
+                  </div>
+                  <ul id="leaderboardList" class="leaderboard list-unstyled mb-0"></ul>
+                </div>
+              </section>
+            </div>
+          </div>
+          <section class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+            <div class="card-body p-4 p-md-5">
+              <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+                <div>
+                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Hızlı hesaplama</p>
+                  <h2 class="h3 mb-2">Ürünleri seç, toplamı anında gör</h2>
+                  <p class="text-secondary mb-0">
+                    Miktarları artırıp azaltabilir, kaydedebilir ve sonradan düzenleyebilirsin.
+                  </p>
+                </div>
+                <div class="service-chip px-4 py-3 rounded-4 shadow-sm d-flex align-items-center gap-2">
+                  <span class="fw-semibold">Servis ücreti</span>
+                  <span class="badge bg-primary-subtle text-primary-emphasis fs-6">200 $</span>
+                </div>
+              </div>
+              <div id="categories" class="categories"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 80px">
+            <div class="card-body p-4 p-md-5 d-flex flex-column gap-3">
+              <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                <div>
+                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş Özeti</p>
+                  <h3 class="h4 mb-0 d-flex align-items-center gap-2">
+                    Canlı Sipariş Listesi
+                    <span class="live-dot"></span>
+                  </h3>
+                </div>
+                <div class="total-chip text-end">
+                  <small class="text-secondary d-block">Toplam</small>
+                  <span id="totalPrice" class="fw-bold display-6">0</span>
+                  <span class="text-secondary">$</span>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <label for="calcName" class="form-label fw-semibold">Sipariş adı</label>
+                <input
+                  id="calcName"
+                  type="text"
+                  class="form-control form-control-lg"
+                  placeholder="Örn: Masa 4 - Akşam"
+                  autocomplete="off"
+                />
+              </div>
+              <button id="saveButton" class="btn btn-primary btn-lg w-100" type="button">
+                Hesaplamayı Kaydet
+              </button>
+
+              <div class="border-top pt-3">
+                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                  <div>
+                    <h4 class="h6 mb-1">Kayıtlı Hesaplamalar</h4>
+                    <p class="text-secondary small mb-0">Kaydettiğin siparişler anında burada listelenir.</p>
+                  </div>
+                </div>
+                <ul id="calcList" class="calc-list list-unstyled d-flex flex-column gap-3 mb-0"></ul>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
-
-    <canvas id="receiptCanvas"></canvas>
-
-    <script>
-      const products = {
-        Pizza: [
-          { name: "Margherita", price: 350 },
-          { name: "Pepperoni", price: 300 },
-          { name: "Spicy Arrabbiata", price: 200 },
-        ],
-        "Spesiyal Makarna": [
-          { name: "Trufa al Maretti", price: 250 },
-          { name: "Mare", price: 290 },
-          { name: "Shrimp Fra Diavolo", price: 260 },
-          { name: "Penne San Remo", price: 200 },
-        ],
-        "Ana Yemek": [
-          { name: "Rosso", price: 250 },
-          { name: "Dolce Agnello", price: 240 },
-          { name: "Mozzarella Caprese", price: 230 },
-          { name: "Fried Calamari", price: 220 },
-        ],
-        Tatlılar: [
-          { name: "Tiramì", price: 250 },
-          { name: "Panna", price: 200 },
-          { name: "Cannolì", price: 300 },
-        ],
-        İçecekler: [
-          { name: "Arancìa", price: 250 },
-          { name: "Sprìtz", price: 200 },
-          { name: "Fresco", price: 190 },
-          { name: "Grappa", price: 160 },
-        ],
-        Salatalar: [
-          { name: "Capres", price: 180 },
-          { name: "Arugula", price: 200 },
-          { name: "Insalata di Mare", price: 150 },
-          { name: "Panzanella", price: 100 },
-        ],
-      };
-
-      let savedCalculations = [];
-      let editingIndex = -1;
-
-      function loadProducts() {
-        const container = document.getElementById("categories");
-        container.innerHTML = "";
-
-        for (const category in products) {
-          const categoryGroup = document.createElement("div");
-          categoryGroup.className = "category-group";
-
-          const categoryTitle = document.createElement("h3");
-          categoryTitle.textContent = category;
-          categoryGroup.appendChild(categoryTitle);
-
-          const grid = document.createElement("div");
-          grid.className = "product-grid";
-
-          products[category].forEach((item) => {
-            const card = document.createElement("div");
-            card.className = "product-card";
-            card.dataset.price = item.price;
-            card.dataset.name = item.name;
-
-            const nameDiv = document.createElement("div");
-            nameDiv.className = "product-name";
-            nameDiv.textContent = item.name;
-
-            const priceDiv = document.createElement("div");
-            priceDiv.className = "product-price";
-            priceDiv.textContent = `${item.price} $`;
-
-            const controlsDiv = document.createElement("div");
-            controlsDiv.className = "controls";
-
-            const minusBtn = document.createElement("button");
-            minusBtn.className = "remove-btn";
-            minusBtn.textContent = "-";
-            minusBtn.onclick = function () {
-              decrease(this);
-            };
-
-            const countSpan = document.createElement("span");
-            countSpan.className = "count";
-            countSpan.textContent = "0";
-
-            const plusBtn = document.createElement("button");
-            plusBtn.className = "add-btn";
-            plusBtn.textContent = "+";
-            plusBtn.onclick = function () {
-              increase(this);
-            };
-
-            controlsDiv.appendChild(minusBtn);
-            controlsDiv.appendChild(countSpan);
-            controlsDiv.appendChild(plusBtn);
-
-            const totalDiv = document.createElement("div");
-            totalDiv.className = "row-total";
-            totalDiv.textContent = "";
-
-            card.appendChild(nameDiv);
-            card.appendChild(priceDiv);
-            card.appendChild(controlsDiv);
-            card.appendChild(totalDiv);
-
-            grid.appendChild(card);
-          });
-
-          categoryGroup.appendChild(grid);
-          container.appendChild(categoryGroup);
-        }
-      }
-
-      function increase(btn) {
-        const card = btn.closest(".product-card");
-        if (!card) return;
-        const countEl = card.querySelector(".count");
-        if (!countEl) return;
-        countEl.innerText = Number(countEl.innerText || 0) + 1;
-        const price = Number(card.dataset.price || 0);
-        updateRowTotal(card, price);
-      }
-
-      function decrease(btn) {
-        const card = btn.closest(".product-card");
-        if (!card) return;
-        const countEl = card.querySelector(".count");
-        if (!countEl) return;
-        if (Number(countEl.innerText || 0) > 0) {
-          countEl.innerText = Number(countEl.innerText) - 1;
-          const price = Number(card.dataset.price || 0);
-          updateRowTotal(card, price);
-        }
-      }
-
-      function updateRowTotal(card, price) {
-        if (!card) return;
-        const countEl = card.querySelector(".count");
-        const totalDiv = card.querySelector(".row-total");
-        if (!countEl || !totalDiv) return;
-        const qty = Number(countEl.innerText || 0);
-        const total = qty * price;
-        totalDiv.textContent = qty > 0 ? `${total} $` : "";
-        calculateTotal();
-      }
-
-      function calculateTotal() {
-        let total = 0;
-        document.querySelectorAll(".product-card").forEach((card) => {
-          const countEl = card.querySelector(".count");
-          if (!countEl) return;
-          const qty = Number(countEl.innerText || 0);
-          const price = Number(card.dataset.price || 0);
-          total += qty * price;
-        });
-
-        total += 200;
-        document.getElementById("totalPrice").innerText =
-          total % 1 === 0 ? total : total.toFixed(2);
-      }
-
-      function saveCalculation() {
-        const name = document.getElementById("calcName").value.trim();
-        if (!name) return alert("Lütfen hesaplamaya bir isim verin.");
-
-        const total = document.getElementById("totalPrice").innerText;
-        const items = [];
-
-        try {
-        document.querySelectorAll(".product-card").forEach((card) => {
-          const countEl = card.querySelector(".count");
-          if (!countEl) return;
-          const qty = Number(countEl.innerText || 0);
-          if (qty === 0) return;
-          const productName = card.dataset.name;
-          const price = Number(card.dataset.price || 0);
-          items.push({ name: productName, qty: qty, price: price });
-          
-        })
-        }
-        finally {
-           items.push({ name: "Servis Hizmeti", qty: 1, price: 200 });
-        };
-
-        if (items.length === 0) {
-          return alert("Lütfen en az bir ürün seçin.");
-        }
-
-        const calculation = {
-          name: name,
-          total: total,
-          items: items,
-        };
-
-        if (editingIndex >= 0) {
-          savedCalculations[editingIndex] = calculation;
-          editingIndex = -1;
-          document.getElementById("saveButton").textContent =
-            "Hesaplamayı Kaydet";
-        } else {
-          savedCalculations.push(calculation);
-        }
-
-        renderCalculationList();
-        resetForm();
-      }
-
-      function renderCalculationList() {
-        const list = document.getElementById("calcList");
-        list.innerHTML = "";
-
-        savedCalculations.forEach((calc, index) => {
-          const li = document.createElement("li");
-
-          const info = document.createElement("div");
-          info.className = "calc-info";
-          const breakdown = calc.items
-            .map((item) => `${item.name} x${item.qty}`)
-            .join(", ");
-          info.innerHTML = `<strong>${calc.name}</strong>: ${calc.total} $</small><br><small>${breakdown}</small>`;
-
-          const actions = document.createElement("div");
-          actions.className = "calc-actions";
-
-          const editBtn = document.createElement("button");
-          editBtn.className = "btn-edit";
-          editBtn.textContent = "Düzenle";
-          editBtn.onclick = () => editCalculation(index);
-
-
-          const copyBtn = document.createElement("button");
-          copyBtn.className = "btn-copy";
-          copyBtn.textContent = "Kopyala";
-          copyBtn.onclick = () => copyList(index);
-
-
-          const downloadBtn = document.createElement("button");
-          downloadBtn.className = "btn-download";
-          downloadBtn.textContent = "İndir";
-          downloadBtn.onclick = () => downloadReceipt(calc);
-
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "btn-delete";
-          deleteBtn.textContent = "Sil";
-          deleteBtn.onclick = () => deleteCalculation(index);
-
-          actions.appendChild(editBtn);
-          actions.appendChild(copyBtn);
-          actions.appendChild(downloadBtn);
-          actions.appendChild(deleteBtn);
-
-          li.appendChild(info);
-          li.appendChild(actions);
-          list.appendChild(li);
-        });
-      }
-
-      function copyList(index) {
-        const calc = savedCalculations[index];
-        let text = `${calc.name}: \nToplam: ${calc.total} $\n\nÜrünler:\n`;
-        calc.items.forEach((item) => {
-          text += `- ${item.name} x${item.qty} = ${item.qty * item.price} $\n`;
-        });
-
-        navigator.clipboard
-          .writeText(text)
-          .then(() => {
-            alert("Hesaplama detayları panoya kopyalandı!");
-          })
-          .catch((err) => {
-            alert("Kopyalama başarısız oldu: ", err);
-          });
-      }
-
-      function editCalculation(index) {
-        const calc = savedCalculations[index];
-        editingIndex = index;
-
-        document.getElementById("calcName").value = calc.name;
-        document.getElementById("saveButton").textContent = "Güncelle";
-
-        resetCounts();
-
-        calc.items.forEach((item) => {
-          const card = Array.from(
-            document.querySelectorAll(".product-card")
-          ).find((c) => c.dataset.name === item.name);
-          if (card) {
-            const countEl = card.querySelector(".count");
-            if (countEl) {
-              countEl.textContent = item.qty;
-              const price = Number(card.dataset.price || 0);
-              updateRowTotal(card, price);
-            }
-          }
-        });
-
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      function deleteCalculation(index) {
-        if (confirm("Bu hesaplamayı silmek istediğinizden emin misiniz?")) {
-          savedCalculations.splice(index, 1);
-          renderCalculationList();
-        }
-      }
-
-      function resetForm() {
-        document.getElementById("calcName").value = "";
-        resetCounts();
-        document.getElementById("totalPrice").innerText = "0";
-      }
-
-      function resetCounts() {
-        document
-          .querySelectorAll(".product-card .count")
-          .forEach((c) => (c.innerText = "0"));
-        document
-          .querySelectorAll(".row-total")
-          .forEach((c) => (c.textContent = ""));
-      }
-
-      function downloadReceipt(calc) {
-        const canvas = document.getElementById("receiptCanvas");
-        const ctx = canvas.getContext("2d");
-
-        const width = 600;
-        const lineHeight = 30;
-        const padding = 40;
-        const headerHeight = 120;
-        const itemsHeight = calc.items.length * lineHeight + 60;
-        const footerHeight = 100;
-        const height = headerHeight + itemsHeight + footerHeight;
-
-        canvas.width = width;
-        canvas.height = height;
-
-        // Arka plan
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, width, height);
-
-        /* ----------------- BAŞLIK (3 kutuya bölünmüş) ----------------- */
-
-        // 3 kutu için weight değerleri (istersen değiştirebilirsin)
-        const weights = [1, 1, 1];
-        const totalWeight = weights.reduce((a, b) => a + b, 0);
-        const boxWidth = (i) => width * (weights[i] / totalWeight);
-
-        let x = 0;
-
-        // 1. kutu (yeşil)
-        ctx.fillStyle = "#00CC00";
-        ctx.fillRect(x, 0, boxWidth(0), 50);
-        x += boxWidth(0);
-
-        // 2. kutu
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(x, 0, boxWidth(1), 50);
-        x += boxWidth(1);
-
-        // 3. kutu
-        ctx.fillStyle = "#FF0000";
-        ctx.fillRect(x, 0, boxWidth(2), 50);
-
-        /* ----------------- BAŞLIK METNİ ----------------- */
-        ctx.fillStyle = "#333333";
-        ctx.font = "bold 32px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("CASA CARMARETTI", width / 2, 40);
-
-        /* ----------------- TARİH + SİPARİŞ ADI ----------------- */
-        ctx.fillStyle = "#333";
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(calc.name, padding, 110);
-
-        /* ----------------- ÇİZGİ ----------------- */
-        ctx.strokeStyle = "#ddd";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(padding, 150);
-        ctx.lineTo(width - padding, 150);
-        ctx.stroke();
-
-        /* ----------------- ÜRÜNLER ----------------- */
-        let yPos = 180;
-        ctx.font = "16px Arial";
-        ctx.fillStyle = "#333";
-
-        calc.items.forEach((item) => {
-          const itemTotal = item.qty * item.price;
-
-          ctx.textAlign = "left";
-          ctx.fillText(item.name, padding, yPos);
-          ctx.fillText(`x${item.qty}`, padding + 250, yPos);
-
-          ctx.textAlign = "right";
-          ctx.fillText(`${item.price} $`, width - padding - 100, yPos);
-          ctx.fillText(`${itemTotal} $`, width - padding, yPos);
-
-          yPos += lineHeight;
-        });
-
-        /* ----------------- ALT ÇİZGİ ----------------- */
-        yPos += 10;
-        ctx.strokeStyle = "#ddd";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(padding, yPos);
-        ctx.lineTo(width - padding, yPos);
-        ctx.stroke();
-
-        /* ----------------- TOPLAM ----------------- */
-        yPos += 40;
-        ctx.font = "bold 24px Arial";
-        ctx.fillStyle = "#28a745";
-        ctx.textAlign = "left";
-        ctx.fillText("TOPLAM:", padding, yPos);
-
-        ctx.textAlign = "right";
-        ctx.fillText(`${calc.total} $`, width - padding, yPos);
-
-        /* ----------------- FOOTER ----------------- */
-        yPos += 50;
-        ctx.font = "12px Arial";
-        ctx.fillStyle = "#999";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          "Bizi tercih ettiğiniz için teşekkür ederiz!",
-          width / 2,
-          yPos - 10
-        );
-
-        /* ----------------- İNDİRME ----------------- */
-        const link = document.createElement("a");
-        link.download = `${calc.name.replace(
-          /[^a-z0-9]/gi,
-          "_"
-        )}_${Date.now()}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      }
-
-      loadProducts();
-    </script>
+    </main>
+
+    <canvas id="receiptCanvas" hidden></canvas>
+    <script type="module" src="./js/ui.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
