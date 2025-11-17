@@ -18,4 +18,4 @@ const db = getDatabase(app);
 // Siparişler için referans
 const ordersRef = ref(db, "orders");
 
-export { db, ordersRef, push, onValue, remove };
+export { db, ordersRef, push, onValue, remove, ref };
