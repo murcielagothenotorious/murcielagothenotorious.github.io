@@ -49,6 +49,7 @@ let waiterModalInstance = null;
 let receiptFontPromise = null;
 
 const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
+const RECEIPT_ITEM_FONT = `14px ${RECEIPT_FONT_FAMILY}`;
 
 const selectors = {
   categories: document.getElementById("categories"),
@@ -604,6 +605,50 @@ function ensureReceiptFont() {
   return receiptFontPromise;
 }
 
+function wrapText(ctx, text, maxWidth) {
+  if (!text) return [""];
+
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (ctx.measureText(testLine).width <= maxWidth) {
+      currentLine = testLine;
+      return;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    if (ctx.measureText(word).width <= maxWidth) {
+      currentLine = word;
+      return;
+    }
+
+    const chars = word.split("");
+    let segment = "";
+    chars.forEach((char) => {
+      const attempt = segment + char;
+      if (ctx.measureText(attempt).width <= maxWidth) {
+        segment = attempt;
+      } else {
+        if (segment) lines.push(segment);
+        segment = char;
+      }
+    });
+    currentLine = segment;
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
 async function downloadReceipt(calc) {
   await ensureReceiptFont();
 
@@ -614,11 +659,24 @@ async function downloadReceipt(calc) {
   const padding = 32;
   const lineHeight = 26;
   const headerHeight = 220;
-  const itemsHeight = calc.items.length * lineHeight + 40;
+  const colName = padding;
+  const colQty = width - padding - 190;
+  const nameColumnWidth = colQty - colName - 14;
+
+  canvas.width = width;
+  ctx.font = RECEIPT_ITEM_FONT;
+
+  const preparedItems = calc.items.map((item) => ({
+    ...item,
+    lines: wrapText(ctx, item.name, nameColumnWidth),
+  }));
+
+  const itemsHeight =
+    preparedItems.reduce((total, item) => total + item.lines.length * lineHeight, 0) +
+    40;
   const footerHeight = 140;
   const height = headerHeight + itemsHeight + footerHeight;
 
-  canvas.width = width;
   canvas.height = height;
 
   ctx.clearRect(0, 0, width, height);
@@ -689,8 +747,6 @@ async function downloadReceipt(calc) {
   drawSeparator(yPos);
   yPos += 30;
 
-  const colName = padding;
-  const colQty = width - padding - 190;
   const colPrice = width - padding - 110;
   const colTotal = width - padding;
 
@@ -711,10 +767,10 @@ async function downloadReceipt(calc) {
   let subtotal = 0;
   let serviceFee = 0;
 
-  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.font = RECEIPT_ITEM_FONT;
   ctx.fillStyle = "#111827";
 
-  calc.items.forEach((item) => {
+  preparedItems.forEach((item) => {
     const itemTotal = item.qty * item.price;
     const isService = item.name.toLowerCase().includes("servis");
     if (isService) {
@@ -723,17 +779,21 @@ async function downloadReceipt(calc) {
       subtotal += itemTotal;
     }
 
-    ctx.textAlign = "left";
-    ctx.fillText(item.name, colName, yPos);
+    item.lines.forEach((line, idx) => {
+      ctx.textAlign = "left";
+      ctx.fillText(line, colName, yPos);
 
-    ctx.textAlign = "center";
-    ctx.fillText(`x${item.qty}`, colQty, yPos);
+      if (idx === 0) {
+        ctx.textAlign = "center";
+        ctx.fillText(`x${item.qty}`, colQty, yPos);
 
-    ctx.textAlign = "right";
-    ctx.fillText(`${item.price} $`, colPrice, yPos);
-    ctx.fillText(`${itemTotal} $`, colTotal, yPos);
+        ctx.textAlign = "right";
+        ctx.fillText(`${item.price} $`, colPrice, yPos);
+        ctx.fillText(`${itemTotal} $`, colTotal, yPos);
+      }
 
-    yPos += lineHeight;
+      yPos += lineHeight;
+    });
   });
 
   yPos -= 6;
