@@ -222,7 +222,8 @@ function loadProducts() {
       card.dataset.name = item.name;
 
       const header = document.createElement("div");
-      header.className = "d-flex align-items-start justify-content-between gap-3";
+      header.className =
+        "d-flex align-items-start justify-content-between gap-3";
 
       const name = document.createElement("div");
       name.className = "product-name fs-6";
@@ -371,7 +372,8 @@ function renderCalculationList() {
   if (!savedCalculations.length) {
     const empty = document.createElement("li");
     empty.className = "empty-state";
-    empty.innerHTML = "<small>Kaydedilen siparişler burada canlı olarak görünecek.</small>";
+    empty.innerHTML =
+      "<small>Kaydedilen siparişler burada canlı olarak görünecek.</small>";
     selectors.calcList.appendChild(empty);
     return;
   }
@@ -511,7 +513,9 @@ function renderLeaderboard(stats = loadWaiterStats()) {
 function copyList(id) {
   const calc = savedCalculations.find((c) => c.id === id);
   if (!calc) return;
-  let text = `${calc.name}: \nToplam: ${calc.total} $\nGarson: ${calc.waiterName || "-"}\n\nÜrünler:\n`;
+  let text = `${calc.name}: \nToplam: ${calc.total} $\nGarson: ${
+    calc.waiterName || "-"
+  }\n\nÜrünler:\n`;
   calc.items.forEach((item) => {
     text += `- ${item.name} x${item.qty} = ${item.qty * item.price} $\n`;
   });
@@ -590,9 +594,7 @@ function resetCounts() {
   document
     .querySelectorAll(".product-card .count")
     .forEach((c) => (c.innerText = "0"));
-  document
-    .querySelectorAll(".row-total")
-    .forEach((c) => (c.textContent = ""));
+  document.querySelectorAll(".row-total").forEach((c) => (c.textContent = ""));
 }
 
 function ensureReceiptFont() {
@@ -673,9 +675,8 @@ async function downloadReceipt(calc) {
 
   const itemsHeight =
     preparedItems
-      .filter(item => !item.name.toLowerCase().includes("servis"))
-      .reduce((total, item) => total + item.lines.length * lineHeight, 0) +
-    40;
+      .filter((item) => !item.name.toLowerCase().includes("servis"))
+      .reduce((total, item) => total + item.lines.length * lineHeight, 0) + 40;
   const footerHeight = 200;
   const height = headerHeight + itemsHeight + footerHeight;
 
@@ -821,8 +822,9 @@ async function downloadReceipt(calc) {
   ctx.font = `700 17px ${RECEIPT_FONT_FAMILY}`;
   ctx.textAlign = "left";
   ctx.fillStyle = "#0f172a";
-  ctx.fillText("TOPLAM", colName, yPos-5);
+  ctx.fillText("TOPLAM", colName, yPos);
   ctx.fillStyle = "#111827";
+  ctx.textAlign = "right";
   ctx.fillText(`${calc.total.toFixed(2)} $`, colTotal, yPos);
 
   yPos += 32;
