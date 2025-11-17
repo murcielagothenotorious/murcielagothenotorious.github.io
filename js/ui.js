@@ -63,24 +63,32 @@ function loadProducts() {
     group.appendChild(title);
 
     const grid = document.createElement("div");
-    grid.className = "product-grid";
+    grid.className = "row g-4 product-grid";
 
     items.forEach((item) => {
+      const col = document.createElement("div");
+      col.className = "col-12 col-sm-6 col-lg-4";
+
       const card = document.createElement("div");
-      card.className = "product-card";
+      card.className = "product-card h-100";
       card.dataset.price = item.price;
       card.dataset.name = item.name;
 
+      const header = document.createElement("div");
+      header.className = "d-flex align-items-start justify-content-between gap-3";
+
       const name = document.createElement("div");
-      name.className = "product-name";
+      name.className = "product-name fs-6";
       name.textContent = item.name;
 
       const price = document.createElement("div");
-      price.className = "product-price";
+      price.className = "product-price small";
       price.textContent = `${item.price} $`;
 
+      header.append(name, price);
+
       const controls = document.createElement("div");
-      controls.className = "controls";
+      controls.className = "controls d-flex align-items-center gap-2 mt-3";
 
       const minusBtn = document.createElement("button");
       minusBtn.className = "remove-btn";
@@ -99,10 +107,11 @@ function loadProducts() {
       controls.append(minusBtn, count, plusBtn);
 
       const rowTotal = document.createElement("div");
-      rowTotal.className = "row-total";
+      rowTotal.className = "row-total small";
 
-      card.append(name, price, controls, rowTotal);
-      grid.appendChild(card);
+      card.append(header, controls, rowTotal);
+      col.appendChild(card);
+      grid.appendChild(col);
     });
 
     group.appendChild(grid);
@@ -207,9 +216,10 @@ function renderCalculationList() {
     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
     .forEach((calc) => {
       const li = document.createElement("li");
+      li.className = "d-flex flex-column gap-2";
 
       const head = document.createElement("div");
-      head.className = "calc-head";
+      head.className = "calc-head flex-wrap";
 
       const titleWrap = document.createElement("div");
       titleWrap.className = "calc-title";
@@ -242,22 +252,22 @@ function renderCalculationList() {
       actions.className = "calc-actions";
 
       const editBtn = document.createElement("button");
-      editBtn.className = "btn-edit";
+      editBtn.className = "btn btn-light btn-sm btn-edit";
       editBtn.textContent = "Düzenle";
       editBtn.addEventListener("click", () => editCalculation(calc.id));
 
       const copyBtn = document.createElement("button");
-      copyBtn.className = "btn-copy";
+      copyBtn.className = "btn btn-light btn-sm btn-copy";
       copyBtn.textContent = "Kopyala";
       copyBtn.addEventListener("click", () => copyList(calc.id));
 
       const downloadBtn = document.createElement("button");
-      downloadBtn.className = "btn-download";
+      downloadBtn.className = "btn btn-light btn-sm btn-download";
       downloadBtn.textContent = "İndir";
       downloadBtn.addEventListener("click", () => downloadReceipt(calc));
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.className = "btn-delete";
+      deleteBtn.className = "btn btn-light btn-sm btn-delete";
       deleteBtn.textContent = "Sil";
       deleteBtn.addEventListener("click", () => deleteCalculation(calc.id));
 
