@@ -677,7 +677,7 @@ async function downloadReceipt(calc) {
     preparedItems
       .filter((item) => !item.name.toLowerCase().includes("servis"))
       .reduce((total, item) => total + item.lines.length * lineHeight, 0) + 40;
-  const footerHeight = 200;
+  const footerHeight = 300;
   const height = headerHeight + itemsHeight + footerHeight;
 
   canvas.height = height;
