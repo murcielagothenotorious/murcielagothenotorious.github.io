@@ -36,6 +36,61 @@
     <main class="container py-5">
       <div class="row g-4 g-xl-5 align-items-start">
         <div class="col-12 col-lg-7">
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-xl-6">
+              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+                <div class="card-body p-4 d-flex flex-column gap-3">
+                  <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
+                      <h2 class="h5 mb-1">Adını kaydet, siparişlerde göster</h2>
+                      <p class="text-secondary mb-0">İsim tarayıcıda saklanır, sayfa yenilense bile kaybolmaz.</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Aktif</span>
+                  </div>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-light">👤</span>
+                    <input
+                      id="waiterNameInput"
+                      type="text"
+                      class="form-control"
+                      placeholder="Garson adı"
+                      autocomplete="name"
+                    />
+                    <button class="btn btn-primary" id="saveWaiterButton" type="button">Kaydet</button>
+                  </div>
+                  <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Aktif garson</span>
+                      <strong id="activeWaiterName">-</strong>
+                    </div>
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Toplam sipariş</span>
+                      <strong id="waiterOrderCount">0</strong>
+                    </div>
+                    <div class="pill soft-pill">
+                      <span class="text-secondary">Servis payı (20%)</span>
+                      <strong id="waiterServiceShare">0 $</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <div class="col-12 col-xl-6">
+              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div>
+                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Liderlik</p>
+                      <h2 class="h5 mb-0">Garson sıralaması</h2>
+                    </div>
+                    <span class="badge bg-info-subtle text-info-emphasis rounded-pill">Canlı</span>
+                  </div>
+                  <ul id="leaderboardList" class="leaderboard list-unstyled mb-0"></ul>
+                </div>
+              </section>
+            </div>
+          </div>
           <section class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
             <div class="card-body p-4 p-md-5">
               <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">

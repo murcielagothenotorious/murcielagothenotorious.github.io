@@ -38,6 +38,8 @@ const products = {
 };
 
 const SERVICE_FEE = 200;
+const SERVICE_SHARE_RATIO = 0.2;
+const WAITER_STORAGE_KEY = "waiterName";
 let savedCalculations = [];
 let editingId = null;
 let unsubscribeOrders = null;
@@ -49,7 +51,26 @@ const selectors = {
   calcName: document.getElementById("calcName"),
   saveButton: document.getElementById("saveButton"),
   receiptCanvas: document.getElementById("receiptCanvas"),
+  waiterNameInput: document.getElementById("waiterNameInput"),
+  saveWaiterButton: document.getElementById("saveWaiterButton"),
+  activeWaiterName: document.getElementById("activeWaiterName"),
+  waiterOrderCount: document.getElementById("waiterOrderCount"),
+  waiterServiceShare: document.getElementById("waiterServiceShare"),
+  leaderboardList: document.getElementById("leaderboardList"),
 };
+
+function getStoredWaiterName() {
+  return localStorage.getItem(WAITER_STORAGE_KEY) || "";
+}
+
+function setWaiterName(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  localStorage.setItem(WAITER_STORAGE_KEY, trimmed);
+  selectors.waiterNameInput.value = trimmed;
+  selectors.activeWaiterName.textContent = trimmed;
+  updateWaiterStats();
+}
 
 function loadProducts() {
   selectors.categories.innerHTML = "";
@@ -157,6 +178,12 @@ function saveCalculation() {
   const name = selectors.calcName.value.trim();
   if (!name) return alert("Lütfen hesaplamaya bir isim verin.");
 
+  const waiterName = selectors.waiterNameInput.value.trim();
+  if (!waiterName) {
+    selectors.waiterNameInput.focus();
+    return alert("Lütfen garson adını kaydedin.");
+  }
+
   const total = selectors.totalPrice.innerText;
   const items = [];
 
@@ -185,6 +212,7 @@ function saveCalculation() {
     items,
     timestamp,
     date: new Date(timestamp).toLocaleString("tr-TR"),
+    waiterName,
   };
 
   if (editingId) {
@@ -239,6 +267,19 @@ function renderCalculationList() {
 
       head.append(titleWrap, total);
 
+      const meta = document.createElement("div");
+      meta.className = "order-meta";
+
+      const waiter = document.createElement("span");
+      waiter.className = "calc-waiter";
+      waiter.textContent = `Garson: ${calc.waiterName || "-"}`;
+      meta.appendChild(waiter);
+
+      const badge = document.createElement("span");
+      badge.className = "badge rounded-pill text-bg-light";
+      badge.textContent = `${calc.items?.length || 0} satır`;
+      meta.appendChild(badge);
+
       const items = document.createElement("div");
       items.className = "calc-items";
       calc.items.forEach((item) => {
@@ -272,15 +313,73 @@ function renderCalculationList() {
       deleteBtn.addEventListener("click", () => deleteCalculation(calc.id));
 
       actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
-      li.append(head, items, actions);
+      li.append(head, meta, items, actions);
       selectors.calcList.appendChild(li);
     });
+}
+
+function renderLeaderboard() {
+  selectors.leaderboardList.innerHTML = "";
+  const leaderboardData = savedCalculations.reduce((acc, calc) => {
+    const name = (calc.waiterName || "Bilinmiyor").trim() || "Bilinmiyor";
+    if (!acc[name]) {
+      acc[name] = { name, count: 0 };
+    }
+    acc[name].count += 1;
+    return acc;
+  }, {});
+
+  const rows = Object.values(leaderboardData).sort((a, b) => {
+    if (b.count === a.count) return a.name.localeCompare(b.name);
+    return b.count - a.count;
+  });
+
+  if (!rows.length) {
+    const empty = document.createElement("li");
+    empty.className = "text-secondary small";
+    empty.textContent = "Henüz sipariş yok. İlk siparişi kaydet!";
+    selectors.leaderboardList.appendChild(empty);
+    return;
+  }
+
+  rows.forEach((row, index) => {
+    const li = document.createElement("li");
+    li.className = "leaderboard-item";
+
+    const meta = document.createElement("div");
+    meta.className = "leaderboard-meta";
+
+    const rank = document.createElement("span");
+    rank.className = "badge text-bg-primary";
+    rank.textContent = `#${index + 1}`;
+
+    const name = document.createElement("strong");
+    name.textContent = row.name;
+
+    meta.append(rank, name);
+
+    const numbers = document.createElement("div");
+    numbers.className = "text-end";
+
+    const orderCount = document.createElement("div");
+    orderCount.className = "fw-semibold";
+    orderCount.textContent = `${row.count} sipariş`;
+
+    const serviceShare = document.createElement("small");
+    const shareValue = row.count * SERVICE_FEE * SERVICE_SHARE_RATIO;
+    serviceShare.className = "text-secondary";
+    serviceShare.textContent = `Servis payı: ${shareValue.toFixed(0)} $`;
+
+    numbers.append(orderCount, serviceShare);
+    li.append(meta, numbers);
+    selectors.leaderboardList.appendChild(li);
+  });
 }
 
 function copyList(id) {
   const calc = savedCalculations.find((c) => c.id === id);
   if (!calc) return;
-  let text = `${calc.name}: \nToplam: ${calc.total} $\n\nÜrünler:\n`;
+  let text = `${calc.name}: \nToplam: ${calc.total} $\nGarson: ${calc.waiterName || "-"}\n\nÜrünler:\n`;
   calc.items.forEach((item) => {
     text += `- ${item.name} x${item.qty} = ${item.qty * item.price} $\n`;
   });
@@ -331,6 +430,24 @@ function resetForm(resetEditing = true) {
     editingId = null;
     selectors.saveButton.textContent = "Hesaplamayı Kaydet";
   }
+}
+
+function updateWaiterStats() {
+  const storedName = getStoredWaiterName();
+  selectors.activeWaiterName.textContent = storedName || "-";
+  if (storedName && selectors.waiterNameInput) {
+    selectors.waiterNameInput.value = storedName;
+  }
+
+  const count = savedCalculations.filter((c) =>
+    (c.waiterName || "").toLowerCase() === (storedName || "").toLowerCase()
+  ).length;
+
+  const share = count * SERVICE_FEE * SERVICE_SHARE_RATIO;
+  selectors.waiterOrderCount.textContent = count;
+  selectors.waiterServiceShare.textContent = `${share.toFixed(0)} $`;
+
+  renderLeaderboard();
 }
 
 function resetCounts() {
@@ -467,6 +584,17 @@ function attachEvents() {
 
   selectors.saveButton.addEventListener("click", saveCalculation);
   selectors.calcName.addEventListener("keydown", handleKeyboardSubmit);
+
+  selectors.saveWaiterButton?.addEventListener("click", () => {
+    setWaiterName(selectors.waiterNameInput.value);
+  });
+
+  selectors.waiterNameInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setWaiterName(selectors.waiterNameInput.value);
+    }
+  });
 }
 
 function initCalculator() {
@@ -474,10 +602,18 @@ function initCalculator() {
   attachEvents();
   calculateTotal();
   renderCalculationList();
+  updateWaiterStats();
   unsubscribeOrders = listenOrders((orders) => {
     savedCalculations = orders || [];
     renderCalculationList();
+    updateWaiterStats();
   });
+
+  const storedName = getStoredWaiterName();
+  if (storedName) {
+    selectors.waiterNameInput.value = storedName;
+    selectors.activeWaiterName.textContent = storedName;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initCalculator);
