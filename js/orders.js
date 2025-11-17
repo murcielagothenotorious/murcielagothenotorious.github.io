@@ -1,5 +1,5 @@
 // orders.js
-import { ordersRef, push, remove, onValue } from './firebase.js';
+import { ordersRef, push, remove, onValue, ref } from './firebase.js';
 import * as UI from './ui.js';
 
 // Yeni sipariş ekleme
@@ -20,6 +20,8 @@ export function listenOrders() {
     snapshot.forEach(child => {
       orders.push({ id: child.key, ...child.val() });
     });
-    UI.renderOrders(orders);
+    if (UI.renderOrders) {
+      UI.renderOrders(orders);
+    }
   });
 }

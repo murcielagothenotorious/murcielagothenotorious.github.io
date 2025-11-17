@@ -35,158 +35,145 @@ const products = {
   ],
 };
 
+const SERVICE_FEE = 200;
 let savedCalculations = [];
 let editingIndex = -1;
 
+const selectors = {
+  categories: document.getElementById("categories"),
+  calcList: document.getElementById("calcList"),
+  totalPrice: document.getElementById("totalPrice"),
+  calcName: document.getElementById("calcName"),
+  saveButton: document.getElementById("saveButton"),
+  receiptCanvas: document.getElementById("receiptCanvas"),
+};
+
 function loadProducts() {
-  const container = document.getElementById("categories");
-  container.innerHTML = "";
+  selectors.categories.innerHTML = "";
 
-  for (const category in products) {
-    const categoryGroup = document.createElement("div");
-    categoryGroup.className = "category-group";
+  Object.entries(products).forEach(([category, items]) => {
+    const group = document.createElement("div");
+    group.className = "category-group";
 
-    const categoryTitle = document.createElement("h3");
-    categoryTitle.textContent = category;
-    categoryGroup.appendChild(categoryTitle);
+    const title = document.createElement("h3");
+    title.textContent = category;
+    group.appendChild(title);
 
     const grid = document.createElement("div");
     grid.className = "product-grid";
 
-    products[category].forEach((item) => {
+    items.forEach((item) => {
       const card = document.createElement("div");
       card.className = "product-card";
       card.dataset.price = item.price;
       card.dataset.name = item.name;
 
-      const nameDiv = document.createElement("div");
-      nameDiv.className = "product-name";
-      nameDiv.textContent = item.name;
+      const name = document.createElement("div");
+      name.className = "product-name";
+      name.textContent = item.name;
 
-      const priceDiv = document.createElement("div");
-      priceDiv.className = "product-price";
-      priceDiv.textContent = `${item.price} $`;
+      const price = document.createElement("div");
+      price.className = "product-price";
+      price.textContent = `${item.price} $`;
 
-      const controlsDiv = document.createElement("div");
-      controlsDiv.className = "controls";
+      const controls = document.createElement("div");
+      controls.className = "controls";
 
       const minusBtn = document.createElement("button");
       minusBtn.className = "remove-btn";
+      minusBtn.type = "button";
       minusBtn.textContent = "-";
-      minusBtn.onclick = function () {
-        decrease(this);
-      };
 
-      const countSpan = document.createElement("span");
-      countSpan.className = "count";
-      countSpan.textContent = "0";
+      const count = document.createElement("span");
+      count.className = "count";
+      count.textContent = "0";
 
       const plusBtn = document.createElement("button");
       plusBtn.className = "add-btn";
+      plusBtn.type = "button";
       plusBtn.textContent = "+";
-      plusBtn.onclick = function () {
-        increase(this);
-      };
 
-      controlsDiv.appendChild(minusBtn);
-      controlsDiv.appendChild(countSpan);
-      controlsDiv.appendChild(plusBtn);
+      controls.append(minusBtn, count, plusBtn);
 
-      const totalDiv = document.createElement("div");
-      totalDiv.className = "row-total";
-      totalDiv.textContent = "";
+      const rowTotal = document.createElement("div");
+      rowTotal.className = "row-total";
 
-      card.appendChild(nameDiv);
-      card.appendChild(priceDiv);
-      card.appendChild(controlsDiv);
-      card.appendChild(totalDiv);
-
+      card.append(name, price, controls, rowTotal);
       grid.appendChild(card);
     });
 
-    categoryGroup.appendChild(grid);
-    container.appendChild(categoryGroup);
-  }
+    group.appendChild(grid);
+    selectors.categories.appendChild(group);
+  });
 }
 
-function increase(btn) {
-  const card = btn.closest(".product-card");
-  if (!card) return;
-  const countEl = card.querySelector(".count");
-  if (!countEl) return;
-  countEl.innerText = Number(countEl.innerText || 0) + 1;
-  const price = Number(card.dataset.price || 0);
-  updateRowTotal(card, price);
-}
-
-function decrease(btn) {
-  const card = btn.closest(".product-card");
-  if (!card) return;
-  const countEl = card.querySelector(".count");
-  if (!countEl) return;
-  if (Number(countEl.innerText || 0) > 0) {
-    countEl.innerText = Number(countEl.innerText) - 1;
-    const price = Number(card.dataset.price || 0);
-    updateRowTotal(card, price);
-  }
-}
-
-function updateRowTotal(card, price) {
+function updateRowTotal(card) {
   if (!card) return;
   const countEl = card.querySelector(".count");
   const totalDiv = card.querySelector(".row-total");
-  if (!countEl || !totalDiv) return;
-  const qty = Number(countEl.innerText || 0);
+  const qty = Number(countEl?.innerText || 0);
+  const price = Number(card.dataset.price || 0);
   const total = qty * price;
-  totalDiv.textContent = qty > 0 ? `${total} $` : "";
+  if (totalDiv) {
+    totalDiv.textContent = qty > 0 ? `${total} $` : "";
+  }
   calculateTotal();
 }
 
+function changeCount(card, delta) {
+  if (!card) return;
+  const countEl = card.querySelector(".count");
+  if (!countEl) return;
+  const next = Math.max(0, Number(countEl.innerText || 0) + delta);
+  countEl.innerText = next;
+  updateRowTotal(card);
+}
+
 function calculateTotal() {
-  let total = 0;
+  let total = SERVICE_FEE;
   document.querySelectorAll(".product-card").forEach((card) => {
     const countEl = card.querySelector(".count");
-    if (!countEl) return;
-    const qty = Number(countEl.innerText || 0);
+    const qty = Number(countEl?.innerText || 0);
     const price = Number(card.dataset.price || 0);
     total += qty * price;
   });
-  document.getElementById("totalPrice").innerText =
-    total % 1 === 0 ? total : total.toFixed(2);
+
+  selectors.totalPrice.innerText = total % 1 === 0 ? total : total.toFixed(2);
 }
 
 function saveCalculation() {
-  const name = document.getElementById("calcName").value.trim();
+  const name = selectors.calcName.value.trim();
   if (!name) return alert("Lütfen hesaplamaya bir isim verin.");
 
-  const total = document.getElementById("totalPrice").innerText;
+  const total = selectors.totalPrice.innerText;
   const items = [];
 
   document.querySelectorAll(".product-card").forEach((card) => {
     const countEl = card.querySelector(".count");
-    if (!countEl) return;
-    const qty = Number(countEl.innerText || 0);
+    const qty = Number(countEl?.innerText || 0);
     if (qty === 0) return;
     const productName = card.dataset.name;
     const price = Number(card.dataset.price || 0);
-    items.push({ name: productName, qty: qty, price: price });
+    items.push({ name: productName, qty, price });
   });
 
-  if (items.length === 0) {
+  items.push({ name: "Servis Hizmeti", qty: 1, price: SERVICE_FEE });
+
+  if (items.length === 1) {
     return alert("Lütfen en az bir ürün seçin.");
   }
 
   const calculation = {
-    name: name,
-    total: total,
-    items: items,
+    name,
+    total,
+    items,
     date: new Date().toLocaleString("tr-TR"),
   };
 
   if (editingIndex >= 0) {
     savedCalculations[editingIndex] = calculation;
     editingIndex = -1;
-    document.getElementById("saveButton").textContent = "Hesaplamayı Kaydet";
+    selectors.saveButton.textContent = "Hesaplamayı Kaydet";
   } else {
     savedCalculations.push(calculation);
   }
@@ -196,8 +183,7 @@ function saveCalculation() {
 }
 
 function renderCalculationList() {
-  const list = document.getElementById("calcList");
-  list.innerHTML = "";
+  selectors.calcList.innerHTML = "";
 
   savedCalculations.forEach((calc, index) => {
     const li = document.createElement("li");
@@ -207,7 +193,7 @@ function renderCalculationList() {
     const breakdown = calc.items
       .map((item) => `${item.name} x${item.qty}`)
       .join(", ");
-    info.innerHTML = `<strong>${calc.name}</strong>: ${calc.total} $<br><small>${calc.date}</small><br><small>${breakdown}</small>`;
+    info.innerHTML = `<strong>${calc.name}</strong><small>${calc.date}</small><small>${breakdown}</small><strong>${calc.total} $</strong>`;
 
     const actions = document.createElement("div");
     actions.className = "calc-actions";
@@ -215,31 +201,26 @@ function renderCalculationList() {
     const editBtn = document.createElement("button");
     editBtn.className = "btn-edit";
     editBtn.textContent = "Düzenle";
-    editBtn.onclick = () => editCalculation(index);
+    editBtn.addEventListener("click", () => editCalculation(index));
 
     const copyBtn = document.createElement("button");
     copyBtn.className = "btn-copy";
     copyBtn.textContent = "Kopyala";
-    copyBtn.onclick = () => copyList(index);
+    copyBtn.addEventListener("click", () => copyList(index));
 
     const downloadBtn = document.createElement("button");
     downloadBtn.className = "btn-download";
     downloadBtn.textContent = "İndir";
-    downloadBtn.onclick = () => downloadReceipt(calc);
+    downloadBtn.addEventListener("click", () => downloadReceipt(calc));
 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn-delete";
     deleteBtn.textContent = "Sil";
-    deleteBtn.onclick = () => deleteCalculation(index);
+    deleteBtn.addEventListener("click", () => deleteCalculation(index));
 
-    actions.appendChild(editBtn);
-    actions.appendChild(copyBtn);
-    actions.appendChild(downloadBtn);
-    actions.appendChild(deleteBtn);
-
-    li.appendChild(info);
-    li.appendChild(actions);
-    list.appendChild(li);
+    actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
+    li.append(info, actions);
+    selectors.calcList.appendChild(li);
   });
 }
 
@@ -252,24 +233,20 @@ function copyList(index) {
 
   navigator.clipboard
     .writeText(text)
-    .then(() => {
-      alert("Hesaplama detayları panoya kopyalandı!");
-    })
-    .catch((err) => {
-      alert("Kopyalama başarısız oldu: ", err);
-    });
+    .then(() => alert("Hesaplama detayları panoya kopyalandı!"))
+    .catch(() => alert("Kopyalama başarısız oldu."));
 }
 
 function editCalculation(index) {
   const calc = savedCalculations[index];
   editingIndex = index;
-
-  document.getElementById("calcName").value = calc.name;
-  document.getElementById("saveButton").textContent = "Güncelle";
+  selectors.calcName.value = calc.name;
+  selectors.saveButton.textContent = "Güncelle";
 
   resetCounts();
 
   calc.items.forEach((item) => {
+    if (item.name === "Servis Hizmeti") return;
     const card = Array.from(document.querySelectorAll(".product-card")).find(
       (c) => c.dataset.name === item.name
     );
@@ -277,8 +254,7 @@ function editCalculation(index) {
       const countEl = card.querySelector(".count");
       if (countEl) {
         countEl.textContent = item.qty;
-        const price = Number(card.dataset.price || 0);
-        updateRowTotal(card, price);
+        updateRowTotal(card);
       }
     }
   });
@@ -294,20 +270,22 @@ function deleteCalculation(index) {
 }
 
 function resetForm() {
-  document.getElementById("calcName").value = "";
+  selectors.calcName.value = "";
   resetCounts();
-  document.getElementById("totalPrice").innerText = "0";
+  selectors.totalPrice.innerText = SERVICE_FEE;
 }
 
 function resetCounts() {
   document
     .querySelectorAll(".product-card .count")
     .forEach((c) => (c.innerText = "0"));
-  document.querySelectorAll(".row-total").forEach((c) => (c.textContent = ""));
+  document
+    .querySelectorAll(".row-total")
+    .forEach((c) => (c.textContent = ""));
 }
 
 function downloadReceipt(calc) {
-  const canvas = document.getElementById("receiptCanvas");
+  const canvas = selectors.receiptCanvas;
   const ctx = canvas.getContext("2d");
 
   const width = 600;
@@ -321,40 +299,30 @@ function downloadReceipt(calc) {
   canvas.width = width;
   canvas.height = height;
 
-  // Arka plan
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
 
-  /* ----------------- BAŞLIK (3 kutuya bölünmüş) ----------------- */
-
-  // 3 kutu için weight değerleri (istersen değiştirebilirsin)
   const weights = [1, 1, 1];
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   const boxWidth = (i) => width * (weights[i] / totalWeight);
 
   let x = 0;
-
-  // 1. kutu (yeşil)
   ctx.fillStyle = "#00CC00";
   ctx.fillRect(x, 0, boxWidth(0), 50);
   x += boxWidth(0);
 
-  // 2. kutu
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(x, 0, boxWidth(1), 50);
   x += boxWidth(1);
 
-  // 3. kutu
   ctx.fillStyle = "#FF0000";
   ctx.fillRect(x, 0, boxWidth(2), 50);
 
-  /* ----------------- BAŞLIK METNİ ----------------- */
   ctx.fillStyle = "#333333";
   ctx.font = "bold 32px Arial";
   ctx.textAlign = "center";
   ctx.fillText("CASA CARMARETTI", width / 2, 40);
 
-  /* ----------------- TARİH + SİPARİŞ ADI ----------------- */
   ctx.fillStyle = "#333";
   ctx.font = "bold 20px Arial";
   ctx.textAlign = "left";
@@ -364,7 +332,6 @@ function downloadReceipt(calc) {
   ctx.fillStyle = "#666";
   ctx.fillText(calc.date, padding, 135);
 
-  /* ----------------- ÇİZGİ ----------------- */
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -372,7 +339,6 @@ function downloadReceipt(calc) {
   ctx.lineTo(width - padding, 150);
   ctx.stroke();
 
-  /* ----------------- ÜRÜNLER ----------------- */
   let yPos = 180;
   ctx.font = "16px Arial";
   ctx.fillStyle = "#333";
@@ -391,7 +357,6 @@ function downloadReceipt(calc) {
     yPos += lineHeight;
   });
 
-  /* ----------------- ALT ÇİZGİ ----------------- */
   yPos += 10;
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 2;
@@ -400,7 +365,6 @@ function downloadReceipt(calc) {
   ctx.lineTo(width - padding, yPos);
   ctx.stroke();
 
-  /* ----------------- TOPLAM ----------------- */
   yPos += 40;
   ctx.font = "bold 24px Arial";
   ctx.fillStyle = "#28a745";
@@ -410,22 +374,47 @@ function downloadReceipt(calc) {
   ctx.textAlign = "right";
   ctx.fillText(`${calc.total} $`, width - padding, yPos);
 
-  /* ----------------- FOOTER ----------------- */
   yPos += 50;
   ctx.font = "12px Arial";
   ctx.fillStyle = "#999";
   ctx.textAlign = "center";
-  ctx.fillText(
-    "Bizi tercih ettiğiniz için teşekkür ederiz!",
-    width / 2,
-    yPos - 10
-  );
+  ctx.fillText("Bizi tercih ettiğiniz için teşekkür ederiz!", width / 2, yPos - 10);
 
-  /* ----------------- İNDİRME ----------------- */
   const link = document.createElement("a");
   link.download = `${calc.name.replace(/[^a-z0-9]/gi, "_")}_${Date.now()}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
 
-loadProducts();
+function handleKeyboardSubmit(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    saveCalculation();
+  }
+}
+
+function attachEvents() {
+  selectors.categories.addEventListener("click", (event) => {
+    const card = event.target.closest(".product-card");
+    if (!card) return;
+
+    if (event.target.classList.contains("add-btn")) {
+      changeCount(card, 1);
+    }
+
+    if (event.target.classList.contains("remove-btn")) {
+      changeCount(card, -1);
+    }
+  });
+
+  selectors.saveButton.addEventListener("click", saveCalculation);
+  selectors.calcName.addEventListener("keydown", handleKeyboardSubmit);
+}
+
+function initCalculator() {
+  loadProducts();
+  attachEvents();
+  calculateTotal();
+}
+
+document.addEventListener("DOMContentLoaded", initCalculator);
