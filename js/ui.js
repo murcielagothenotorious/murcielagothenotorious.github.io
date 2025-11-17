@@ -728,7 +728,7 @@ async function downloadReceipt(calc) {
   ctx.fillStyle = "#4b5563";
   ctx.fillText("Downtown Vinewood Power St.", width / 2, yPos);
   yPos += 18;
-  ctx.fillText("PH: +39 02 555 1234", width / 2, yPos);
+  ctx.fillText("PH: 62618712", width / 2, yPos);
 
   yPos += 26;
   drawSeparator(yPos);
@@ -819,6 +819,7 @@ async function downloadReceipt(calc) {
 
   yPos += 26;
   ctx.font = `700 17px ${RECEIPT_FONT_FAMILY}`;
+  ctx.textAlign = "left";
   ctx.fillStyle = "#0f172a";
   ctx.fillText("TOPLAM", colName, yPos-5);
   ctx.fillStyle = "#111827";
