@@ -775,15 +775,13 @@ async function downloadReceipt(calc) {
     const isService = item.name.toLowerCase().includes("servis");
     if (isService) {
       serviceFee += itemTotal;
+      return;
     } else {
       subtotal += itemTotal;
     }
 
     item.lines.forEach((line, idx) => {
       ctx.textAlign = "left";
-      if (colName === "Servis Hizmeti") {
-        continue;
-      }
       ctx.fillText(line, colName, yPos);
 
       if (idx === 0) {
