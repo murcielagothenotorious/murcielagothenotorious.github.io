@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ürün Toplam Hesaplayıcı</title>
+    <title>Sipariş Maestro</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -17,22 +17,10 @@
       <div class="gradient-overlay"></div>
       <div class="container-xxl py-5 position-relative">
         <div class="row g-4 align-items-center">
-          <div class="col-12 col-lg-8 d-flex flex-column gap-2">
+          <div class="col-12 col-lg-9 d-flex flex-column gap-2">
             <p class="hero-eyebrow mb-0">Casa Carmaretti</p>
-            <h1 class="fw-bold display-5 mb-2 text-white">Ürün Toplam Hesaplayıcı</h1>
-            <p class="text-light lead mb-0">
-              Garsonunu seç, ürünleri ekle, siparişlerini anında listele.
-            </p>
-          </div>
-          <div class="col-12 col-lg-4">
-            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-              <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
-                <span class="status-dot me-2"></span>Canlı Firebase
-              </span>
-              <span class="badge bg-dark-subtle text-dark-emphasis rounded-pill px-3 py-2">
-                Servis ücreti dahil edilir
-              </span>
-            </div>
+            <h1 class="fw-bold display-5 mb-2 text-white">Sipariş Maestro</h1>
+            <p class="text-light lead mb-0">Buon lavoro e buon servizio.</p>
           </div>
         </div>
       </div>
@@ -48,10 +36,9 @@
                   <div class="d-flex justify-content-between align-items-start gap-3">
                     <div>
                       <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
-                      <h2 class="h5 mb-1">Garson bilgini hatırlayalım</h2>
-                      <p class="text-secondary mb-0">İsim sadece ilk girişte sorulur ve otomatik hatırlanır.</p>
+                      <h2 class="h5 mb-1">Garson bilgisi</h2>
+                      <p class="text-secondary mb-0">Adın siparişlere otomatik eklenir.</p>
                     </div>
-                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Aktif</span>
                   </div>
                   <div class="d-flex flex-wrap gap-3 align-items-center">
                     <div class="pill soft-pill">
@@ -66,9 +53,6 @@
                       <span class="text-secondary">Servis payı (20%)</span>
                       <strong id="waiterServiceShare">0 $</strong>
                     </div>
-                    <button id="waiterChangeButton" class="btn btn-outline-primary btn-sm rounded-pill ms-auto">
-                      Garsonu değiştir
-                    </button>
                   </div>
                 </div>
               </section>
@@ -92,11 +76,9 @@
             <div class="card-body p-4 p-md-5">
               <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
                 <div>
-                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Hızlı hesaplama</p>
-                  <h2 class="h3 mb-2">Ürünleri seç, toplamı anında gör</h2>
-                  <p class="text-secondary mb-0">
-                    Miktarları artırıp azaltabilir, kaydedebilir ve sonradan düzenleyebilirsin.
-                  </p>
+                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş oluştur</p>
+                  <h2 class="h3 mb-2">Ürünleri seç, servisi ekle ve kaydet</h2>
+                  <p class="text-secondary mb-0">Miktarları ayarla, siparişini oluştur, her şey hazır olsun.</p>
                 </div>
                 <div class="service-chip px-4 py-3 rounded-4 shadow-sm d-flex align-items-center gap-2">
                   <span class="fw-semibold">Servis ücreti</span>
@@ -137,14 +119,14 @@
                 />
               </div>
               <button id="saveButton" class="btn btn-primary btn-lg w-100" type="button">
-                Hesaplamayı Kaydet
+                Siparişi Kaydet
               </button>
 
               <div class="border-top pt-3">
-                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                <div class="d-flex align-items-start justify-content-between mb-2 flex-wrap gap-2">
                   <div>
-                    <h4 class="h6 mb-1">Kayıtlı Hesaplamalar</h4>
-                    <p class="text-secondary small mb-0">Kaydettiğin siparişler anında burada listelenir.</p>
+                    <h4 class="h6 mb-1">Kayıtlı Siparişler</h4>
+                    <p class="text-secondary small mb-0">Kaydedilen siparişler anında burada listelenir.</p>
                   </div>
                 </div>
                 <ul id="calcList" class="calc-list list-unstyled d-flex flex-column gap-3 mb-0"></ul>

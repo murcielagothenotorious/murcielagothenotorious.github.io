@@ -40,6 +40,8 @@ const products = {
 const SERVICE_FEE = 200;
 const SERVICE_SHARE_RATIO = 0.2;
 const WAITER_STORAGE_KEY = "waiterName";
+const WAITER_STATS_KEY = "waiterStats";
+const MASTER_WAITERS = ["samuel pugliani", "christopher raucci"];
 let savedCalculations = [];
 let editingId = null;
 let unsubscribeOrders = null;
@@ -56,11 +58,88 @@ const selectors = {
   waiterOrderCount: document.getElementById("waiterOrderCount"),
   waiterServiceShare: document.getElementById("waiterServiceShare"),
   leaderboardList: document.getElementById("leaderboardList"),
-  waiterChangeButton: document.getElementById("waiterChangeButton"),
   waiterModal: document.getElementById("waiterModal"),
   waiterModalInput: document.getElementById("waiterModalInput"),
   waiterModalSave: document.getElementById("waiterModalSave"),
 };
+
+const normalizeName = (name = "") => name.trim();
+const normalizeKey = (name = "") => normalizeName(name).toLowerCase();
+
+function loadWaiterStats() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(WAITER_STATS_KEY)) || {};
+    Object.entries(parsed).forEach(([key, value]) => {
+      if (typeof value === "number") {
+        parsed[key] = { name: key, count: value };
+      }
+    });
+    return parsed;
+  } catch (error) {
+    console.error("Waiter stats parse failed", error);
+    return {};
+  }
+}
+
+function saveWaiterStats(stats) {
+  localStorage.setItem(WAITER_STATS_KEY, JSON.stringify(stats));
+}
+
+function isMasterWaiter(name) {
+  return MASTER_WAITERS.includes(normalizeKey(name));
+}
+
+function syncStatsWithOrders(orders) {
+  const stats = loadWaiterStats();
+  const counts = {};
+
+  (orders || []).forEach((order) => {
+    const name = normalizeName(order.waiterName || "Bilinmiyor");
+    const key = normalizeKey(name);
+    if (!key) return;
+    if (!counts[key]) {
+      counts[key] = { name, count: 0 };
+    }
+    counts[key].count += 1;
+  });
+
+  let changed = false;
+  Object.entries(counts).forEach(([key, value]) => {
+    if (!stats[key]) {
+      stats[key] = value;
+      changed = true;
+      return;
+    }
+
+    if (!stats[key].name) stats[key].name = value.name;
+    if ((stats[key].count || 0) < value.count) {
+      stats[key].count = value.count;
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    saveWaiterStats(stats);
+  }
+
+  return stats;
+}
+
+function adjustWaiterCount(name, delta) {
+  const stats = loadWaiterStats();
+  const key = normalizeKey(name);
+  if (!key) return stats;
+
+  const current = stats[key]?.count || 0;
+  const next = Math.max(0, current + delta);
+  stats[key] = {
+    name: stats[key]?.name || normalizeName(name),
+    count: next,
+  };
+
+  saveWaiterStats(stats);
+  return stats;
+}
 
 function getStoredWaiterName() {
   return localStorage.getItem(WAITER_STORAGE_KEY) || "";
@@ -206,14 +285,16 @@ function changeCount(card, delta) {
 }
 
 function calculateTotal() {
-  let total = SERVICE_FEE;
+  let productTotal = 0;
   document.querySelectorAll(".product-card").forEach((card) => {
     const countEl = card.querySelector(".count");
     const qty = Number(countEl?.innerText || 0);
     const price = Number(card.dataset.price || 0);
-    total += qty * price;
+    productTotal += qty * price;
   });
 
+  const includeService = productTotal > 0;
+  const total = productTotal + (includeService ? SERVICE_FEE : 0);
   selectors.totalPrice.innerText = total % 1 === 0 ? total : total.toFixed(2);
 }
 
@@ -227,7 +308,7 @@ function saveCalculation() {
     return alert("Lütfen önce garson adını kaydedin.");
   }
 
-  const total = selectors.totalPrice.innerText;
+  let productTotal = 0;
   const items = [];
 
   document.querySelectorAll(".product-card").forEach((card) => {
@@ -236,13 +317,20 @@ function saveCalculation() {
     if (qty === 0) return;
     const productName = card.dataset.name;
     const price = Number(card.dataset.price || 0);
+    const lineTotal = qty * price;
+    productTotal += lineTotal;
     items.push({ name: productName, qty, price });
   });
 
-  items.push({ name: "Servis Hizmeti", qty: 1, price: SERVICE_FEE });
-
-  if (items.length === 1) {
+  const includeService = productTotal > 0;
+  if (!items.length) {
     return alert("Lütfen en az bir ürün seçin.");
+  }
+
+  const total = includeService ? productTotal + SERVICE_FEE : productTotal;
+
+  if (includeService) {
+    items.push({ name: "Servis Hizmeti", qty: 1, price: SERVICE_FEE });
   }
 
   const timestamp = editingId
@@ -261,10 +349,12 @@ function saveCalculation() {
   if (editingId) {
     updateOrder(editingId, calculation).finally(() => {
       editingId = null;
-      selectors.saveButton.textContent = "Hesaplamayı Kaydet";
+      selectors.saveButton.textContent = "Siparişi Kaydet";
       resetForm(false);
     });
   } else {
+    const stats = adjustWaiterCount(waiterName, 1);
+    updateWaiterStats(stats);
     addOrder(calculation).finally(() => {
       resetForm(false);
     });
@@ -277,7 +367,7 @@ function renderCalculationList() {
   if (!savedCalculations.length) {
     const empty = document.createElement("li");
     empty.className = "empty-state";
-    empty.innerHTML = "<strong>Henüz kayıt yok</strong><small>Kaydettiğiniz siparişler burada canlı olarak görünecek.</small>";
+    empty.innerHTML = "<small>Kaydedilen siparişler burada canlı olarak görünecek.</small>";
     selectors.calcList.appendChild(empty);
     return;
   }
@@ -361,26 +451,21 @@ function renderCalculationList() {
     });
 }
 
-function renderLeaderboard() {
+function renderLeaderboard(stats = loadWaiterStats()) {
   selectors.leaderboardList.innerHTML = "";
-  const leaderboardData = savedCalculations.reduce((acc, calc) => {
-    const name = (calc.waiterName || "Bilinmiyor").trim() || "Bilinmiyor";
-    if (!acc[name]) {
-      acc[name] = { name, count: 0 };
-    }
-    acc[name].count += 1;
-    return acc;
-  }, {});
-
-  const rows = Object.values(leaderboardData).sort((a, b) => {
-    if (b.count === a.count) return a.name.localeCompare(b.name);
-    return b.count - a.count;
-  });
+  const rows = Object.values(stats || {})
+    .filter((entry) => entry?.name)
+    .sort((a, b) => {
+      if ((b.count || 0) === (a.count || 0)) {
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      return (b.count || 0) - (a.count || 0);
+    });
 
   if (!rows.length) {
     const empty = document.createElement("li");
     empty.className = "text-secondary small";
-    empty.textContent = "Henüz sipariş yok. İlk siparişi kaydet!";
+    empty.textContent = "İlk siparişi kaydet ve sıralamayı başlat.";
     selectors.leaderboardList.appendChild(empty);
     return;
   }
@@ -406,10 +491,10 @@ function renderLeaderboard() {
 
     const orderCount = document.createElement("div");
     orderCount.className = "fw-semibold";
-    orderCount.textContent = `${row.count} sipariş`;
+    orderCount.textContent = `${row.count || 0} sipariş`;
 
     const serviceShare = document.createElement("small");
-    const shareValue = row.count * SERVICE_FEE * SERVICE_SHARE_RATIO;
+    const shareValue = (row.count || 0) * SERVICE_FEE * SERVICE_SHARE_RATIO;
     serviceShare.className = "text-secondary";
     serviceShare.textContent = `Servis payı: ${shareValue.toFixed(0)} $`;
 
@@ -429,7 +514,7 @@ function copyList(id) {
 
   navigator.clipboard
     .writeText(text)
-    .then(() => alert("Hesaplama detayları panoya kopyalandı!"))
+    .then(() => alert("Sipariş detayları panoya kopyalandı!"))
     .catch(() => alert("Kopyalama başarısız oldu."));
 }
 
@@ -460,7 +545,15 @@ function editCalculation(id) {
 }
 
 function deleteCalculation(id) {
-  if (confirm("Bu hesaplamayı silmek istediğinizden emin misiniz?")) {
+  if (confirm("Bu siparişi silmek istediğinizden emin misiniz?")) {
+    const calc = savedCalculations.find((c) => c.id === id);
+    const actor = getStoredWaiterName();
+    const master = isMasterWaiter(actor);
+    if (calc?.waiterName && !master) {
+      const stats = adjustWaiterCount(calc.waiterName, -1);
+      updateWaiterStats(stats);
+    }
+
     deleteOrder(id);
   }
 }
@@ -468,26 +561,25 @@ function deleteCalculation(id) {
 function resetForm(resetEditing = true) {
   selectors.calcName.value = "";
   resetCounts();
-  selectors.totalPrice.innerText = SERVICE_FEE;
+  selectors.totalPrice.innerText = 0;
   if (resetEditing) {
     editingId = null;
-    selectors.saveButton.textContent = "Hesaplamayı Kaydet";
+    selectors.saveButton.textContent = "Siparişi Kaydet";
   }
 }
 
-function updateWaiterStats() {
+function updateWaiterStats(stats = loadWaiterStats()) {
   const storedName = getStoredWaiterName();
   selectors.activeWaiterName.textContent = storedName || "-";
 
-  const count = savedCalculations.filter((c) =>
-    (c.waiterName || "").toLowerCase() === (storedName || "").toLowerCase()
-  ).length;
+  const key = normalizeKey(storedName);
+  const count = key && stats[key]?.count ? stats[key].count : 0;
 
   const share = count * SERVICE_FEE * SERVICE_SHARE_RATIO;
   selectors.waiterOrderCount.textContent = count;
   selectors.waiterServiceShare.textContent = `${share.toFixed(0)} $`;
 
-  renderLeaderboard();
+  renderLeaderboard(stats);
 }
 
 function resetCounts() {
@@ -625,10 +717,6 @@ function attachEvents() {
   selectors.saveButton.addEventListener("click", saveCalculation);
   selectors.calcName.addEventListener("keydown", handleKeyboardSubmit);
 
-  selectors.waiterChangeButton?.addEventListener("click", () => {
-    promptWaiterName(true);
-  });
-
   selectors.waiterModalSave?.addEventListener("click", () => {
     setWaiterName(selectors.waiterModalInput?.value || "");
   });
@@ -646,11 +734,12 @@ function initCalculator() {
   attachEvents();
   calculateTotal();
   renderCalculationList();
-  updateWaiterStats();
+  updateWaiterStats(syncStatsWithOrders(savedCalculations));
   unsubscribeOrders = listenOrders((orders) => {
     savedCalculations = orders || [];
+    const stats = syncStatsWithOrders(savedCalculations);
     renderCalculationList();
-    updateWaiterStats();
+    updateWaiterStats(stats);
   });
 
   promptWaiterName();

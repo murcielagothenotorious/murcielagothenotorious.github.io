@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --bg-gradient-start: #111827;
-  --bg-gradient-end: #0f172a;
+  --bg-gradient-start: #0f9d58;
+  --bg-gradient-middle: #ffffff;
+  --bg-gradient-end: #d93025;
   --card-bg: #ffffff;
   --muted: #6b7280;
   --chip-bg: #f3f6ff;
@@ -23,9 +24,20 @@ body {
 }
 
 .bg-gradient {
-  background: linear-gradient(120deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.95));
+  background: linear-gradient(
+    90deg,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-middle) 50%,
+    var(--bg-gradient-end) 100%
+  );
   position: relative;
   isolation: isolate;
+}
+
+header h1,
+header .lead,
+header .hero-eyebrow {
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .bg-gradient > .container-xxl {
@@ -36,10 +48,10 @@ body {
 .gradient-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.35), transparent 32%),
-    radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.35), transparent 28%),
-    linear-gradient(140deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0));
-  opacity: 1;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.28), transparent 42%),
+    radial-gradient(circle at 80% 20%, rgba(12, 143, 69, 0.22), transparent 36%),
+    radial-gradient(circle at 60% 70%, rgba(217, 48, 37, 0.18), transparent 32%);
+  opacity: 0.9;
   z-index: 0;
 }
 
@@ -82,8 +94,8 @@ header .lead {
 }
 
 .category-group {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(150deg, #ffffff 0%, #f3f6ff 55%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
   border-radius: 22px;
   padding: 1.2rem 1.4rem 1.8rem;
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
