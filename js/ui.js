@@ -1,3 +1,5 @@
+import { addOrder, deleteOrder, listenOrders, updateOrder } from "./orders.js";
+
 const products = {
   Pizza: [
     { name: "Margherita", price: 350 },
@@ -37,7 +39,8 @@ const products = {
 
 const SERVICE_FEE = 200;
 let savedCalculations = [];
-let editingIndex = -1;
+let editingId = null;
+let unsubscribeOrders = null;
 
 const selectors = {
   categories: document.getElementById("categories"),
@@ -163,69 +166,87 @@ function saveCalculation() {
     return alert("Lütfen en az bir ürün seçin.");
   }
 
+  const timestamp = editingId
+    ? savedCalculations.find((c) => c.id === editingId)?.timestamp || Date.now()
+    : Date.now();
+
   const calculation = {
     name,
     total,
     items,
-    date: new Date().toLocaleString("tr-TR"),
+    timestamp,
+    date: new Date(timestamp).toLocaleString("tr-TR"),
   };
 
-  if (editingIndex >= 0) {
-    savedCalculations[editingIndex] = calculation;
-    editingIndex = -1;
-    selectors.saveButton.textContent = "Hesaplamayı Kaydet";
+  if (editingId) {
+    updateOrder(editingId, calculation).finally(() => {
+      editingId = null;
+      selectors.saveButton.textContent = "Hesaplamayı Kaydet";
+      resetForm(false);
+    });
   } else {
-    savedCalculations.push(calculation);
+    addOrder(calculation).finally(() => {
+      resetForm(false);
+    });
   }
-
-  renderCalculationList();
-  resetForm();
 }
 
 function renderCalculationList() {
   selectors.calcList.innerHTML = "";
 
-  savedCalculations.forEach((calc, index) => {
-    const li = document.createElement("li");
+  if (!savedCalculations.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty-state";
+    empty.innerHTML = "<strong>Henüz kayıt yok</strong><small>Kaydettiğiniz siparişler burada canlı olarak görünecek.</small>";
+    selectors.calcList.appendChild(empty);
+    return;
+  }
 
-    const info = document.createElement("div");
-    info.className = "calc-info";
-    const breakdown = calc.items
-      .map((item) => `${item.name} x${item.qty}`)
-      .join(", ");
-    info.innerHTML = `<strong>${calc.name}</strong><small>${calc.date}</small><small>${breakdown}</small><strong>${calc.total} $</strong>`;
+  savedCalculations
+    .slice()
+    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+    .forEach((calc) => {
+      const li = document.createElement("li");
 
-    const actions = document.createElement("div");
-    actions.className = "calc-actions";
+      const info = document.createElement("div");
+      info.className = "calc-info";
+      const breakdown = calc.items
+        .map((item) => `${item.name} x${item.qty}`)
+        .join(", ");
+      info.innerHTML = `<strong>${calc.name}</strong><small>${calc.date}</small><small>${breakdown}</small><strong>${calc.total} $</strong>`;
 
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn-edit";
-    editBtn.textContent = "Düzenle";
-    editBtn.addEventListener("click", () => editCalculation(index));
+      const actions = document.createElement("div");
+      actions.className = "calc-actions";
 
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "btn-copy";
-    copyBtn.textContent = "Kopyala";
-    copyBtn.addEventListener("click", () => copyList(index));
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn-edit";
+      editBtn.textContent = "Düzenle";
+      editBtn.addEventListener("click", () => editCalculation(calc.id));
 
-    const downloadBtn = document.createElement("button");
-    downloadBtn.className = "btn-download";
-    downloadBtn.textContent = "İndir";
-    downloadBtn.addEventListener("click", () => downloadReceipt(calc));
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "btn-copy";
+      copyBtn.textContent = "Kopyala";
+      copyBtn.addEventListener("click", () => copyList(calc.id));
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn-delete";
-    deleteBtn.textContent = "Sil";
-    deleteBtn.addEventListener("click", () => deleteCalculation(index));
+      const downloadBtn = document.createElement("button");
+      downloadBtn.className = "btn-download";
+      downloadBtn.textContent = "İndir";
+      downloadBtn.addEventListener("click", () => downloadReceipt(calc));
 
-    actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
-    li.append(info, actions);
-    selectors.calcList.appendChild(li);
-  });
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn-delete";
+      deleteBtn.textContent = "Sil";
+      deleteBtn.addEventListener("click", () => deleteCalculation(calc.id));
+
+      actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
+      li.append(info, actions);
+      selectors.calcList.appendChild(li);
+    });
 }
 
-function copyList(index) {
-  const calc = savedCalculations[index];
+function copyList(id) {
+  const calc = savedCalculations.find((c) => c.id === id);
+  if (!calc) return;
   let text = `${calc.name}: \nToplam: ${calc.total} $\n\nÜrünler:\n`;
   calc.items.forEach((item) => {
     text += `- ${item.name} x${item.qty} = ${item.qty * item.price} $\n`;
@@ -237,9 +258,10 @@ function copyList(index) {
     .catch(() => alert("Kopyalama başarısız oldu."));
 }
 
-function editCalculation(index) {
-  const calc = savedCalculations[index];
-  editingIndex = index;
+function editCalculation(id) {
+  const calc = savedCalculations.find((c) => c.id === id);
+  if (!calc) return;
+  editingId = id;
   selectors.calcName.value = calc.name;
   selectors.saveButton.textContent = "Güncelle";
 
@@ -262,17 +284,20 @@ function editCalculation(index) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function deleteCalculation(index) {
+function deleteCalculation(id) {
   if (confirm("Bu hesaplamayı silmek istediğinizden emin misiniz?")) {
-    savedCalculations.splice(index, 1);
-    renderCalculationList();
+    deleteOrder(id);
   }
 }
 
-function resetForm() {
+function resetForm(resetEditing = true) {
   selectors.calcName.value = "";
   resetCounts();
   selectors.totalPrice.innerText = SERVICE_FEE;
+  if (resetEditing) {
+    editingId = null;
+    selectors.saveButton.textContent = "Hesaplamayı Kaydet";
+  }
 }
 
 function resetCounts() {
@@ -415,6 +440,11 @@ function initCalculator() {
   loadProducts();
   attachEvents();
   calculateTotal();
+  renderCalculationList();
+  unsubscribeOrders = listenOrders((orders) => {
+    savedCalculations = orders || [];
+    renderCalculationList();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", initCalculator);

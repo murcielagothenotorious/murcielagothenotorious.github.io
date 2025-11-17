@@ -1,10 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  remove,
+  update,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // Firebase config (senin verdiğin)
 const firebaseConfig = {
   apiKey: "AIzaSyC17G-mWb_z2xIHBo7s4rrcQkeyHqv51KA",
   authDomain: "casacarmaretti.firebaseapp.com",
+  databaseURL: "https://casacarmaretti-default-rtdb.firebaseio.com",
   projectId: "casacarmaretti",
   storageBucket: "casacarmaretti.firebasestorage.app",
   messagingSenderId: "1078474886220",
@@ -18,4 +26,4 @@ const db = getDatabase(app);
 // Siparişler için referans
 const ordersRef = ref(db, "orders");
 
-export { db, ordersRef, push, onValue, remove, ref };
+export { db, ordersRef, push, onValue, remove, ref, update };
