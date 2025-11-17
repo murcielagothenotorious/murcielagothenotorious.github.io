@@ -43,6 +43,7 @@ const WAITER_STORAGE_KEY = "waiterName";
 let savedCalculations = [];
 let editingId = null;
 let unsubscribeOrders = null;
+let waiterModalInstance = null;
 
 const selectors = {
   categories: document.getElementById("categories"),
@@ -51,12 +52,14 @@ const selectors = {
   calcName: document.getElementById("calcName"),
   saveButton: document.getElementById("saveButton"),
   receiptCanvas: document.getElementById("receiptCanvas"),
-  waiterNameInput: document.getElementById("waiterNameInput"),
-  saveWaiterButton: document.getElementById("saveWaiterButton"),
   activeWaiterName: document.getElementById("activeWaiterName"),
   waiterOrderCount: document.getElementById("waiterOrderCount"),
   waiterServiceShare: document.getElementById("waiterServiceShare"),
   leaderboardList: document.getElementById("leaderboardList"),
+  waiterChangeButton: document.getElementById("waiterChangeButton"),
+  waiterModal: document.getElementById("waiterModal"),
+  waiterModalInput: document.getElementById("waiterModalInput"),
+  waiterModalSave: document.getElementById("waiterModalSave"),
 };
 
 function getStoredWaiterName() {
@@ -67,9 +70,35 @@ function setWaiterName(name) {
   const trimmed = name.trim();
   if (!trimmed) return;
   localStorage.setItem(WAITER_STORAGE_KEY, trimmed);
-  selectors.waiterNameInput.value = trimmed;
   selectors.activeWaiterName.textContent = trimmed;
+  if (selectors.waiterModalInput) {
+    selectors.waiterModalInput.value = trimmed;
+  }
+  const modal = getWaiterModal();
+  modal?.hide();
   updateWaiterStats();
+}
+
+function getWaiterModal() {
+  if (!waiterModalInstance && window.bootstrap && selectors.waiterModal) {
+    waiterModalInstance = new window.bootstrap.Modal(selectors.waiterModal, {
+      backdrop: "static",
+      keyboard: false,
+    });
+  }
+  return waiterModalInstance;
+}
+
+function promptWaiterName(force = false) {
+  const stored = getStoredWaiterName();
+  if (!force && stored) return;
+  const modal = getWaiterModal();
+  if (!modal) return;
+  if (selectors.waiterModalInput) {
+    selectors.waiterModalInput.value = stored || "";
+    setTimeout(() => selectors.waiterModalInput?.focus(), 200);
+  }
+  modal.show();
 }
 
 function loadProducts() {
@@ -79,16 +108,30 @@ function loadProducts() {
     const group = document.createElement("div");
     group.className = "category-group";
 
+    const header = document.createElement("div");
+    header.className = "category-header";
+
+    const titleWrap = document.createElement("div");
     const title = document.createElement("h3");
     title.textContent = category;
-    group.appendChild(title);
+    const hint = document.createElement("p");
+    hint.className = "muted mb-0";
+    hint.textContent = "Ürünleri seçip miktarları ayarla";
+    titleWrap.append(title, hint);
+
+    const badge = document.createElement("span");
+    badge.className = "badge text-bg-light";
+    badge.textContent = `${items.length} ürün`;
+
+    header.append(titleWrap, badge);
+    group.appendChild(header);
 
     const grid = document.createElement("div");
     grid.className = "row g-4 product-grid";
 
     items.forEach((item) => {
       const col = document.createElement("div");
-      col.className = "col-12 col-sm-6 col-lg-4";
+      col.className = "col-12 col-sm-6 col-md-4 col-xl-3";
 
       const card = document.createElement("div");
       card.className = "product-card h-100";
@@ -178,10 +221,10 @@ function saveCalculation() {
   const name = selectors.calcName.value.trim();
   if (!name) return alert("Lütfen hesaplamaya bir isim verin.");
 
-  const waiterName = selectors.waiterNameInput.value.trim();
+  const waiterName = getStoredWaiterName();
   if (!waiterName) {
-    selectors.waiterNameInput.focus();
-    return alert("Lütfen garson adını kaydedin.");
+    promptWaiterName(true);
+    return alert("Lütfen önce garson adını kaydedin.");
   }
 
   const total = selectors.totalPrice.innerText;
@@ -435,9 +478,6 @@ function resetForm(resetEditing = true) {
 function updateWaiterStats() {
   const storedName = getStoredWaiterName();
   selectors.activeWaiterName.textContent = storedName || "-";
-  if (storedName && selectors.waiterNameInput) {
-    selectors.waiterNameInput.value = storedName;
-  }
 
   const count = savedCalculations.filter((c) =>
     (c.waiterName || "").toLowerCase() === (storedName || "").toLowerCase()
@@ -585,14 +625,18 @@ function attachEvents() {
   selectors.saveButton.addEventListener("click", saveCalculation);
   selectors.calcName.addEventListener("keydown", handleKeyboardSubmit);
 
-  selectors.saveWaiterButton?.addEventListener("click", () => {
-    setWaiterName(selectors.waiterNameInput.value);
+  selectors.waiterChangeButton?.addEventListener("click", () => {
+    promptWaiterName(true);
   });
 
-  selectors.waiterNameInput?.addEventListener("keydown", (event) => {
+  selectors.waiterModalSave?.addEventListener("click", () => {
+    setWaiterName(selectors.waiterModalInput?.value || "");
+  });
+
+  selectors.waiterModalInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      setWaiterName(selectors.waiterNameInput.value);
+      setWaiterName(selectors.waiterModalInput.value);
     }
   });
 }
@@ -609,11 +653,7 @@ function initCalculator() {
     updateWaiterStats();
   });
 
-  const storedName = getStoredWaiterName();
-  if (storedName) {
-    selectors.waiterNameInput.value = storedName;
-    selectors.activeWaiterName.textContent = storedName;
-  }
+  promptWaiterName();
 }
 
 document.addEventListener("DOMContentLoaded", initCalculator);

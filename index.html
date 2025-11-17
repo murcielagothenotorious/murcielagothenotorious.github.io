@@ -13,29 +13,34 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body class="bg-body text-body">
-    <header class="bg-gradient position-relative overflow-hidden">
-      <div class="container py-4">
-        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
-          <div>
-            <p class="hero-eyebrow mb-2">Casa Carmaretti</p>
-            <h1 class="fw-bold display-6 mb-1 text-white">Ürün Toplam Hesaplayıcı</h1>
-            <p class="text-light mb-0">Hızlıca seç, kaydet ve canlı sipariş akışını izle.</p>
+    <header class="bg-gradient position-relative overflow-hidden text-white">
+      <div class="gradient-overlay"></div>
+      <div class="container-xxl py-5 position-relative">
+        <div class="row g-4 align-items-center">
+          <div class="col-12 col-lg-8 d-flex flex-column gap-2">
+            <p class="hero-eyebrow mb-0">Casa Carmaretti</p>
+            <h1 class="fw-bold display-5 mb-2 text-white">Ürün Toplam Hesaplayıcı</h1>
+            <p class="text-light lead mb-0">
+              Garsonunu seç, ürünleri ekle, siparişlerini anında listele.
+            </p>
           </div>
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
-              <span class="status-dot me-2"></span>Canlı Firebase
-            </span>
-            <span class="badge bg-dark-subtle text-dark-emphasis rounded-pill px-3 py-2">
-              Servis ücreti dahil edilir
-            </span>
+          <div class="col-12 col-lg-4">
+            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+              <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
+                <span class="status-dot me-2"></span>Canlı Firebase
+              </span>
+              <span class="badge bg-dark-subtle text-dark-emphasis rounded-pill px-3 py-2">
+                Servis ücreti dahil edilir
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="container py-5">
+    <main class="container-xxl py-5">
       <div class="row g-4 g-xl-5 align-items-start">
-        <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-7 col-xxl-8">
           <div class="row g-3 mb-4">
             <div class="col-12 col-xl-6">
               <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
@@ -43,21 +48,10 @@
                   <div class="d-flex justify-content-between align-items-start gap-3">
                     <div>
                       <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
-                      <h2 class="h5 mb-1">Adını kaydet, siparişlerde göster</h2>
-                      <p class="text-secondary mb-0">İsim tarayıcıda saklanır, sayfa yenilense bile kaybolmaz.</p>
+                      <h2 class="h5 mb-1">Garson bilgini hatırlayalım</h2>
+                      <p class="text-secondary mb-0">İsim sadece ilk girişte sorulur ve otomatik hatırlanır.</p>
                     </div>
                     <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Aktif</span>
-                  </div>
-                  <div class="input-group input-group-lg">
-                    <span class="input-group-text bg-light">👤</span>
-                    <input
-                      id="waiterNameInput"
-                      type="text"
-                      class="form-control"
-                      placeholder="Garson adı"
-                      autocomplete="name"
-                    />
-                    <button class="btn btn-primary" id="saveWaiterButton" type="button">Kaydet</button>
                   </div>
                   <div class="d-flex flex-wrap gap-3 align-items-center">
                     <div class="pill soft-pill">
@@ -72,6 +66,9 @@
                       <span class="text-secondary">Servis payı (20%)</span>
                       <strong id="waiterServiceShare">0 $</strong>
                     </div>
+                    <button id="waiterChangeButton" class="btn btn-outline-primary btn-sm rounded-pill ms-auto">
+                      Garsonu değiştir
+                    </button>
                   </div>
                 </div>
               </section>
@@ -111,8 +108,8 @@
           </section>
         </div>
 
-        <div class="col-12 col-lg-5">
-          <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 80px">
+        <div class="col-12 col-lg-5 col-xxl-4">
+          <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 100px">
             <div class="card-body p-4 p-md-5 d-flex flex-column gap-3">
               <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                 <div>
@@ -159,11 +156,54 @@
     </main>
 
     <canvas id="receiptCanvas" hidden></canvas>
-    <script type="module" src="./js/ui.js"></script>
+    <div
+      class="modal fade"
+      id="waiterModal"
+      tabindex="-1"
+      aria-labelledby="waiterModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div class="modal-header border-0 pb-0">
+            <div>
+              <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson adı</p>
+              <h2 class="h5 mb-0" id="waiterModalLabel">Kullanmak istediğin adı gir</h2>
+            </div>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body pt-3">
+            <div class="input-group input-group-lg">
+              <span class="input-group-text bg-light">👤</span>
+              <input
+                id="waiterModalInput"
+                type="text"
+                class="form-control"
+                placeholder="Örn: Ayşe"
+                autocomplete="name"
+              />
+            </div>
+            <p class="text-secondary small mt-2 mb-0">
+              Bu ad siparişlere otomatik eklenecek ve tarayıcıda saklanacak.
+            </p>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Vazgeç</button>
+            <button type="button" class="btn btn-primary" id="waiterModalSave">Kaydet</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="./js/ui.js"></script>
   </body>
 </html>
