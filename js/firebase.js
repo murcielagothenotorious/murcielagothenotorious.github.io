@@ -14,7 +14,7 @@ const firebaseConfig = {
   authDomain: "casacarmaretti.firebaseapp.com",
   databaseURL: "https://casacarmaretti-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "casacarmaretti",
-  storageBucket: "casacarmaretti.firebasestorage.app",
+  storageBucket: "casacarmaretti.appspot.com",
   messagingSenderId: "1078474886220",
   appId: "1:1078474886220:web:56c8410a0f2189694278e9",
 };
