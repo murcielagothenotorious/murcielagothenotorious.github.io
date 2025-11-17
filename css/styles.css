@@ -1,0 +1,225 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --bg-gradient-start: #0f172a;
+  --bg-gradient-end: #111827;
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --chip-bg: #f3f6ff;
+  --chip-border: #dbeafe;
+  --success: #16a34a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: linear-gradient(120deg, #f8fbff 0%, #eef2ff 100%);
+  color: #0f172a;
+}
+
+.bg-gradient {
+  background: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.25), transparent 25%),
+    radial-gradient(circle at 90% 10%, rgba(79, 70, 229, 0.25), transparent 22%),
+    linear-gradient(120deg, var(--bg-gradient-start), var(--bg-gradient-end));
+}
+
+.hero-eyebrow {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-dot,
+.live-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.16);
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.service-chip {
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+}
+
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-group h3 {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.category-group .muted {
+  color: var(--muted);
+}
+
+.product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 180px;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+}
+
+.product-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.product-price {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.controls button {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background: #e0f2fe;
+  border-color: #bfdbfe;
+}
+
+.controls .count {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.row-total {
+  color: var(--success);
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+
+.calc-list li {
+  padding: 1.2rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.calc-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.calc-title strong {
+  font-size: 1.05rem;
+  display: block;
+}
+
+.calc-date {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.calc-total {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.calc-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.calc-chip {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.calc-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.calc-actions button {
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+.calc-actions .btn-edit {
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.calc-actions .btn-delete {
+  color: #dc2626;
+  border-color: #fecdd3;
+}
+
+.calc-actions .btn-download {
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.calc-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.total-chip {
+  min-width: 140px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed #d1d5db;
+  border-radius: 1rem;
+  padding: 1.2rem;
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+@media (max-width: 991px) {
+  .sticky-top {
+    position: static !important;
+  }
+}
