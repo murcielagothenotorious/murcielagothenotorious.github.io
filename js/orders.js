@@ -1,21 +1,21 @@
 // orders.js
-import { ordersRef, push, remove, onValue, ref, update } from "./firebase.js";
+import { ordersRef, push, remove, onValue, ref, update, child } from "./firebase.js";
 
 // Yeni sipariş ekleme
-export function addOrder(order) {
+export async function addOrder(order) {
   if (!order) return null;
-  return push(ordersRef, order);
+  return await push(ordersRef, order);
 }
 
 // Sipariş güncelleme
-export function updateOrder(orderId, order) {
+export async function updateOrder(orderId, order) {
   if (!orderId || !order) return null;
-  return update(ref(ordersRef, orderId), order);
+  return await update(child(ordersRef, orderId), order);
 }
 
 // Sipariş silme
 export function deleteOrder(orderId) {
-  return remove(ref(ordersRef, orderId));
+  return remove(child(ordersRef, orderId));
 }
 
 // Realtime listener

@@ -208,12 +208,35 @@ function renderCalculationList() {
     .forEach((calc) => {
       const li = document.createElement("li");
 
-      const info = document.createElement("div");
-      info.className = "calc-info";
-      const breakdown = calc.items
-        .map((item) => `${item.name} x${item.qty}`)
-        .join(", ");
-      info.innerHTML = `<strong>${calc.name}</strong><small>${calc.date}</small><small>${breakdown}</small><strong>${calc.total} $</strong>`;
+      const head = document.createElement("div");
+      head.className = "calc-head";
+
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "calc-title";
+
+      const title = document.createElement("strong");
+      title.textContent = calc.name;
+
+      const date = document.createElement("span");
+      date.className = "calc-date";
+      date.textContent = calc.date;
+
+      titleWrap.append(title, date);
+
+      const total = document.createElement("span");
+      total.className = "calc-total";
+      total.textContent = `${calc.total} $`;
+
+      head.append(titleWrap, total);
+
+      const items = document.createElement("div");
+      items.className = "calc-items";
+      calc.items.forEach((item) => {
+        const chip = document.createElement("span");
+        chip.className = "calc-chip";
+        chip.textContent = `${item.name} x${item.qty}`;
+        items.appendChild(chip);
+      });
 
       const actions = document.createElement("div");
       actions.className = "calc-actions";
@@ -239,7 +262,7 @@ function renderCalculationList() {
       deleteBtn.addEventListener("click", () => deleteCalculation(calc.id));
 
       actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
-      li.append(info, actions);
+      li.append(head, items, actions);
       selectors.calcList.appendChild(li);
     });
 }

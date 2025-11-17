@@ -5,6 +5,7 @@ import {
   push,
   onValue,
   remove,
+  child,
   update,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -26,4 +27,4 @@ const db = getDatabase(app);
 // Siparişler için referans
 const ordersRef = ref(db, "orders");
 
-export { db, ordersRef, push, onValue, remove, ref, update };
+export { child, db, ordersRef, push, onValue, remove, ref, update };
