@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="script.js"></script>
     <title>Ürün Toplam Hesaplayıcı</title>
     <style>
       * {
@@ -453,6 +454,8 @@
           const price = Number(card.dataset.price || 0);
           total += qty * price;
         });
+
+        total += 200;
         document.getElementById("totalPrice").innerText =
           total % 1 === 0 ? total : total.toFixed(2);
       }
@@ -464,6 +467,7 @@
         const total = document.getElementById("totalPrice").innerText;
         const items = [];
 
+        try {
         document.querySelectorAll(".product-card").forEach((card) => {
           const countEl = card.querySelector(".count");
           if (!countEl) return;
@@ -472,7 +476,12 @@
           const productName = card.dataset.name;
           const price = Number(card.dataset.price || 0);
           items.push({ name: productName, qty: qty, price: price });
-        });
+          
+        })
+        }
+        finally {
+           items.push({ name: "Servis Hizmeti", qty: 1, price: 200 });
+        };
 
         if (items.length === 0) {
           return alert("Lütfen en az bir ürün seçin.");
@@ -482,7 +491,6 @@
           name: name,
           total: total,
           items: items,
-          date: new Date().toLocaleString("tr-TR"),
         };
 
         if (editingIndex >= 0) {
@@ -510,7 +518,7 @@
           const breakdown = calc.items
             .map((item) => `${item.name} x${item.qty}`)
             .join(", ");
-          info.innerHTML = `<strong>${calc.name}</strong>: ${calc.total} $<br><small>${calc.date}</small><br><small>${breakdown}</small>`;
+          info.innerHTML = `<strong>${calc.name}</strong>: ${calc.total} $</small><br><small>${breakdown}</small>`;
 
           const actions = document.createElement("div");
           actions.className = "calc-actions";
@@ -666,10 +674,6 @@
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "left";
         ctx.fillText(calc.name, padding, 110);
-
-        ctx.font = "14px Arial";
-        ctx.fillStyle = "#666";
-        ctx.fillText(calc.date, padding, 135);
 
         /* ----------------- ÇİZGİ ----------------- */
         ctx.strokeStyle = "#ddd";
