@@ -719,14 +719,14 @@ async function downloadReceipt(calc) {
 
   ctx.font = `600 16px ${RECEIPT_FONT_FAMILY}`;
   ctx.fillStyle = "#1f2937";
-  ctx.fillText("Osteria & Bar", width / 2, yPos);
+  ctx.fillText("Fine Dining", width / 2, yPos);
   yPos += 22;
 
   ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
   ctx.fillStyle = "#4b5563";
-  ctx.fillText("Via Roma 21 - Milano", width / 2, yPos);
+  ctx.fillText("Downtown Vinewood Power St.", width / 2, yPos);
   yPos += 18;
-  ctx.fillText("Tel: +39 02 555 1234", width / 2, yPos);
+  ctx.fillText("PH: +39 02 555 1234", width / 2, yPos);
 
   yPos += 26;
   drawSeparator(yPos);
@@ -781,6 +781,9 @@ async function downloadReceipt(calc) {
 
     item.lines.forEach((line, idx) => {
       ctx.textAlign = "left";
+      if (colName === "Servis Hizmeti") {
+        continue;
+      }
       ctx.fillText(line, colName, yPos);
 
       if (idx === 0) {
@@ -817,7 +820,7 @@ async function downloadReceipt(calc) {
   yPos += 26;
   ctx.font = `700 17px ${RECEIPT_FONT_FAMILY}`;
   ctx.fillStyle = "#0f172a";
-  ctx.fillText("TOPLAM", colName, yPos);
+  ctx.fillText("TOPLAM", colName, yPos-5);
   ctx.fillStyle = "#111827";
   ctx.fillText(`${calc.total.toFixed(2)} $`, colTotal, yPos);
 
@@ -839,19 +842,6 @@ async function downloadReceipt(calc) {
   ctx.fillStyle = "#111827";
   ctx.font = `600 14px ${RECEIPT_FONT_FAMILY}`;
   ctx.fillText("Bizi tercih ettiğiniz için teşekkür ederiz!", width / 2, yPos);
-  yPos += 20;
-  ctx.font = `13px ${RECEIPT_FONT_FAMILY}`;
-  ctx.fillStyle = "#4b5563";
-  ctx.fillText("En iyi deneyim için yakında tekrar görüşelim.", width / 2, yPos);
-
-  const barcodeY = height - 60;
-  ctx.fillStyle = "#111827";
-  for (let i = 0; i < 40; i++) {
-    const barWidth = Math.random() * 3 + 1;
-    const barHeight = Math.random() * 20 + 30;
-    const x = padding + i * 8;
-    ctx.fillRect(x, barcodeY - barHeight, barWidth, barHeight);
-  }
 
   const link = document.createElement("a");
   link.download = `${calc.name.replace(/[^a-z0-9]/gi, "_")}_${Date.now()}.png`;
