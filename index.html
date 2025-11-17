@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ürün Toplam Hesaplayıcı</title>
-<style>
+  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -98,35 +98,57 @@
     }
     .product-row {
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 12px;
       align-items: center;
-      border-bottom: 1px solid #f0f0f0;
-      gap: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      gap: 8px;
+      min-height: 140px;
+      transition: all 0.2s;
+    }
+    .product-row:hover {
+      border-color: #007bff;
+      box-shadow: 0 2px 8px rgba(0,123,255,0.2);
     }
     .product-row:last-child {
-      border-bottom: none;
+      border-bottom: 2px solid #e0e0e0;
     }
     .product-name {
       flex: 1;
       font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .product-price {
+      font-size: 16px;
+      font-weight: bold;
+      color: #28a745;
+      margin: 4px 0;
     }
     .product-row .controls {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
+      width: 100%;
+      justify-content: center;
     }
     .count {
-      min-width: 20px;
+      min-width: 25px;
       text-align: center;
       font-weight: bold;
+      font-size: 16px;
     }
     .row-total {
-      min-width: 50px;
-      text-align: right;
+      width: 100%;
+      text-align: center;
       font-weight: bold;
       color: #007bff;
+      font-size: 15px;
+      margin-top: 4px;
     }
     input#calcName {
       width: 100%;
@@ -137,10 +159,26 @@
       font-size: 16px;
     }
     .category {
-      margin-bottom: 20px;
+      margin-bottom: 100px;
     }
-    .category > div {
-      margin-bottom: 20px;
+    .category-group {
+      margin-bottom: 25px;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (min-width: 600px) {
+      .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 599px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
     #calcList {
       list-style: none;
