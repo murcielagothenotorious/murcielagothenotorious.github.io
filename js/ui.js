@@ -1048,7 +1048,7 @@ function playNewOrderSound(count = 1) {
   const volume = getStoredVolume();
 
   try {
-    const audio = new Audio("/bell.wav");
+    const audio = new Audio("/artifacts/bell.wav");
     audio.volume = volume;
     audio.preload = "auto";
     audio.addEventListener("canplaythrough", () => {
