@@ -303,6 +303,12 @@ header .lead {
   border-color: #bfdbfe;
 }
 
+.calc-actions .btn-delivered {
+  color: #e1eb25;
+  border-color: #bfdbfe;
+}
+
+
 .calc-actions .btn-delete {
   color: #dc2626;
   border-color: #fecdd3;
@@ -371,4 +377,38 @@ header .lead {
   .sticky-top {
     position: static !important;
   }
+}
+
+/* Delivered order styling */
+.order-delivered {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-color: #d1fae5;
+  box-shadow: none;
+  opacity: 0.9;
+  position: relative;
+}
+
+.order-delivered::before {
+  content: "Teslim Edildi";
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.12);
+}
+
+.order-delivered .calc-title strong {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.order-delivered .calc-actions .btn-delivered {
+  background: #eefdf6;
+  border-color: #bbf7d0;
+  color: #065f46;
 }

@@ -13,6 +13,12 @@ export async function updateOrder(orderId, order) {
   return await update(child(ordersRef, orderId), order);
 }
 
+// Sipariş teslim edildi olarak işaretleme
+export async function orderDelivered(orderId) {
+  if (!orderId) return null;
+  return await update(child(ordersRef, orderId), { delivered: true });
+}
+
 // Sipariş silme
 export function deleteOrder(orderId) {
   return remove(child(ordersRef, orderId));

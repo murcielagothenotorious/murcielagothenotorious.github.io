@@ -1,4 +1,4 @@
-import { addOrder, deleteOrder, listenOrders, updateOrder } from "./orders.js";
+import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered } from "./orders.js";
 
 const products = {
   Pizza: [
@@ -41,12 +41,13 @@ const SERVICE_FEE = 200;
 const SERVICE_SHARE_RATIO = 0.2;
 const WAITER_STORAGE_KEY = "waiterName";
 const WAITER_STATS_KEY = "waiterStats";
-const MASTER_WAITERS = ["samuel pugliani", "christopher raucci"];
+const MASTER_WAITERS = ["samuel pugliani", "austin marcelli", "frederick scarcelli"];
 let savedCalculations = [];
 let editingId = null;
 let unsubscribeOrders = null;
 let waiterModalInstance = null;
 let receiptFontPromise = null;
+let _initialOrdersLoaded = false;
 
 const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
 const RECEIPT_ITEM_FONT = `14px ${RECEIPT_FONT_FAMILY}`;
@@ -436,6 +437,12 @@ function renderCalculationList() {
       editBtn.textContent = "Düzenle";
       editBtn.addEventListener("click", () => editCalculation(calc.id));
 
+      const deliveredBtn = document.createElement("button");
+      deliveredBtn.className = "btn btn-light btn-sm btn-delivered";
+      deliveredBtn.textContent = calc.delivered ? "Teslim Edildi" : "Teslim Et";
+      deliveredBtn.disabled = !!calc.delivered;
+      deliveredBtn.addEventListener("click", () => handleOrderDelivered(calc.id, li, deliveredBtn));
+
       const copyBtn = document.createElement("button");
       copyBtn.className = "btn btn-light btn-sm btn-copy";
       copyBtn.textContent = "Kopyala";
@@ -451,7 +458,11 @@ function renderCalculationList() {
       deleteBtn.textContent = "Sil";
       deleteBtn.addEventListener("click", () => deleteCalculation(calc.id));
 
-      actions.append(editBtn, copyBtn, downloadBtn, deleteBtn);
+      actions.append(editBtn, copyBtn, downloadBtn, deleteBtn, deliveredBtn);
+      if (calc.delivered) {
+        li.classList.add("order-delivered");
+      }
+
       li.append(head, meta, items, actions);
       selectors.calcList.appendChild(li);
     });
@@ -526,6 +537,32 @@ function copyList(id) {
     .catch(() => alert("Kopyalama başarısız oldu."));
 }
 
+function isDelivered(id) {
+  if (!id) return false;
+  const calc = savedCalculations.find((c) => c.id === id);
+  return !!(calc && calc.delivered);
+}
+
+function handleOrderDelivered(id, listItem, button) {
+  if (!id) return;
+  orderDelivered(id)
+    .then(() => {
+      if (listItem) listItem.classList.add("order-delivered");
+      if (button) {
+        button.textContent = "Teslim Edildi";
+        button.disabled = true;
+      }
+      const calc = savedCalculations.find((c) => c.id === id);
+      const actor = getStoredWaiterName();
+      const master = isMasterWaiter(actor);
+      if (calc?.waiterName && !master) {
+        const stats = adjustWaiterCount(calc.waiterName, -1);
+        updateWaiterStats(stats);
+      }
+    })
+    .catch(() => alert("İşaretleme başarısız oldu."));
+}
+
 function editCalculation(id) {
   const calc = savedCalculations.find((c) => c.id === id);
   if (!calc) return;
@@ -553,17 +590,28 @@ function editCalculation(id) {
 }
 
 function deleteCalculation(id) {
-  if (confirm("Bu siparişi silmek istediğinizden emin misiniz?")) {
-    const calc = savedCalculations.find((c) => c.id === id);
-    const actor = getStoredWaiterName();
-    const master = isMasterWaiter(actor);
-    if (calc?.waiterName && !master) {
-      const stats = adjustWaiterCount(calc.waiterName, -1);
-      updateWaiterStats(stats);
-    }
+  const calc = savedCalculations.find((c) => c.id === id);
+  if (!calc) return;
 
-    deleteOrder(id);
+  const actor = getStoredWaiterName();
+  const master = isMasterWaiter(actor);
+  const delivered = !!calc.delivered;
+
+  if (!master && !delivered) {
+    return alert("Bu siparişi yalnızca yönetici garson silebilir çünkü henüz teslim edilmedi.");
   }
+
+  if (!confirm("Bu siparişi silmek istediğinizden emin misiniz?")) return;
+
+  if (calc?.waiterName && !delivered && !master) {
+    const stats = adjustWaiterCount(calc.waiterName, -1);
+    updateWaiterStats(stats);
+  } else if (calc?.waiterName && master && !delivered) {
+    const stats = adjustWaiterCount(calc.waiterName, -1);
+    updateWaiterStats(stats);
+  }
+
+  deleteOrder(id);
 }
 
 function resetForm(resetEditing = true) {
@@ -894,13 +942,51 @@ function initCalculator() {
   renderCalculationList();
   updateWaiterStats(syncStatsWithOrders(savedCalculations));
   unsubscribeOrders = listenOrders((orders) => {
-    savedCalculations = orders || [];
+    const nextOrders = orders || [];
+    const prevIds = new Set((savedCalculations || []).map((o) => o.id));
+    const newOnes = nextOrders.filter((o) => !prevIds.has(o.id));
+
+    savedCalculations = nextOrders;
     const stats = syncStatsWithOrders(savedCalculations);
     renderCalculationList();
     updateWaiterStats(stats);
+
+    if (_initialOrdersLoaded && newOnes.length > 0) {
+      try {
+        playNewOrderSound(newOnes.length);
+      } catch (e) {
+        console.warn("New order sound failed", e);
+      }
+    }
+    _initialOrdersLoaded = true;
   });
 
   promptWaiterName();
+}
+
+function playNewOrderSound(count = 1) {
+  if (!window.AudioContext && !window.webkitAudioContext) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AudioCtx();
+  const now = ctx.currentTime;
+  for (let i = 0; i < count; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(900, now + i * 0.18);
+    gain.gain.setValueAtTime(0.0001, now + i * 0.18);
+    gain.gain.exponentialRampToValueAtTime(0.2, now + i * 0.18 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + i * 0.18);
+    osc.stop(now + i * 0.18 + 0.2);
+  }
+  setTimeout(() => {
+    try {
+      ctx.close();
+    } catch (e) {}
+  }, Math.max(600, count * 200));
 }
 
 document.addEventListener("DOMContentLoaded", initCalculator);
