@@ -162,7 +162,6 @@ function saveWaiterStats(stats) {
 }
 
 function isMasterWaiter(name) {
-  selectors.waiterRank.textContent = isMasterWaiter(name) ? "Yönetici" : "Normal";
   return MASTER_WAITERS.includes(normalizeKey(name));
   
 }
@@ -705,6 +704,8 @@ function resetForm(resetEditing = true) {
 function updateWaiterStats(stats = loadWaiterStats()) {
   const storedName = getStoredWaiterName();
   selectors.activeWaiterName.textContent = storedName || "-";
+
+    selectors.waiterRank.textContent = isMasterWaiter(name) ? "Yönetici" : "Normal";
 
   const key = normalizeKey(storedName);
   const count = key && stats[key]?.count ? stats[key].count : 0;
