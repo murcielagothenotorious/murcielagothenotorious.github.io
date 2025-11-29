@@ -50,6 +50,7 @@ let receiptFontPromise = null;
 let waiterStatsCache = {};
 let unsubscribeWaiterStats = null;
 let _initialOrdersLoaded = false;
+let _previousOrderCount = 0;
 
 const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
 const RECEIPT_ITEM_FONT = `14px ${RECEIPT_FONT_FAMILY}`;
@@ -1018,22 +1019,23 @@ function initCalculator() {
   createSoundControls();
   unsubscribeOrders = listenOrders((orders) => {
     const nextOrders = orders || [];
-    const prevIds = new Set((savedCalculations || []).map((o) => o.id));
-    const newOnes = nextOrders.filter((o) => !prevIds.has(o.id));
+    const newOrderCount = nextOrders.length;
+    const orderCountIncreased = _initialOrdersLoaded && newOrderCount > _previousOrderCount;
 
     savedCalculations = nextOrders;
     const stats = syncStatsWithOrders(savedCalculations);
     renderCalculationList();
     updateWaiterStats(stats);
 
-    if (_initialOrdersLoaded && newOnes.length > 0) {
+    if (orderCountIncreased) {
       try {
-        playNewOrderSound(newOnes.length);
+        playNewOrderSound(newOrderCount - _previousOrderCount);
       } catch (e) {
         console.warn("New order sound failed", e);
       }
     }
     _initialOrdersLoaded = true;
+    _previousOrderCount = newOrderCount;
   });
 
   // listen to waiter stats stored in DB
