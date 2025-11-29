@@ -484,11 +484,6 @@ function renderCalculationList() {
       waiter.textContent = `Garson: ${calc.waiterName || "-"}`;
       meta.appendChild(waiter);
 
-      const badge = document.createElement("span");
-      badge.className = "badge rounded-pill text-bg-light";
-      badge.textContent = `${calc.items?.length || 0} satır`;
-      meta.appendChild(badge);
-
       const items = document.createElement("div");
       items.className = "calc-items";
       calc.items.forEach((item) => {
