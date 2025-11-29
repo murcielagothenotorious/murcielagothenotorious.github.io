@@ -162,7 +162,9 @@ function saveWaiterStats(stats) {
 }
 
 function isMasterWaiter(name) {
+  selectors.waiterRank.textContent = isMasterWaiter(name) ? "Yönetici" : "Normal";
   return MASTER_WAITERS.includes(normalizeKey(name));
+  
 }
 
 function syncStatsWithOrders(orders) {
@@ -212,7 +214,6 @@ function adjustWaiterCount(name, delta) {
     name: stats[key]?.name || normalizeName(name),
     count: next,
   };
-  selectors.waiterRank.textContent = isMasterWaiter(name) ? "Yönetici" : "Normal";
   saveWaiterStats(stats);
   return stats;
 }
