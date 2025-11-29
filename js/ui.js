@@ -448,10 +448,14 @@ function renderCalculationList() {
     return;
   }
 
-  savedCalculations
+  // Sort and limit to last 100 orders to prevent memory bloat
+  const maxOrders = 100;
+  const toRender = savedCalculations
     .slice()
     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-    .forEach((calc) => {
+    .slice(0, maxOrders);
+
+  toRender.forEach((calc) => {
       const li = document.createElement("li");
       li.className = "d-flex flex-column gap-2";
 
@@ -1050,6 +1054,17 @@ function initCalculator() {
   });
 
   promptWaiterName();
+
+  // Periodically clean up memory: prune old orders from local storage (keep last 100)
+  setInterval(() => {
+    if (savedCalculations.length > 100) {
+      const sorted = savedCalculations
+        .slice()
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      // Keep only the latest 100 in memory (older ones stay in DB)
+      savedCalculations = sorted.slice(0, 100);
+    }
+  }, 60000); // every minute
 }
 
 function playNewOrderSound(count = 1) {
@@ -1061,22 +1076,39 @@ function playNewOrderSound(count = 1) {
     const audio = new Audio("/artifacts/bell.wav");
     audio.volume = volume;
     audio.preload = "auto";
-    audio.addEventListener("canplaythrough", () => {
-      let i = 0;
-      const playNext = () => {
-        if (i >= count) return;
-        audio.currentTime = 0;
-        audio.play().catch(() => {
-          fallbackBeep(count - i);
-        });
-        i += 1;
-        audio.addEventListener("ended", playNext, { once: true });
-      };
-      playNext();
-    });
-    audio.addEventListener("error", () => {
+
+    const cleanup = () => {
+      audio.pause();
+      audio.src = "";
+      audio.removeEventListener("canplaythrough", onCanPlay);
+      audio.removeEventListener("error", onError);
+      audio.removeEventListener("ended", onEnd);
+    };
+
+    let i = 0;
+    const playNext = () => {
+      if (i >= count) {
+        cleanup();
+        return;
+      }
+      audio.currentTime = 0;
+      audio.play().catch(() => {
+        cleanup();
+        fallbackBeep(count - i);
+      });
+      i += 1;
+    };
+
+    const onEnd = () => playNext();
+    const onCanPlay = () => playNext();
+    const onError = () => {
+      cleanup();
       fallbackBeep(count);
-    });
+    };
+
+    audio.addEventListener("canplaythrough", onCanPlay, { once: true });
+    audio.addEventListener("error", onError, { once: true });
+    audio.addEventListener("ended", onEnd);
     audio.load();
     return;
   } catch (e) {
@@ -1087,27 +1119,40 @@ function playNewOrderSound(count = 1) {
 function fallbackBeep(count = 1) {
   if (!window.AudioContext && !window.webkitAudioContext) return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  const ctx = new AudioCtx();
-  const now = ctx.currentTime;
-  const volume = getStoredVolume();
-  for (let i = 0; i < count; i++) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(900, now + i * 0.18);
-    gain.gain.setValueAtTime(0.0001, now + i * 0.18);
-    gain.gain.exponentialRampToValueAtTime(0.2 * volume, now + i * 0.18 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.18);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now + i * 0.18);
-    osc.stop(now + i * 0.18 + 0.2);
+  let ctx = null;
+  try {
+    ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    const volume = getStoredVolume();
+    for (let i = 0; i < count; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(900, now + i * 0.18);
+      gain.gain.setValueAtTime(0.0001, now + i * 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.2 * volume, now + i * 0.18 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.18);
+      osc.stop(now + i * 0.18 + 0.2);
+    }
+    // Close context after sounds finish
+    setTimeout(() => {
+      try {
+        if (ctx && ctx.state !== "closed") {
+          ctx.close();
+        }
+      } catch (e) {}
+      ctx = null;
+    }, Math.max(600, count * 200));
+  } catch (e) {
+    if (ctx && ctx.state !== "closed") {
+      try {
+        ctx.close();
+      } catch (err) {}
+    }
   }
-  setTimeout(() => {
-    try {
-      ctx.close();
-    } catch (e) {}
-  }, Math.max(600, count * 200));
 }
 
 document.addEventListener("DOMContentLoaded", initCalculator);
