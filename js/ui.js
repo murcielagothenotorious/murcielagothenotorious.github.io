@@ -212,7 +212,7 @@ function adjustWaiterCount(name, delta) {
     name: stats[key]?.name || normalizeName(name),
     count: next,
   };
-
+  selectors.waiterRank.textContent = isMasterWaiter(name) ? "Yönetici" : "Normal";
   saveWaiterStats(stats);
   return stats;
 }
@@ -1052,13 +1052,11 @@ function playNewOrderSound(count = 1) {
     audio.volume = volume;
     audio.preload = "auto";
     audio.addEventListener("canplaythrough", () => {
-      // play multiple times sequentially if count > 1
       let i = 0;
       const playNext = () => {
         if (i >= count) return;
         audio.currentTime = 0;
         audio.play().catch(() => {
-          // fallback to beep
           fallbackBeep(count - i);
         });
         i += 1;
@@ -1069,11 +1067,9 @@ function playNewOrderSound(count = 1) {
     audio.addEventListener("error", () => {
       fallbackBeep(count);
     });
-    // attempt to load
     audio.load();
     return;
   } catch (e) {
-    // fallback to beep
     fallbackBeep(count);
   }
 }
