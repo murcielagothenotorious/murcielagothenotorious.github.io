@@ -1,5 +1,8 @@
 // orders.js
-import { ordersRef, push, remove, onValue, ref, update, child } from "./firebase.js";
+import { ordersRef, push, remove, onValue, ref, update, child, db } from "./firebase.js";
+
+// Waiter stats reference in DB
+const waiterStatsRef = ref(db, "waiterStats");
 
 // Yeni sipariş ekleme
 export async function addOrder(order) {
@@ -33,4 +36,18 @@ export function listenOrders(callback) {
     });
     callback?.(orders);
   });
+}
+
+// Listen to waiter stats stored in DB
+export function listenWaiterStats(callback) {
+  return onValue(waiterStatsRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    callback?.(data);
+  });
+}
+
+// Set waiter stats in DB (overwrites or updates children)
+export async function setWaiterStats(stats) {
+  if (!stats) return null;
+  return await update(waiterStatsRef, stats);
 }

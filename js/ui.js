@@ -1,4 +1,4 @@
-import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered } from "./orders.js";
+import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, listenWaiterStats, setWaiterStats } from "./orders.js";
 
 const products = {
   Pizza: [
@@ -47,6 +47,8 @@ let editingId = null;
 let unsubscribeOrders = null;
 let waiterModalInstance = null;
 let receiptFontPromise = null;
+let waiterStatsCache = {};
+let unsubscribeWaiterStats = null;
 let _initialOrdersLoaded = false;
 
 const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
@@ -143,22 +145,17 @@ const normalizeName = (name = "") => name.trim();
 const normalizeKey = (name = "") => normalizeName(name).toLowerCase();
 
 function loadWaiterStats() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(WAITER_STATS_KEY)) || {};
-    Object.entries(parsed).forEach(([key, value]) => {
-      if (typeof value === "number") {
-        parsed[key] = { name: key, count: value };
-      }
-    });
-    return parsed;
-  } catch (error) {
-    console.error("Waiter stats parse failed", error);
-    return {};
-  }
+  return waiterStatsCache || {};
 }
 
 function saveWaiterStats(stats) {
-  localStorage.setItem(WAITER_STATS_KEY, JSON.stringify(stats));
+  waiterStatsCache = stats || {};
+  try {
+    // persist to DB (async)
+    setWaiterStats(waiterStatsCache).catch(() => {});
+  } catch (e) {
+    // ignore
+  }
 }
 
 function isMasterWaiter(name) {
@@ -1037,6 +1034,22 @@ function initCalculator() {
       }
     }
     _initialOrdersLoaded = true;
+  });
+
+  // listen to waiter stats stored in DB
+  unsubscribeWaiterStats = listenWaiterStats((data) => {
+    // normalize numeric entries to { name, count }
+    const parsed = {};
+    Object.entries(data || {}).forEach(([key, value]) => {
+      if (typeof value === "number") {
+        parsed[key] = { name: key, count: value };
+      } else if (value && typeof value === "object") {
+        parsed[key] = value;
+      }
+    });
+    waiterStatsCache = parsed;
+    renderLeaderboard(waiterStatsCache);
+    updateWaiterStats(waiterStatsCache);
   });
 
   promptWaiterName();
