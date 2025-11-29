@@ -68,6 +68,77 @@ const selectors = {
   waiterModalSave: document.getElementById("waiterModalSave"),
 };
 
+const SOUND_VOLUME_KEY = "soundVolume";
+const SOUND_MUTED_KEY = "soundMuted";
+
+function getStoredVolume() {
+  const v = localStorage.getItem(SOUND_VOLUME_KEY);
+  return v == null ? 1 : Math.min(1, Math.max(0, Number(v)));
+}
+
+function isSoundMuted() {
+  return localStorage.getItem(SOUND_MUTED_KEY) === "1";
+}
+
+function saveSoundVolume(v) {
+  localStorage.setItem(SOUND_VOLUME_KEY, String(v));
+}
+
+function saveSoundMuted(muted) {
+  localStorage.setItem(SOUND_MUTED_KEY, muted ? "1" : "0");
+}
+
+function createSoundControls() {
+  const container = document.createElement("div");
+  container.id = "soundControls";
+  container.style.position = "fixed";
+  container.style.right = "16px";
+  container.style.bottom = "16px";
+  container.style.background = "rgba(255,255,255,0.95)";
+  container.style.border = "1px solid #e5e7eb";
+  container.style.padding = "8px 10px";
+  container.style.borderRadius = "10px";
+  container.style.boxShadow = "0 8px 30px rgba(15,23,42,0.06)";
+  container.style.zIndex = 9999;
+
+  const label = document.createElement("label");
+  label.style.display = "block";
+  label.style.fontSize = "12px";
+  label.style.marginBottom = "6px";
+  label.textContent = "Ses: ";
+
+  const slider = document.createElement("input");
+  slider.type = "range";
+  slider.min = 0;
+  slider.max = 100;
+  slider.value = String(Math.round(getStoredVolume() * 100));
+  slider.style.width = "120px";
+  slider.addEventListener("input", (e) => {
+    const val = Number(e.target.value) / 100;
+    saveSoundVolume(val);
+  });
+
+  const mute = document.createElement("input");
+  mute.type = "checkbox";
+  mute.checked = isSoundMuted();
+  mute.style.marginLeft = "8px";
+  mute.title = "Ses kapat/aç";
+  mute.addEventListener("change", (e) => saveSoundMuted(e.target.checked));
+
+  const muteLabel = document.createElement("span");
+  muteLabel.textContent = "Kapat";
+  muteLabel.style.fontSize = "12px";
+  muteLabel.style.marginLeft = "4px";
+
+  label.appendChild(slider);
+  label.appendChild(mute);
+  label.appendChild(muteLabel);
+
+  container.appendChild(label);
+
+  document.body.appendChild(container);
+}
+
 const normalizeName = (name = "") => name.trim();
 const normalizeKey = (name = "") => normalizeName(name).toLowerCase();
 
@@ -947,6 +1018,7 @@ function initCalculator() {
   calculateTotal();
   renderCalculationList();
   updateWaiterStats(syncStatsWithOrders(savedCalculations));
+  createSoundControls();
   unsubscribeOrders = listenOrders((orders) => {
     const nextOrders = orders || [];
     const prevIds = new Set((savedCalculations || []).map((o) => o.id));
@@ -971,17 +1043,54 @@ function initCalculator() {
 }
 
 function playNewOrderSound(count = 1) {
+  if (isSoundMuted()) return;
+
+  const volume = getStoredVolume();
+
+  try {
+    const audio = new Audio("/bell.wav");
+    audio.volume = volume;
+    audio.preload = "auto";
+    audio.addEventListener("canplaythrough", () => {
+      // play multiple times sequentially if count > 1
+      let i = 0;
+      const playNext = () => {
+        if (i >= count) return;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          // fallback to beep
+          fallbackBeep(count - i);
+        });
+        i += 1;
+        audio.addEventListener("ended", playNext, { once: true });
+      };
+      playNext();
+    });
+    audio.addEventListener("error", () => {
+      fallbackBeep(count);
+    });
+    // attempt to load
+    audio.load();
+    return;
+  } catch (e) {
+    // fallback to beep
+    fallbackBeep(count);
+  }
+}
+
+function fallbackBeep(count = 1) {
   if (!window.AudioContext && !window.webkitAudioContext) return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   const ctx = new AudioCtx();
   const now = ctx.currentTime;
+  const volume = getStoredVolume();
   for (let i = 0; i < count; i++) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "sine";
     osc.frequency.setValueAtTime(900, now + i * 0.18);
     gain.gain.setValueAtTime(0.0001, now + i * 0.18);
-    gain.gain.exponentialRampToValueAtTime(0.2, now + i * 0.18 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.2 * volume, now + i * 0.18 + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.18);
     osc.connect(gain);
     gain.connect(ctx.destination);
