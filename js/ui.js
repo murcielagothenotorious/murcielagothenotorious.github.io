@@ -461,6 +461,9 @@ function renderCalculationList() {
       actions.append(editBtn, copyBtn, downloadBtn, deleteBtn, deliveredBtn);
       if (calc.delivered) {
         li.classList.add("order-delivered");
+        li.classList.remove("order-pending");
+      } else {
+        li.classList.add("order-pending");
       }
 
       li.append(head, meta, items, actions);
@@ -547,7 +550,10 @@ function handleOrderDelivered(id, listItem, button) {
   if (!id) return;
   orderDelivered(id)
     .then(() => {
-      if (listItem) listItem.classList.add("order-delivered");
+      if (listItem) {
+        listItem.classList.add("order-delivered");
+        listItem.classList.remove("order-pending");
+      }
       if (button) {
         button.textContent = "Teslim Edildi";
         button.disabled = true;
