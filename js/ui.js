@@ -35,6 +35,12 @@ const products = {
     { name: "Insalata di Mare", price: 150 },
     { name: "Panzanella", price: 100 },
   ],
+  Noel: [
+    { name: "Hindi", price: 700 },
+    { name: "Sıcak Şarap", price: 300 },
+    { name: "Noel Kurabiyeleri", price: 300 },
+    { name: "Üzümlü Kek", price: 400 },
+  ],
 };
 
 const SERVICE_FEE = 200;
