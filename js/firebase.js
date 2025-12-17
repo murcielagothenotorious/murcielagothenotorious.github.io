@@ -9,15 +9,15 @@ import {
   update,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Firebase config (senin verdiğin)
+// Ortam değişkenlerinden Firebase config'i alıyoruz
 const firebaseConfig = {
-  apiKey: "AIzaSyC17G-mWb_z2xIHBo7s4rrcQkeyHqv51KA",
-  authDomain: "casacarmaretti.firebaseapp.com",
-  databaseURL: "https://casacarmaretti-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "casacarmaretti",
-  storageBucket: "casacarmaretti.appspot.com",
-  messagingSenderId: "1078474886220",
-  appId: "1:1078474886220:web:56c8410a0f2189694278e9",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Firebase’i başlat
