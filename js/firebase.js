@@ -9,15 +9,15 @@ import {
   update,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Ortam değişkenlerinden Firebase config'i alıyoruz
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: window.FIREBASE_API_KEY,
+  authDomain: window.FIREBASE_AUTH_DOMAIN,
+  databaseURL: window.FIREBASE_DATABASE_URL,
+  projectId: window.FIREBASE_PROJECT_ID,
+  storageBucket: window.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: window.FIREBASE_MESSAGING_SENDER_ID,
+  appId: window.FIREBASE_APP_ID,
 };
 
 // Firebase’i başlat
