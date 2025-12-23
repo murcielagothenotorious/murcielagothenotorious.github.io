@@ -5,31 +5,31 @@
 
 /* === DESIGN TOKENS === */
 :root {
-  /* Colors */
-  --bg-base: #0f1014;
-  --bg-elevated: #16181f;
-  --bg-panel: #1d1f28;
-  --bg-surface: #252834;
+  /* Colors - Neutral Dark Palette */
+  --bg-base: #1a1a1a;
+  --bg-elevated: #222222;
+  --bg-panel: #2a2a2a;
+  --bg-surface: #333333;
 
-  --accent: #f5c14b;
-  --accent-hover: #ffcf62;
-  --accent-subtle: rgba(245, 193, 75, 0.12);
+  --accent: #4CAF50;
+  --accent-hover: #66BB6A;
+  --accent-subtle: rgba(76, 175, 80, 0.15);
 
-  --success: #68f29d;
-  --warning: #ffb94e;
-  --danger: #ff6b6b;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --danger: #f44336;
 
-  --text-primary: #f8f6f2;
-  --text-secondary: #a8adbb;
-  --text-tertiary: #6c7281;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
 
   /* Spacing */
   --space-xs: 4px;
