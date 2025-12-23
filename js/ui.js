@@ -129,12 +129,12 @@ function init() {
     }
     previousOrderCount = activeNow;
 
-    // Detect order becoming "delivered" (ready) - notify only the waiter who took it
+    // Detect order becoming "ready" (kitchen says it's done) - notify only the waiter who took it
     if (state.activeWaiter && state.orders.length > 0) {
       newOrders.forEach(newOrder => {
         const oldOrder = state.orders.find(o => o.id === newOrder.id);
-        // Check if order just became delivered
-        if (oldOrder && !oldOrder.delivered && newOrder.delivered) {
+        // Check if order just became READY (not delivered!)
+        if (oldOrder && !oldOrder.ready && newOrder.ready) {
           // Check if current user is the waiter who took this order
           if (newOrder.waiterName.toLowerCase().trim() === state.activeWaiter.toLowerCase().trim()) {
             playBellSound();
@@ -537,7 +537,7 @@ function renderActiveOrders() {
            </button>
          ` : `
            <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
-             <i class="bi bi-bag-check-fill"></i> Teslim Et
+             <i class="bi bi-bag-check-fill"></i> Teslim Edildi
            </button>
          `}
       </div>
