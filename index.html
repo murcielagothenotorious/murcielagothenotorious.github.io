@@ -1,202 +1,179 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Casa Carmaretti</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
-  <body class="bg-body text-body">
-    <header class="bg-gradient position-relative overflow-hidden text-white">
-      <div class="gradient-overlay"></div>
-      <div class="container-xxl py-5 position-relative">
-        <div class="row g-4 align-items-center">
-          <div class="col-12 col-lg-9 d-flex flex-column gap-2">
-            <p class="hero-eyebrow mb-0 text-black">Casa Carmaretti</p>
-            <h1 class="fw-bold display-5 mb-2 text-black">Carmaretti Sipariş Arayüzü</h1>
-            <p class="text-light lead mb-0 text-black">Buon lavoro e buon servizio.</p>
-          </div>
-        </div>
-      </div>
-    </header>
 
-    <main class="container-xxl py-5">
-      <div class="row g-4 g-xl-5 align-items-start">
-        <div class="col-12 col-lg-7 col-xxl-8">
-          <div class="row g-3 mb-4">
-            <div class="col-12 col-xl-6">
-              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
-                <div class="card-body p-4 d-flex flex-column gap-3">
-                  <div class="d-flex justify-content-between align-items-start gap-3">
-                    <div>
-                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
-                      <h2 class="h5 mb-1">Garson bilgisi</h2>
-                      <p class="text-secondary mb-0">Adın siparişlere otomatik eklenir.</p>
-                    </div>
-                  </div>
-                  <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="pill soft-pill">
-                      <span class="text-secondary">Aktif garson</span>
-                      <strong id="activeWaiterName">-</strong>
-                    </div>
-                    <div class="pill soft-pill">
-                      <span class="text-secondary">Toplam sipariş</span>
-                      <strong id="waiterOrderCount">0</strong>
-                    </div>
-                    <div class="pill soft-pill">
-                      <span class="text-secondary">Servis payı (20%)</span>
-                      <strong id="waiterServiceShare">0 $</strong>
-                    </div>
-                    <div class="pill soft-pill">
-                      <span class="text-secondary">Yetki Düzeyi</span>
-                      <strong id="waiterRank">Normal</strong>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-            <div class="col-12 col-xl-6">
-              <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
-                <div class="card-body p-4">
-                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                    <div>
-                      <p class="text-uppercase fw-semibold text-secondary small mb-1">Liderlik</p>
-                      <h2 class="h5 mb-0">Garson sıralaması</h2>
-                    </div>
-                    <span class="badge bg-info-subtle text-info-emphasis rounded-pill">Canlı</span>
-                  </div>
-                  <ul id="leaderboardList" class="leaderboard list-unstyled mb-0"></ul>
-                </div>
-              </section>
-            </div>
-          </div>
-          <section class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
-            <div class="card-body p-4 p-md-5">
-              <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
-                <div>
-                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş oluştur</p>
-                  <h2 class="h3 mb-2">Ürünleri seç, servisi ekle ve kaydet</h2>
-                  <p class="text-secondary mb-0">Miktarları ayarla, siparişini oluştur, her şey hazır olsun.</p>
-                </div>
-                <div class="service-chip px-4 py-3 rounded-4 shadow-sm d-flex align-items-center gap-2">
-                  <span class="fw-semibold">Servis ücreti</span>
-                  <span class="badge bg-primary-subtle text-primary-emphasis fs-6">200 $</span>
-                </div>
-              </div>
-              <div id="categories" class="categories"></div>
-            </div>
-          </section>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Casa Carmaretti</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
 
-        <div class="col-12 col-lg-5 col-xxl-4">
-          <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 100px">
-            <div class="card-body p-4 p-md-5 d-flex flex-column gap-3">
-              <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-                <div>
-                  <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş Özeti</p>
-                  <h3 class="h4 mb-0 d-flex align-items-center gap-2">
-                    Canlı Sipariş Listesi
-                    <span class="live-dot"></span>
-                  </h3>
-                </div>
-                <div class="total-chip text-end">
-                  <small class="text-secondary d-block">Toplam</small>
-                  <span id="totalPrice" class="fw-bold display-6">0</span>
-                  <span class="text-secondary">$</span>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <label for="calcName" class="form-label fw-semibold">Sipariş adı</label>
-                <input
-                  id="calcName"
-                  type="text"
-                  class="form-control form-control-lg"
-                  placeholder="Örn: Masa 4 veya IC isimler"
-                  autocomplete="off"
-                />
-              </div>
-              <button id="saveButton" class="btn btn-primary btn-lg w-100" type="button">
-                Siparişi Kaydet
-              </button>
-
-              <div class="border-top pt-3">
-                <div class="d-flex align-items-start justify-content-between mb-2 flex-wrap gap-2">
-                  <div>
-                    <h4 class="h6 mb-1">Kayıtlı Siparişler</h4>
-                    <p class="text-secondary small mb-0">Kaydedilen siparişler anında burada listelenir.</p>
-                  </div>
-                </div>
-                <ul id="calcList" class="calc-list list-unstyled d-flex flex-column gap-3 mb-0"></ul>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </main>
-
-    <canvas id="receiptCanvas" hidden></canvas>
-    <div
-      class="modal fade"
-      id="waiterModal"
-      tabindex="-1"
-      aria-labelledby="waiterModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4">
-          <div class="modal-header border-0 pb-0">
-            <div>
-              <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson adı</p>
-              <h2 class="h5 mb-0" id="waiterModalLabel">IC adınızı buraya girin.</h2>
-            </div>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body pt-3">
-            <div class="input-group input-group-lg">
-              <span class="input-group-text bg-light">👤</span>
-              <input
-                id="waiterModalInput"
-                type="text"
-                class="form-control"
-                placeholder="Örn: Matteo Lamberti"
-                autocomplete="name"
-              />
-            </div>
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Vazgeç</button>
-            <button type="button" class="btn btn-primary" id="waiterModalSave">Kaydet</button>
-          </div>
+<body class="bg-body text-body">
+  <header class="bg-gradient position-relative overflow-hidden text-white">
+    <div class="gradient-overlay"></div>
+    <div class="container-xxl py-5 position-relative">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9 d-flex flex-column gap-2">
+          <p class="hero-eyebrow mb-0 text-black">Casa Carmaretti</p>
+          <h1 class="fw-bold display-5 mb-2 text-black">Carmaretti Sipariş Arayüzü</h1>
+          <p class="text-light lead mb-0 text-black">Buon lavoro e buon servizio.</p>
         </div>
       </div>
     </div>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
-    <script>
-      // Firebase global variables
-      window.FIREBASE_API_KEY = window.FIREBASE_API_KEY || "";
-      window.FIREBASE_AUTH_DOMAIN = window.FIREBASE_AUTH_DOMAIN || "";
-      window.FIREBASE_DATABASE_URL = window.FIREBASE_DATABASE_URL || "";
-      window.FIREBASE_PROJECT_ID = window.FIREBASE_PROJECT_ID || "";
-      window.FIREBASE_STORAGE_BUCKET = window.FIREBASE_STORAGE_BUCKET || "";
-      window.FIREBASE_MESSAGING_SENDER_ID = window.FIREBASE_MESSAGING_SENDER_ID || "";
-      window.FIREBASE_APP_ID = window.FIREBASE_APP_ID || "";
-    </script>
-    <script type="module" src="./js/ui.js"></script>
-  </body>
+  </header>
+
+  <main class="container-xxl py-5">
+    <div class="row g-4 g-xl-5 align-items-start">
+      <div class="col-12 col-lg-7 col-xxl-8">
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-xl-6">
+            <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+              <div class="card-body p-4 d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
+                    <h2 class="h5 mb-1">Garson bilgisi</h2>
+                    <p class="text-secondary mb-0">Adın siparişlere otomatik eklenir.</p>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                  <div class="pill soft-pill">
+                    <span class="text-secondary">Aktif garson</span>
+                    <strong id="activeWaiterName">-</strong>
+                  </div>
+                  <div class="pill soft-pill">
+                    <span class="text-secondary">Toplam sipariş</span>
+                    <strong id="waiterOrderCount">0</strong>
+                  </div>
+                  <div class="pill soft-pill">
+                    <span class="text-secondary">Servis payı (20%)</span>
+                    <strong id="waiterServiceShare">0 $</strong>
+                  </div>
+                  <div class="pill soft-pill">
+                    <span class="text-secondary">Yetki Düzeyi</span>
+                    <strong id="waiterRank">Normal</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div class="col-12 col-xl-6">
+            <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                  <div>
+                    <p class="text-uppercase fw-semibold text-secondary small mb-1">Liderlik</p>
+                    <h2 class="h5 mb-0">Garson sıralaması</h2>
+                  </div>
+                  <span class="badge bg-info-subtle text-info-emphasis rounded-pill">Canlı</span>
+                </div>
+                <ul id="leaderboardList" class="leaderboard list-unstyled mb-0"></ul>
+              </div>
+            </section>
+          </div>
+        </div>
+        <section class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+          <div class="card-body p-4 p-md-5">
+            <div
+              class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+              <div>
+                <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş oluştur</p>
+                <h2 class="h3 mb-2">Ürünleri seç, servisi ekle ve kaydet</h2>
+                <p class="text-secondary mb-0">Miktarları ayarla, siparişini oluştur, her şey hazır olsun.</p>
+              </div>
+              <div class="service-chip px-4 py-3 rounded-4 shadow-sm d-flex align-items-center gap-2">
+                <span class="fw-semibold">Servis ücreti</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis fs-6">200 $</span>
+              </div>
+            </div>
+            <div id="categories" class="categories"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12 col-lg-5 col-xxl-4">
+        <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 100px">
+          <div class="card-body p-4 p-md-5 d-flex flex-column gap-3">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <div>
+                <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş Özeti</p>
+                <h3 class="h4 mb-0 d-flex align-items-center gap-2">
+                  Canlı Sipariş Listesi
+                  <span class="live-dot"></span>
+                </h3>
+              </div>
+              <div class="total-chip text-end">
+                <small class="text-secondary d-block">Toplam</small>
+                <span id="totalPrice" class="fw-bold display-6">0</span>
+                <span class="text-secondary">$</span>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label for="calcName" class="form-label fw-semibold">Sipariş adı</label>
+              <input id="calcName" type="text" class="form-control form-control-lg"
+                placeholder="Örn: Masa 4 veya IC isimler" autocomplete="off" />
+            </div>
+            <button id="saveButton" class="btn btn-primary btn-lg w-100" type="button">
+              Siparişi Kaydet
+            </button>
+
+            <div class="border-top pt-3">
+              <div class="d-flex align-items-start justify-content-between mb-2 flex-wrap gap-2">
+                <div>
+                  <h4 class="h6 mb-1">Kayıtlı Siparişler</h4>
+                  <p class="text-secondary small mb-0">Kaydedilen siparişler anında burada listelenir.</p>
+                </div>
+              </div>
+              <ul id="calcList" class="calc-list list-unstyled d-flex flex-column gap-3 mb-0"></ul>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <canvas id="receiptCanvas" hidden></canvas>
+  <div class="modal fade" id="waiterModal" tabindex="-1" aria-labelledby="waiterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <div>
+            <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson adı</p>
+            <h2 class="h5 mb-0" id="waiterModalLabel">IC adınızı buraya girin.</h2>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light">👤</span>
+            <input id="waiterModalInput" type="text" class="form-control" placeholder="Örn: Matteo Lamberti"
+              autocomplete="name" />
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Vazgeç</button>
+          <button type="button" class="btn btn-primary" id="waiterModalSave">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script>
+    // Firebase global variables - Netlify injects these during build
+    window.FIREBASE_API_KEY = "__FIREBASE_API_KEY__";
+    window.FIREBASE_AUTH_DOMAIN = "__FIREBASE_AUTH_DOMAIN__";
+    window.FIREBASE_DATABASE_URL = "__FIREBASE_DATABASE_URL__";
+    window.FIREBASE_PROJECT_ID = "__FIREBASE_PROJECT_ID__";
+    window.FIREBASE_STORAGE_BUCKET = "__FIREBASE_STORAGE_BUCKET__";
+    window.FIREBASE_MESSAGING_SENDER_ID = "__FIREBASE_MESSAGING_SENDER_ID__";
+    window.FIREBASE_APP_ID = "__FIREBASE_APP_ID__";
+  </script>
+  <script type="module" src="./js/ui.js"></script>
+</body>
+
 </html>
