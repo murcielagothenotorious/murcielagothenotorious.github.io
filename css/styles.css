@@ -450,6 +450,25 @@ body {
   box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
+/* Global Form Control Styling */
+.form-control {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  background: var(--bg-panel);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.form-control::placeholder {
+  color: var(--text-tertiary);
+}
+
 .ticket-input::placeholder {
   color: var(--text-tertiary);
   font-weight: 500;
@@ -681,21 +700,29 @@ body {
 
 /* === SCROLLBARS === */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(245, 193, 75, 0.25);
+  background: rgba(245, 193, 75, 0.4);
   border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 193, 75, 0.4);
+  background: rgba(245, 193, 75, 0.6);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--accent);
+  background-clip: padding-box;
 }
 
 /* === RESPONSIVE === */

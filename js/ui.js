@@ -149,6 +149,9 @@ function init() {
   checkAuth();
   setupEventListeners();
 
+  // Expose switchView globally for inline onclick handlers
+  window.switchView = switchView;
+
   // Start Listeners
   listenOrders((orders) => {
     const newOrders = orders || [];
@@ -1060,6 +1063,8 @@ function updateDashboardStats() {
 function updateProfileDisplay() {
   if (state.activeWaiter) {
     els.waiterNameDisplay.textContent = state.activeWaiter;
+    if (els.mobileActiveWaiter) els.mobileActiveWaiter.textContent = state.activeWaiter;
+
     const waiterLower = state.activeWaiter.toLowerCase().trim();
     const isMaster = MASTER_WAITERS.includes(waiterLower);
     const isCashier = CASHIERS.includes(waiterLower);
@@ -1071,18 +1076,22 @@ function updateProfileDisplay() {
     else if (isCashier) rank = "Kasiyer";
     els.waiterRankDisplay.textContent = rank;
 
-    // Toggle KDS Button (for Masters / Chefs)
+    // Toggle KDS Button (Desktop & Mobile)
     if (isMaster) {
       els.btnToggleKDS?.classList.remove("d-none");
+      els.mobileBtnKDS?.classList.remove("d-none");
     } else {
       els.btnToggleKDS?.classList.add("d-none");
+      els.mobileBtnKDS?.classList.add("d-none");
     }
 
-    // Toggle Cashier Button (for Cashiers)
+    // Toggle Cashier Button (Desktop & Mobile)
     if (isCashier) {
       els.btnToggleCashier?.classList.remove("d-none");
+      els.mobileBtnCashier?.classList.remove("d-none");
     } else {
       els.btnToggleCashier?.classList.add("d-none");
+      els.mobileBtnCashier?.classList.add("d-none");
     }
   }
 }
