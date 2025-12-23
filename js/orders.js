@@ -120,3 +120,41 @@ export function listenCashiers(callback) {
   });
 }
 
+// Upload receipt PNG to Cloudinary
+export async function uploadReceipt(orderId, blob) {
+  if (!orderId || !blob) return null;
+
+  const cloudName = window.CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = window.CLOUDINARY_UPLOAD_PRESET;
+
+  if (!cloudName || !uploadPreset) {
+    console.warn("Cloudinary not configured. Skipping receipt upload.");
+    return null;
+  }
+
+  const formData = new FormData();
+  formData.append('file', blob, `receipt_${orderId}.png`);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('folder', 'receipts');
+  formData.append('public_id', `${orderId}_${Date.now()}`);
+
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: 'POST', body: formData }
+    );
+
+    if (!response.ok) throw new Error('Upload failed');
+
+    const data = await response.json();
+    const downloadURL = data.secure_url;
+
+    // Save receipt URL to order in Firebase
+    await update(child(ordersRef, orderId), { receiptUrl: downloadURL });
+
+    return downloadURL;
+  } catch (error) {
+    console.error("Receipt upload failed:", error);
+    return null;
+  }
+}
