@@ -101,6 +101,10 @@ const els = {
   mobileBtnKDS: document.getElementById("mobile-btn-kds"),
   mobileBtnCashier: document.getElementById("mobile-btn-cashier"),
 
+  // Mobile Stats
+  mobileWaiterOrderCount: document.getElementById("mobileWaiterOrderCount"),
+  mobileWaiterServiceShare: document.getElementById("mobileWaiterServiceShare"),
+
   waiterNameDisplay: document.getElementById("activeWaiterName"),
   waiterRankDisplay: document.getElementById("waiterRank"),
   waiterOrderCount: document.getElementById("waiterOrderCount"),
@@ -579,8 +583,10 @@ function renderActiveOrders() {
     .filter(o => !o.delivered)
     .sort((a, b) => b.timestamp - a.timestamp);
 
-  els.activeOrderBadge.textContent = active.length;
-  els.activeOrderBadge.classList.toggle("d-none", active.length === 0);
+  if (els.activeOrderBadge) {
+    els.activeOrderBadge.textContent = active.length;
+    els.activeOrderBadge.classList.toggle("d-none", active.length === 0);
+  }
 
   if (active.length === 0) {
     els.activeOrdersList.innerHTML = '<li class="list-group-item text-center text-muted py-4">Açık masa yok.</li>';
@@ -996,8 +1002,14 @@ function syncStats() {
   if (state.activeWaiter) {
     const myKey = state.activeWaiter.toLowerCase().trim();
     const myStats = newCounts[myKey] || { count: 0 };
-    els.waiterOrderCount.textContent = `${myStats.count} Sipariş`;
-    els.waiterServiceShare.textContent = `${(myStats.count * SERVICE_FEE * SERVICE_SHARE_RATIO).toFixed(0)} $`;
+
+    // Desktop Update
+    if (els.waiterOrderCount) els.waiterOrderCount.textContent = myStats.count;
+    if (els.waiterServiceShare) els.waiterServiceShare.textContent = `${(myStats.count * SERVICE_FEE * SERVICE_SHARE_RATIO).toFixed(2)} $`;
+
+    // Mobile Update
+    if (els.mobileWaiterOrderCount) els.mobileWaiterOrderCount.textContent = myStats.count;
+    if (els.mobileWaiterServiceShare) els.mobileWaiterServiceShare.textContent = `${(myStats.count * SERVICE_FEE * SERVICE_SHARE_RATIO).toFixed(2)} $`;
   }
 }
 
