@@ -743,6 +743,46 @@ body {
   border-bottom: 1px solid var(--border-subtle);
 }
 
+/* === BTN-GOLD EXPLICIT STYLING === */
+.btn-gold {
+  background: var(--accent) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-gold:hover,
+.btn-gold:focus,
+.btn-gold:active {
+  background: var(--accent-hover) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* === LIST GROUP ITEMS FIX === */
+.list-group-item {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.list-group-item.text-center.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* === MODAL FIX === */
+.modal-content {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 /* === SCROLLBARS === */
 ::-webkit-scrollbar {
   width: 8px;
@@ -754,14 +794,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(245, 193, 75, 0.4);
+  background: rgba(76, 175, 80, 0.4);
   border-radius: var(--radius-full);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 193, 75, 0.6);
+  background: rgba(76, 175, 80, 0.6);
   background-clip: padding-box;
 }
 
