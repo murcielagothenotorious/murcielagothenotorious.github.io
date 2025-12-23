@@ -60,6 +60,10 @@ let CASHIERS = [];
 const bellAudio = new Audio('./artifacts/bell.wav');
 bellAudio.volume = 0.7;
 
+// Sound and Theme settings
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let darkMode = localStorage.getItem('darkMode') !== 'false';
+
 // Track order count for new order detection
 let previousOrderCount = 0;
 
@@ -131,6 +135,10 @@ const els = {
   // Cashier elements
   cashierGrid: document.getElementById("cashier-grid"),
 
+  // Sound & Theme
+  btnSoundToggle: document.getElementById("btn-sound-toggle"),
+  btnThemeToggle: document.getElementById("btn-theme-toggle"),
+
   // Modals
   waiterModal: new bootstrap.Modal('#waiterModal'),
   historyModal: new bootstrap.Modal('#historyModal'),
@@ -156,9 +164,13 @@ function init() {
   listenOrders((orders) => {
     const newOrders = orders || [];
 
-    // Detect new order for bell sound (Kitchen)
-    const activeNow = newOrders.filter(o => !o.delivered).length;
-    if (activeNow > previousOrderCount && previousOrderCount > 0) {
+    // Detect new order for bell sound (Kitchen ONLY - for masters)
+    const activeNow = newOrders.filter(o => !o.ready && !o.delivered).length;
+    const waiterLower = state.activeWaiter?.toLowerCase().trim() || '';
+    const isMaster = MASTER_WAITERS.includes(waiterLower);
+
+    // Only play bell for masters when new order arrives
+    if (isMaster && activeNow > previousOrderCount && previousOrderCount >= 0) {
       playBellSound();
     }
     previousOrderCount = activeNow;
@@ -170,7 +182,7 @@ function init() {
         // Check if order just became READY (not delivered!)
         if (oldOrder && !oldOrder.ready && newOrder.ready) {
           // Check if current user is the waiter who took this order
-          if (newOrder.waiterName.toLowerCase().trim() === state.activeWaiter.toLowerCase().trim()) {
+          if (newOrder.waiterName.toLowerCase().trim() === waiterLower) {
             playBellSound();
             showToast(`🍽️ "${newOrder.name}" siparişi hazır!`, "success");
           }
@@ -267,6 +279,22 @@ function setupEventListeners() {
   // View Toggle Buttons
   els.btnToggleKDS?.addEventListener("click", () => switchView('kds'));
   els.btnToggleCashier?.addEventListener("click", () => switchView('cashier'));
+
+  // Sound Toggle
+  els.btnSoundToggle?.addEventListener("click", () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('soundEnabled', soundEnabled);
+    updateSoundIcon();
+  });
+  updateSoundIcon();
+
+  // Theme Toggle
+  els.btnThemeToggle?.addEventListener("click", () => {
+    darkMode = !darkMode;
+    localStorage.setItem('darkMode', darkMode);
+    updateTheme();
+  });
+  updateTheme();
 
   // Global Click Event Delegation (Performance)
   document.addEventListener("click", (e) => {
@@ -841,6 +869,21 @@ function switchView(view) {
     view = 'pos';
   }
 
+  // Authorization check - block unauthorized access
+  const waiterLower = state.activeWaiter?.toLowerCase().trim() || '';
+  const isMaster = MASTER_WAITERS.includes(waiterLower);
+  const isCashier = CASHIERS.includes(waiterLower);
+
+  if (view === 'kds' && !isMaster) {
+    showToast('Mutfak ekranına erişim yetkiniz yok!', 'warning');
+    return;
+  }
+
+  if (view === 'cashier' && !isCashier) {
+    showToast('Kasa ekranına erişim yetkiniz yok!', 'warning');
+    return;
+  }
+
   currentView = view;
 
   // Hide all views
@@ -1111,10 +1154,26 @@ function animateCard(card) {
 }
 
 function playBellSound() {
+  if (!soundEnabled) return;
   bellAudio.currentTime = 0;
   bellAudio.play().catch(err => {
     console.warn("Bell sound could not play:", err);
   });
+}
+
+function updateSoundIcon() {
+  const icon = els.btnSoundToggle?.querySelector('i');
+  if (icon) {
+    icon.className = soundEnabled ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill';
+  }
+}
+
+function updateTheme() {
+  document.body.classList.toggle('light-mode', !darkMode);
+  const icon = els.btnThemeToggle?.querySelector('i');
+  if (icon) {
+    icon.className = darkMode ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+  }
 }
 
 /* =========================================

@@ -45,6 +45,51 @@
   --radius-full: 999px;
 }
 
+/* Light Mode Theme */
+body.light-mode {
+  --bg-base: #f0f2f5;
+  --bg-elevated: #ffffff;
+  --bg-panel: #f8f9fa;
+  --bg-surface: #e9ecef;
+
+  --text-primary: #1a1d21;
+  --text-secondary: #495057;
+  --text-tertiary: #868e96;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
+}
+
+body.light-mode .topbar {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%);
+}
+
+body.light-mode .action-pill {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+body.light-mode .product-card {
+  background: var(--bg-elevated);
+}
+
+/* Action Divider */
+.action-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-subtle);
+  margin: 0 8px;
+}
+
+/* Icon-only action pill */
+.action-pill.icon-only {
+  padding: 8px 12px;
+}
+
 /* === BASE RESET === */
 *,
 *::before,

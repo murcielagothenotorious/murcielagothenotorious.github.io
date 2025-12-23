@@ -41,11 +41,37 @@
       </div>
 
       <div class="topbar-actions d-none d-lg-flex">
-        <button id="btn-toggle-kds" class="action-pill d-none d-lg-inline-flex">
+        <!-- Açık Masalar -->
+        <button class="action-pill" data-bs-toggle="modal" data-bs-target="#activeOrdersModal">
+          <i class="bi bi-clock-history"></i>Açık
+          <span id="activeOrderBadge" class="badge bg-danger rounded-pill ms-1 d-none">0</span>
+        </button>
+
+        <!-- Geçmiş -->
+        <button class="action-pill" data-bs-toggle="modal" data-bs-target="#historyModal">
+          <i class="bi bi-journal-check"></i>Geçmiş
+        </button>
+
+        <div class="action-divider"></div>
+
+        <!-- KDS/Cashier (role-based) -->
+        <button id="btn-toggle-kds" class="action-pill d-none">
           <i class="bi bi-display"></i>Mutfak
         </button>
-        <button id="btn-toggle-cashier" class="action-pill alt d-none d-lg-inline-flex">
+        <button id="btn-toggle-cashier" class="action-pill alt d-none">
           <i class="bi bi-cash-stack"></i>Kasa
+        </button>
+
+        <div class="action-divider"></div>
+
+        <!-- Sound Toggle -->
+        <button id="btn-sound-toggle" class="action-pill icon-only" title="Ses Aç/Kapa">
+          <i class="bi bi-volume-up-fill"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="btn-theme-toggle" class="action-pill icon-only" title="Tema Değiştir">
+          <i class="bi bi-moon-fill"></i>
         </button>
       </div>
 
@@ -115,8 +141,7 @@
               <span class="ticket-label">Adisyon</span>
               <span class="ticket-sub">Hızlı ödeme • Güncel</span>
             </div>
-            <input type="text" id="calcName" class="form-control ticket-input"
-              placeholder="MASA NO / MÜŞTERİ">
+            <input type="text" id="calcName" class="form-control ticket-input" placeholder="MASA NO / MÜŞTERİ">
           </div>
 
           <div id="desktop-ticket-items" class="ticket-items">
@@ -193,8 +218,8 @@
         <span class="x-small">Açık</span>
       </button>
 
-      <button class="nav-item btn btn-link d-flex flex-column align-items-center"
-        data-bs-toggle="offcanvas" data-bs-target="#moreMenuOffcanvas">
+      <button class="nav-item btn btn-link d-flex flex-column align-items-center" data-bs-toggle="offcanvas"
+        data-bs-target="#moreMenuOffcanvas">
         <i class="bi bi-three-dots fs-5"></i>
         <span class="x-small">Diğer</span>
       </button>
