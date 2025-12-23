@@ -1,4 +1,4 @@
-import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, listenWaiterStats, setWaiterStats } from "./orders.js";
+import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, listenWaiterStats, setWaiterStats, listenMasters } from "./orders.js";
 
 /* =========================================
    CONSTANTS & CONFIG
@@ -49,7 +49,16 @@ const PRODUCTS = {
 const SERVICE_FEE = 200;
 const SERVICE_SHARE_RATIO = 0.2;
 const WAITER_STORAGE_KEY = "waiterName";
-const MASTER_WAITERS = ["samuel pugliani", "austin marcelli", "frederick scarcelli", "serena castello"];
+
+// Default masters (fallback if Firebase has no data)
+let MASTER_WAITERS = ["samuel pugliani", "austin marcelli", "frederick scarcelli", "serena castello"];
+
+// Audio for new orders
+const bellAudio = new Audio('./artifacts/bell.wav');
+bellAudio.volume = 0.7;
+
+// Track order count for new order detection
+let previousOrderCount = 0;
 
 /* =========================================
    STATE MANAGEMENT
@@ -111,7 +120,31 @@ function init() {
 
   // Start Listeners
   listenOrders((orders) => {
-    state.orders = orders || [];
+    const newOrders = orders || [];
+
+    // Detect new order for bell sound (Kitchen)
+    const activeNow = newOrders.filter(o => !o.delivered).length;
+    if (activeNow > previousOrderCount && previousOrderCount > 0) {
+      playBellSound();
+    }
+    previousOrderCount = activeNow;
+
+    // Detect order becoming "delivered" (ready) - notify only the waiter who took it
+    if (state.activeWaiter && state.orders.length > 0) {
+      newOrders.forEach(newOrder => {
+        const oldOrder = state.orders.find(o => o.id === newOrder.id);
+        // Check if order just became delivered
+        if (oldOrder && !oldOrder.delivered && newOrder.delivered) {
+          // Check if current user is the waiter who took this order
+          if (newOrder.waiterName.toLowerCase().trim() === state.activeWaiter.toLowerCase().trim()) {
+            playBellSound();
+            showToast(`🍽️ "${newOrder.name}" siparişi hazır!`, "success");
+          }
+        }
+      });
+    }
+
+    state.orders = newOrders;
     renderActiveOrders(); // Açık Masalar
     renderClosedHistory(); // Kapananlar
     renderKDS(); // Update Kitchen Screen if active
@@ -121,6 +154,14 @@ function init() {
   listenWaiterStats((stats) => {
     state.waiterStats = stats || {};
     updateDashboardStats();
+  });
+
+  // Listen to dynamic masters from Firebase
+  listenMasters((masters) => {
+    if (masters && masters.length > 0) {
+      MASTER_WAITERS = masters;
+    }
+    updateProfileDisplay(); // Refresh KDS toggle visibility
   });
 }
 
@@ -456,22 +497,34 @@ function renderActiveOrders() {
 
   els.activeOrdersList.innerHTML = "";
   active.forEach(order => {
+    // Build items list HTML
+    const itemsHtml = order.items
+      .filter(i => i.name !== "Servis Hizmeti")
+      .map(i => `<span class="badge bg-light text-dark border me-1 mb-1">${i.qty}x ${i.name}</span>`)
+      .join("");
+
+    const minsElapsed = Math.floor((Date.now() - order.timestamp) / 60000);
+
     const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-center p-3";
+    li.className = "list-group-item p-3";
     li.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start mb-2">
          <div>
-            <h5 class="fw-bold mb-1">${order.name}</h5>
-            <small class="text-secondary">${order.waiterName} • ${order.total}$</small>
+            <h5 class="fw-bold mb-0">${order.name}</h5>
+            <small class="text-secondary">${order.waiterName} • ${minsElapsed} dk önce</small>
          </div>
-         <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
-              <i class="bi bi-pencil-fill"></i> Düzelt
-            </button>
-            <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
-              <i class="bi bi-check-lg"></i> Kapat
-            </button>
-         </div>
-      `;
+         <span class="badge bg-warning text-dark">${order.total}$</span>
+      </div>
+      <div class="mb-2">${itemsHtml}</div>
+      <div class="d-flex gap-2 justify-content-end">
+         <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
+           <i class="bi bi-pencil-fill"></i> Düzelt
+         </button>
+         <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
+           <i class="bi bi-check-lg"></i> Kapat
+         </button>
+      </div>
+    `;
     els.activeOrdersList.appendChild(li);
   });
 }
@@ -817,6 +870,13 @@ function filterProducts(query) {
 function animateCard(card) {
   card.classList.add("scale-click");
   setTimeout(() => card.classList.remove("scale-click"), 100);
+}
+
+function playBellSound() {
+  bellAudio.currentTime = 0;
+  bellAudio.play().catch(err => {
+    console.warn("Bell sound could not play:", err);
+  });
 }
 
 /* =========================================

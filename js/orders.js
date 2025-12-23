@@ -4,6 +4,9 @@ import { ordersRef, push, remove, onValue, ref, update, child, db } from "./fire
 // Waiter stats reference in DB
 const waiterStatsRef = ref(db, "waiterStats");
 
+// Masters (Şef Garsonlar) reference in DB
+const mastersRef = ref(db, "masters");
+
 // Yeni sipariş ekleme
 export async function addOrder(order) {
   if (!order) return null;
@@ -50,4 +53,19 @@ export function listenWaiterStats(callback) {
 export async function setWaiterStats(stats) {
   if (!stats) return null;
   return await update(waiterStatsRef, stats);
+}
+
+// Listen to masters list for dynamic authorization
+export function listenMasters(callback) {
+  return onValue(mastersRef, (snapshot) => {
+    const data = snapshot.val();
+    // Expecting either an array or object with names
+    let masters = [];
+    if (Array.isArray(data)) {
+      masters = data.map(n => n.toLowerCase().trim());
+    } else if (data && typeof data === 'object') {
+      masters = Object.values(data).map(n => String(n).toLowerCase().trim());
+    }
+    callback?.(masters);
+  });
 }
