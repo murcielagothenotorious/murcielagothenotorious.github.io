@@ -440,6 +440,56 @@ body {
   text-align: center;
 }
 
+/* Product Controls (+/- buttons) */
+.product-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.qty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 1rem;
+}
+
+.qty-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.qty-btn:active {
+  transform: scale(0.9);
+}
+
+.qty-plus {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.qty-display {
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 30px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
 /* === TICKET SIDEBAR === */
 .ticket-sidebar {
   width: 380px;

@@ -308,14 +308,14 @@ function setupEventListeners() {
       }
     }
 
-    // Quantity Controls in Product Card (if visible)
-    if (e.target.matches(".qty-btn")) {
-      const card = e.target.closest(".product-card");
+    // Quantity Controls in Product Card
+    const qtyBtn = e.target.closest(".qty-btn");
+    if (qtyBtn) {
+      e.stopPropagation();
+      const card = qtyBtn.closest(".product-card");
       const name = card.dataset.name;
       const price = parseFloat(card.dataset.price);
-      const delta = e.target.classList.contains("plus") ? 1 : -1;
-      // Stop propagation to prevent card click
-      e.stopPropagation();
+      const delta = qtyBtn.classList.contains("qty-plus") ? 1 : -1;
       updateCartItem(name, price, delta);
     }
 
@@ -409,16 +409,23 @@ function updateProductCardUI(name) {
 
   const qty = state.cart[name]?.qty || 0;
   const badge = card.querySelector(".badge-qty");
+  const qtyDisplay = card.querySelector(".qty-display");
+
+  // Update qty display
+  if (qtyDisplay) qtyDisplay.textContent = qty;
 
   if (qty > 0) {
     card.classList.add("active");
-    badge.textContent = qty;
-    badge.classList.remove("d-none");
+    if (badge) {
+      badge.textContent = qty;
+      badge.classList.remove("d-none");
+    }
   } else {
     card.classList.remove("active");
-    badge.classList.add("d-none");
+    if (badge) badge.classList.add("d-none");
   }
 }
+
 
 function renderCart() {
   const items = Object.entries(state.cart);
@@ -532,6 +539,7 @@ async function handleSaveOrder() {
       showToast("Sipariş güncellendi!");
     } else {
       await addOrder(orderData);
+      flushText();
       showToast("Sipariş mutfağa iletildi!");
       updateWaiterStatsLocally(state.activeWaiter, 1);
     }
@@ -544,6 +552,11 @@ async function handleSaveOrder() {
     els.saveButton.innerHTML = 'MUTFAĞA İLET <i class="bi bi-send-fill ms-2"></i>';
     state.editingOrderId = null;
   }
+}
+
+function flushText() {
+  els.mobileCalcName.value = "";
+  els.calcName.value = "";
 }
 
 function handleOrderAction(id, action) {
