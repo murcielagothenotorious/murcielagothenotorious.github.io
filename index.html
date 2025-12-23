@@ -54,179 +54,109 @@
 
           <!-- Right: Actions & User -->
           <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-dark-glass position-relative" data-bs-toggle="modal"
-              data-bs-target="#activeOrdersModal">
-              <i class="bi bi-clock-history me-2"></i>Açık Masalar
-              <span id="activeOrderBadge"
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
-            </button>
+            <button class="btn btn-dark-glass position-relative" data-bs-toggle="modal" <!-- Navbar -->
+              <nav class="app-nav d-flex align-items-center justify-content-between px-3 px-md-4">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="brand-logo text-primary">
+                    <i class="bi bi-grid-fill"></i>
+                  </div>
+                  <div>
+                    <h1 class="h5 mb-0 fw-bold text-white tracking-wide">CASA CARMARETTI</h1>
+                    <div class="x-small text-secondary">Restaurant POS System</div>
+                  </div>
+                </div>
 
-            <button class="btn btn-dark-glass" data-bs-toggle="modal" data-bs-target="#historyModal">
-              <i class="bi bi-journal-check me-2"></i>Kapananlar
-            </button>
+                <div class="d-flex align-items-center gap-3">
+                  <!-- KDS Toggle Button (Hidden by default, shown for Masters) -->
+                  <button id="btn-toggle-mode" class="btn btn-dark-glass d-none">
+                    <i class="bi bi-display me-2"></i> <span id="mode-text">Mutfak Ekranı</span>
+                  </button>
 
-            <div class="vr bg-white opacity-25 mx-2"></div>
+                  <div class="d-flex align-items-center gap-2 text-end">
+                    <div class="d-none d-md-block">
+                      <div id="activeWaiterName" class="text-white fw-bold x-small">--</div>
+                      <div id="waiterRank" class="text-secondary x-small">Giriş Yapılmadı</div>
+                    </div>
+                    <div class="avatar rounded-circle bg-white bg-opacity-10 text-white">
+                      <i class="bi bi-person-fill"></i>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+          </div>
+          </main>
 
-            <div class="user-profile d-flex align-items-center gap-2" id="userProfileBtn" role="button">
-              <div class="text-end d-none d-sm-block">
-                <p class="mb-0 fw-bold small text-white" id="activeWaiterName">Giriş Yap</p>
-                <p class="mb-0 x-small text-white-50" id="waiterRank">-</p>
+        </div>
+
+        <!-- Modals -->
+
+        <!-- User Login Modal -->
+        <div class="modal fade" id="waiterModal" tabindex="-1" data-bs-backdrop="static">
+          <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg">
+              <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                  <i class="bi bi-person-circle display-4 text-primary"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Garson Girişi</h5>
+                <input type="text" class="form-control form-control-lg text-center mb-3" id="waiterModalInput"
+                  placeholder="Ad Soyad">
+                <button type="button" class="btn btn-primary w-100" id="waiterModalSave">Giriş Yap</button>
               </div>
-              <div class="avatar">
-                <i class="bi bi-person-fill"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Orders Modal (Açık Masalar) -->
+        <div class="modal fade" id="activeOrdersModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+              <div class="modal-header bg-warning-subtle">
+                <h5 class="modal-title fw-bold text-warning-emphasis"><i class="bi bi-clock-history me-2"></i>Açık
+                  Masalar
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-0">
+                <ul id="activeOrdersList" class="list-group list-group-flush"></ul>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
 
-    <!-- Main Content Area -->
-    <main class="app-content container-fluid g-0 flex-grow-1 overflow-hidden">
-      <div class="row h-100 g-0">
-
-        <!-- LEFT PANEL: MENU -->
-        <div class="col-12 col-md-7 col-lg-8 col-xl-9 h-100 d-flex flex-column bg-light-gray">
-          <!-- Dashboard Stats Row -->
-          <div class="stats-row px-3 py-2 border-bottom d-flex gap-3 bg-white">
-            <div class="stat-item">
-              <span class="text-muted x-small">VARDIYANIZ</span>
-              <strong class="d-block" id="waiterOrderCount">0 Sipariş</strong>
-            </div>
-            <div class="vr"></div>
-            <div class="stat-item">
-              <span class="text-muted x-small">SERVIS PAYI</span>
-              <strong class="d-block text-success" id="waiterServiceShare">0 $</strong>
+        <!-- Closed History Modal (Kapananlar) -->
+        <div class="modal fade" id="historyModal" tabindex="-1">
+          <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-secondary"><i class="bi bi-journal-check me-2"></i>Kapanan İşlemler
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-0 bg-light">
+                <ul id="calcList" class="list-unstyled d-flex flex-column gap-3 p-3 mb-0"></ul>
+              </div>
             </div>
           </div>
-
-          <!-- Products Grid -->
-          <div class="flex-grow-1 overflow-y-auto p-3 p-md-4" id="categories">
-            <!-- Products will be injected here -->
-          </div>
         </div>
 
-        <!-- RIGHT PANEL: TICKET (ADISYON) -->
-        <div
-          class="col-12 col-md-5 col-lg-4 col-xl-3 h-100 bg-white border-start position-relative d-flex flex-column shadow-lg ticket-panel">
+        <canvas id="receiptCanvas" hidden></canvas>
+        <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
-          <!-- Ticket Header -->
-          <div class="ticket-header p-3 border-bottom bg-white">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h2 class="h5 fw-bold mb-0">ADİSYON</h2>
-              <span class="badge bg-light text-dark border">Yeni Sipariş</span>
-            </div>
-            <input type="text" id="calcName" class="form-control form-control-lg fw-bold border-0 bg-light"
-              placeholder="MASA NO / MÜŞTERİ" autocomplete="off">
-          </div>
-
-          <!-- Ticket Items (Scrollable) -->
-          <div class="ticket-body flex-grow-1 overflow-y-auto p-0 customize-scrollbar bg-paper"
-            id="ticketItemsContainer">
-            <div
-              class="empty-ticket-state d-flex flex-column align-items-center justify-content-center h-100 text-muted opacity-50">
-              <i class="bi bi-receipt display-1 mb-3"></i>
-              <p>Adisyon Boş</p>
-            </div>
-            <ul id="liveCartList" class="list-unstyled mb-0 p-3 ticket-list d-none"></ul>
-          </div>
-
-          <!-- Ticket Footer (Fixed Bottom) -->
-          <div class="ticket-footer p-3 bg-white border-top shadow-up">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="text-secondary small">Ara Toplam</span>
-              <span class="fw-bold" id="subTotal">0 $</span>
-            </div>
-            <div class="d-flex justify-content-between mb-3">
-              <span class="text-secondary small">Servis (%20 Max 200)</span>
-              <span class="fw-bold text-success">+200 $</span>
-            </div>
-
-            <div
-              class="total-row d-flex justify-content-between align-items-center mb-3 p-2 bg-dark text-white rounded">
-              <span class="fw-medium">TOPLAM</span>
-              <span class="h3 mb-0 fw-bold" id="totalPrice">0 $</span>
-            </div>
-
-            <button id="saveButton" class="btn btn-success w-100 py-3 fw-bold fs-5 text-uppercase shadow-sm">
-              MUTFAĞA İLET
-              <i class="bi bi-send-fill ms-2"></i>
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </main>
-
-  </div>
-
-  <!-- Modals -->
-
-  <!-- User Login Modal -->
-  <div class="modal fade" id="waiterModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-body p-4 text-center">
-          <div class="mb-3">
-            <i class="bi bi-person-circle display-4 text-primary"></i>
-          </div>
-          <h5 class="fw-bold mb-3">Garson Girişi</h5>
-          <input type="text" class="form-control form-control-lg text-center mb-3" id="waiterModalInput"
-            placeholder="Ad Soyad">
-          <button type="button" class="btn btn-primary w-100" id="waiterModalSave">Giriş Yap</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Active Orders Modal (Açık Masalar) -->
-  <div class="modal fade" id="activeOrdersModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-warning-subtle">
-          <h5 class="modal-title fw-bold text-warning-emphasis"><i class="bi bi-clock-history me-2"></i>Açık Masalar
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-0">
-          <ul id="activeOrdersList" class="list-group list-group-flush"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Closed History Modal (Kapananlar) -->
-  <div class="modal fade" id="historyModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-light">
-          <h5 class="modal-title fw-bold text-secondary"><i class="bi bi-journal-check me-2"></i>Kapanan İşlemler</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-0 bg-light">
-          <ul id="calcList" class="list-unstyled d-flex flex-column gap-3 p-3 mb-0"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <canvas id="receiptCanvas" hidden></canvas>
-  <div class="toast-container position-fixed top-0 end-0 p-3"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script>
-    // Firebase global variables - Netlify injects these during build
-    window.FIREBASE_API_KEY = "__FIREBASE_API_KEY__";
-    window.FIREBASE_AUTH_DOMAIN = "__FIREBASE_AUTH_DOMAIN__";
-    window.FIREBASE_DATABASE_URL = "__FIREBASE_DATABASE_URL__";
-    window.FIREBASE_PROJECT_ID = "__FIREBASE_PROJECT_ID__";
-    window.FIREBASE_STORAGE_BUCKET = "__FIREBASE_STORAGE_BUCKET__";
-    window.FIREBASE_MESSAGING_SENDER_ID = "__FIREBASE_MESSAGING_SENDER_ID__";
-    window.FIREBASE_APP_ID = "__FIREBASE_APP_ID__";
-  </script>
-  <script type="module" src="./js/ui.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+          crossorigin="anonymous"></script>
+        <script>
+          // Firebase global variables - Netlify injects these during build
+          window.FIREBASE_API_KEY = "__FIREBASE_API_KEY__";
+          window.FIREBASE_AUTH_DOMAIN = "__FIREBASE_AUTH_DOMAIN__";
+          window.FIREBASE_DATABASE_URL = "__FIREBASE_DATABASE_URL__";
+          window.FIREBASE_PROJECT_ID = "__FIREBASE_PROJECT_ID__";
+          window.FIREBASE_STORAGE_BUCKET = "__FIREBASE_STORAGE_BUCKET__";
+          window.FIREBASE_MESSAGING_SENDER_ID = "__FIREBASE_MESSAGING_SENDER_ID__";
+          window.FIREBASE_APP_ID = "__FIREBASE_APP_ID__";
+        </script>
+        <script type="module" src="./js/ui.js"></script>
 </body>
 
 </html>

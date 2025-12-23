@@ -83,6 +83,14 @@ const els = {
   activeOrdersList: document.getElementById("activeOrdersList"),
   activeOrderBadge: document.getElementById("activeOrderBadge"),
 
+  // Views
+  posView: document.getElementById("pos-view"),
+  kdsView: document.getElementById("kds-view"),
+  btnToggleMode: document.getElementById("btn-toggle-mode"),
+  modeText: document.getElementById("mode-text"),
+  kdsGrid: document.getElementById("kds-grid"),
+  kdsClock: document.getElementById("kds-clock"),
+
   // Modals
   waiterModal: new bootstrap.Modal('#waiterModal'),
   historyModal: new bootstrap.Modal('#historyModal'),
@@ -106,6 +114,7 @@ function init() {
     state.orders = orders || [];
     renderActiveOrders(); // Açık Masalar
     renderClosedHistory(); // Kapananlar
+    renderKDS(); // Update Kitchen Screen if active
     syncStats();
   });
 
@@ -143,6 +152,9 @@ function setupEventListeners() {
 
   // Save Order
   els.saveButton.addEventListener("click", handleSaveOrder);
+
+  // KDS Toggle
+  els.btnToggleMode.addEventListener("click", toggleMode);
 
   // Global Click Event Delegation (Performance)
   document.addEventListener("click", (e) => {
@@ -655,6 +667,97 @@ async function downloadReceipt(order) {
 
 
 /* =========================================
+   KITCHEN DISPLAY SYSTEM (KDS)
+   ========================================= */
+let isKDSMode = false;
+
+function toggleMode() {
+  isKDSMode = !isKDSMode;
+
+  if (isKDSMode) {
+    els.posView.classList.add("d-none");
+    els.kdsView.classList.remove("d-none");
+    els.modeText.textContent = "Sipariş Ekranı";
+    document.body.style.backgroundColor = "#111"; // Full dark for kitchen
+    renderKDS();
+    startKDSClock();
+  } else {
+    els.posView.classList.remove("d-none");
+    els.kdsView.classList.add("d-none");
+    els.modeText.textContent = "Mutfak Ekranı";
+    document.body.style.backgroundColor = ""; // Reset
+    stopKDSClock();
+  }
+}
+
+let kdsClockInterval;
+function startKDSClock() {
+  if (kdsClockInterval) clearInterval(kdsClockInterval);
+  kdsClockInterval = setInterval(() => {
+    const now = new Date();
+    els.kdsClock.textContent = now.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+    renderKDS(); // Re-render to update elapsed times
+  }, 60000); // Update every minute
+}
+
+function stopKDSClock() {
+  if (kdsClockInterval) clearInterval(kdsClockInterval);
+}
+
+function renderKDS() {
+  if (!isKDSMode) return;
+
+  const activeOrders = state.orders.filter(o => !o.delivered).sort((a, b) => a.timestamp - b.timestamp);
+  els.kdsGrid.innerHTML = "";
+
+  if (activeOrders.length === 0) {
+    els.kdsGrid.innerHTML = '<div class="col-12 text-center text-secondary py-5"><h3>Aktif Sipariş Yok</h3><p>Şu an mutfak sakin.</p></div>';
+    return;
+  }
+
+  activeOrders.forEach(order => {
+    const minsElapsed = Math.floor((Date.now() - order.timestamp) / 60000);
+    let headerClass = "";
+    if (minsElapsed > 20) headerClass = "late";
+    else if (minsElapsed > 10) headerClass = "medium";
+
+    const col = document.createElement("div");
+    col.className = "col-md-6 col-xl-4 col-xxl-3";
+
+    let itemsHtml = "";
+    order.items.forEach(item => {
+      if (item.name === "Servis Hizmeti") return;
+      itemsHtml += `
+            <div class="kds-item">
+               <span>${item.qty}x ${item.name}</span>
+            </div>
+         `;
+    });
+
+    col.innerHTML = `
+         <div class="kds-card h-100">
+            <div class="kds-card-header ${headerClass}">
+               <div>
+                  <h5 class="mb-0 fw-bold title-font">${order.name}</h5>
+                  <small class="x-small text-white-50">${order.waiterName}</small>
+               </div>
+               <div class="kds-time fs-4">${minsElapsed} dk</div>
+            </div>
+            <div class="kds-card-body">
+               ${itemsHtml}
+            </div>
+            <div class="kds-action">
+               <button class="btn btn-success w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="deliver">
+                  <i class="bi bi-check-lg me-2"></i> HAZIR / TESLİM
+               </button>
+            </div>
+         </div>
+      `;
+    els.kdsGrid.appendChild(col);
+  });
+}
+
+/* =========================================
    STATS & HELPERS
    ========================================= */
 function updateWaiterStatsLocally(name, delta) {
@@ -692,6 +795,13 @@ function updateProfileDisplay() {
     els.waiterNameDisplay.textContent = state.activeWaiter;
     const isMaster = MASTER_WAITERS.includes(state.activeWaiter.toLowerCase());
     els.waiterRankDisplay.textContent = isMaster ? "Şef Garson" : "Garson";
+
+    // Toggle KDS Button
+    if (isMaster) {
+      els.btnToggleMode.classList.remove("d-none");
+    } else {
+      els.btnToggleMode.classList.add("d-none");
+    }
   }
 }
 

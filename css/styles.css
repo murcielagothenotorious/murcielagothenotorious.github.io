@@ -674,6 +674,9 @@ h6 {
   border-left: 4px solid var(--color-secondary);
 }
 
+
+/* ... existing code ... */
+
 /* Ripple Effect */
 .ripple {
   position: absolute;
@@ -688,4 +691,82 @@ h6 {
     transform: scale(4);
     opacity: 0;
   }
+}
+
+/* ============================
+   KDS (Kitchen Display System)
+   ============================ */
+#kds-view {
+  background-color: #111;
+}
+
+.kds-card {
+  background-color: #222;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.kds-card-header {
+  padding: 1rem;
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kds-card-header.late {
+  background-color: #c0392b;
+  /* Kırmızı uyarı */
+}
+
+.kds-card-header.medium {
+  background-color: #d35400;
+  /* Turuncu uyarı */
+}
+
+.kds-card-body {
+  padding: 1rem;
+  background-color: #fff;
+  color: #000;
+  min-height: 200px;
+}
+
+.kds-item {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #ccc;
+  display: flex;
+  justify-content: space-between;
+}
+
+.kds-item:last-child {
+  border-bottom: none;
+}
+
+.kds-time {
+  font-family: var(--font-mono);
+  font-weight: bold;
+}
+
+.kds-action {
+  padding: 1rem;
+  background-color: #222;
+  border-top: 1px solid #333;
+}
+
+/* Fullscreen utility for KDS */
+.fw-mono {
+  font-family: var(--font-mono);
+}
+
+/* Adjust button visibility in nav */
+#btn-toggle-mode {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  min-width: 140px;
 }
