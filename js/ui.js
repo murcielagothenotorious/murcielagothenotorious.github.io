@@ -380,6 +380,146 @@ async function handleSaveOrder() {
   }
 }
 
+/* =========================================
+   RECEIPT GENERATION
+   ========================================= */
+const RECEIPT_FONT_FAMILY = '"Inconsolata", "Courier New", monospace';
+const RECEIPT_ITEM_FONT = `14px ${RECEIPT_FONT_FAMILY}`;
+let receiptFontPromise = null;
+
+function ensureReceiptFont() {
+  if (receiptFontPromise) return receiptFontPromise;
+  if (document.fonts?.load) {
+    receiptFontPromise = document.fonts.load(`16px ${RECEIPT_FONT_FAMILY}`);
+  } else {
+    receiptFontPromise = Promise.resolve();
+  }
+  return receiptFontPromise;
+}
+
+function wrapText(ctx, text, maxWidth) {
+  if (!text) return [""];
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (ctx.measureText(testLine).width <= maxWidth) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  });
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+async function downloadReceipt(order) {
+  await ensureReceiptFont();
+  const canvas = document.getElementById("receiptCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const width = 480;
+  const padding = 32;
+  const lineHeight = 26;
+  const headerHeight = 220;
+
+  // Calculate height
+  let contentHeight = headerHeight;
+  const items = order.items.map(item => ({
+    ...item,
+    lines: wrapText(ctx, item.name, 200) // Estimate wrap
+  }));
+
+  items.forEach(item => {
+    contentHeight += Math.max(item.lines.length * lineHeight, lineHeight) + 10;
+  });
+  contentHeight += 150; // Total area
+
+  canvas.width = width;
+  canvas.height = contentHeight;
+
+  // Background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, contentHeight);
+
+  // Header
+  ctx.font = `bold 24px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "center";
+  ctx.fillText("CASA CARMARETTI", width / 2, 60);
+
+  ctx.font = `16px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillText("Sipariş Fişi", width / 2, 90);
+
+  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillText(order.date, width / 2, 120);
+
+  ctx.textAlign = "left";
+  ctx.fillText(`Masa/Kişi: ${order.name}`, padding, 160);
+  ctx.fillText(`Garson: ${order.waiterName}`, padding, 185);
+
+  // Divider
+  ctx.beginPath();
+  ctx.moveTo(padding, 200);
+  ctx.lineTo(width - padding, 200);
+  ctx.strokeStyle = "#000000";
+  ctx.stroke();
+
+  // Items
+  let y = 230;
+  ctx.font = RECEIPT_ITEM_FONT;
+
+  items.forEach(item => {
+    const qtyText = `x${item.qty}`;
+    const priceText = `${item.qty * item.price} $`;
+
+    ctx.fillText(qtyText, padding, y);
+    ctx.fillText(priceText, width - padding - ctx.measureText(priceText).width, y);
+
+    // Name wrapping
+    let nameY = y;
+    const nameX = padding + 50;
+    const nameWidth = width - padding - 150;
+    const wrappedName = wrapText(ctx, item.name, nameWidth);
+
+    wrappedName.forEach(line => {
+      ctx.fillText(line, nameX, nameY);
+      nameY += lineHeight;
+    });
+
+    y = Math.max(nameY, y + lineHeight) + 10;
+  });
+
+  // Divider
+  y += 10;
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(width - padding, y);
+  ctx.stroke();
+
+  // Total
+  y += 40;
+  ctx.font = `bold 20px ${RECEIPT_FONT_FAMILY}`;
+  ctx.fillText("TOPLAM", padding, y);
+  const totalText = `${order.total} $`;
+  ctx.fillText(totalText, width - padding - ctx.measureText(totalText).width, y);
+
+  // Footer
+  y += 60;
+  ctx.font = `12px ${RECEIPT_FONT_FAMILY}`;
+  ctx.textAlign = "center";
+  ctx.fillText("Teşekkür ederiz!", width / 2, y);
+
+  // Download
+  const link = document.createElement("a");
+  link.download = `Fiş-${order.name}-${Date.now()}.png`;
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
 function handleOrderAction(id, action) {
   const order = state.orders.find(o => o.id === id);
   if (!order) return;
@@ -408,6 +548,9 @@ function handleOrderAction(id, action) {
   }
   else if (action === "copy") {
     copyOrderText(order);
+  }
+  else if (action === "download") {
+    downloadReceipt(order);
   }
 }
 
@@ -461,6 +604,9 @@ function renderHistory() {
       </div>
 
       <div class="d-flex gap-2 justify-content-end">
+         <button class="btn btn-sm btn-outline-dark action-btn" data-id="${order.id}" data-action="download">
+            <i class="bi bi-download"></i> İndir
+         </button>
          ${!isDelivered ? `
            <button class="btn btn-sm btn-outline-success action-btn" data-id="${order.id}" data-action="deliver">
              <i class="bi bi-check-lg"></i> Teslim
