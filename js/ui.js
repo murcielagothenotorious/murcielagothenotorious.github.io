@@ -67,13 +67,10 @@ let state = {
    ========================================= */
 const els = {
   categories: document.getElementById("categories"),
-  cartItemsContainer: document.getElementById("cartItemsContainer"),
+  cartItemsContainer: document.getElementById("ticketItemsContainer"),
   liveCartList: document.getElementById("liveCartList"),
-  cartItemCount: document.getElementById("cartItemCount"),
-  mobileCartCount: document.getElementById("mobileCartCount"),
   subTotal: document.getElementById("subTotal"),
   totalPrice: document.getElementById("totalPrice"),
-  mobileCartTotal: document.getElementById("mobileCartTotal"),
   calcName: document.getElementById("calcName"),
   saveButton: document.getElementById("saveButton"),
   waiterNameDisplay: document.getElementById("activeWaiterName"),
@@ -81,13 +78,15 @@ const els = {
   waiterOrderCount: document.getElementById("waiterOrderCount"),
   waiterServiceShare: document.getElementById("waiterServiceShare"),
   productSearch: document.getElementById("productSearch"),
-  leaderboardList: document.getElementById("leaderboardList"),
+  leaderboardList: document.getElementById("leaderboardList"), // Hidden but kept for logic
   historyList: document.getElementById("calcList"),
+  activeOrdersList: document.getElementById("activeOrdersList"),
+  activeOrderBadge: document.getElementById("activeOrderBadge"),
 
   // Modals
   waiterModal: new bootstrap.Modal('#waiterModal'),
   historyModal: new bootstrap.Modal('#historyModal'),
-  leaderboardModal: new bootstrap.Modal('#leaderboardModal'),
+  activeOrdersModal: new bootstrap.Modal('#activeOrdersModal'),
 
   // Inputs
   waiterModalInput: document.getElementById("waiterModalInput"),
@@ -105,7 +104,8 @@ function init() {
   // Start Listeners
   listenOrders((orders) => {
     state.orders = orders || [];
-    renderHistory();
+    renderActiveOrders(); // Açık Masalar
+    renderClosedHistory(); // Kapananlar
     syncStats();
   });
 
@@ -132,7 +132,7 @@ function setupEventListeners() {
       localStorage.setItem(WAITER_STORAGE_KEY, name);
       updateProfileDisplay();
       els.waiterModal.hide();
-      showToast(`Hoş geldin, ${name}!`);
+      showToast(`Servis açıldı: ${name}`);
     }
   });
 
@@ -146,23 +146,28 @@ function setupEventListeners() {
 
   // Global Click Event Delegation (Performance)
   document.addEventListener("click", (e) => {
-    // Add to Cart
-    if (e.target.closest(".btn-add-cart")) {
-      const btn = e.target.closest(".btn-add-cart");
-      addToCart(btn.dataset.name, parseFloat(btn.dataset.price));
-      animateButton(btn);
+    // POS Style: Click product card to add
+    if (e.target.closest(".product-card")) {
+      const card = e.target.closest(".product-card");
+      // Don't trigger if clicked on qty controls
+      if (!e.target.closest(".qty-btn")) {
+        addToCart(card.dataset.name, parseFloat(card.dataset.price));
+        animateCard(card);
+      }
     }
 
-    // Quantity Controls in Product Card
+    // Quantity Controls in Product Card (if visible)
     if (e.target.matches(".qty-btn")) {
       const card = e.target.closest(".product-card");
       const name = card.dataset.name;
       const price = parseFloat(card.dataset.price);
       const delta = e.target.classList.contains("plus") ? 1 : -1;
+      // Stop propagation to prevent card click
+      e.stopPropagation();
       updateCartItem(name, price, delta);
     }
 
-    // Cart Item Remove
+    // Ticket Item Remove
     if (e.target.closest(".remove-item-btn")) {
       const name = e.target.closest(".remove-item-btn").dataset.name;
       removeFromCart(name);
@@ -185,37 +190,33 @@ function loadProducts() {
   els.categories.innerHTML = "";
 
   Object.entries(PRODUCTS).forEach(([category, items]) => {
-    const section = document.createElement("div");
-    section.className = "category-section mb-4";
+    // Create Category Section
+    const sectionTitle = document.createElement("h3");
+    sectionTitle.className = "category-title mt-4 mb-3";
+    sectionTitle.textContent = category;
+    els.categories.appendChild(sectionTitle);
 
-    section.innerHTML = `
-      <h3 class="category-title">${category}</h3>
-      <div class="row g-3">
-        ${items.map(item => `
-          <div class="col-6 col-md-4 col-xl-3 product-wrapper" data-name="${item.name.toLowerCase()}">
-            <div class="product-card" data-name="${item.name}" data-price="${item.price}">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="fs-1">${item.icon || '🍽️'}</span>
-                <span class="product-price">${item.price}$</span>
-              </div>
-              <h4 class="product-name">${item.name}</h4>
-              <div class="mt-auto pt-3 d-flex justify-content-between align-items-center">
-                 <div class="qty-control d-none">
-                    <button class="qty-btn minus">-</button>
-                    <span class="qty-val">0</span>
-                    <button class="qty-btn plus">+</button>
-                 </div>
-                 <button class="btn btn-sm btn-primary w-100 btn-add-cart rounded-pill" 
-                         data-name="${item.name}" data-price="${item.price}">
-                   Ekle <i class="bi bi-plus"></i>
-                 </button>
-              </div>
+    const row = document.createElement("div");
+    row.className = "row g-3";
+
+    items.forEach(item => {
+      const col = document.createElement("div");
+      col.className = "col-6 col-md-4 col-xl-3 product-wrapper";
+      col.dataset.name = item.name.toLowerCase();
+
+      col.innerHTML = `
+         <div class="product-card h-100" data-name="${item.name}" data-price="${item.price}">
+            <div class="product-content">
+               <span class="product-icon">${item.icon || '🍽️'}</span>
+               <h4 class="product-name">${item.name}</h4>
+               <span class="product-price">${item.price}$</span>
+               <div class="badge-qty d-none">0</div>
             </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    els.categories.appendChild(section);
+         </div>
+      `;
+      row.appendChild(col);
+    });
+    els.categories.appendChild(row);
   });
 }
 
@@ -229,6 +230,7 @@ function addToCart(name, price) {
 }
 
 function updateCartItem(name, price, delta) {
+  // Not used directly from card anymore in POS mode, but good for logic
   if (!state.cart[name]) {
     if (delta > 0) state.cart[name] = { price, qty: 0 };
     else return;
@@ -254,19 +256,15 @@ function updateProductCardUI(name) {
   if (!card) return;
 
   const qty = state.cart[name]?.qty || 0;
-  const addBtn = card.querySelector(".btn-add-cart");
-  const qtyControl = card.querySelector(".qty-control");
-  const qtyVal = card.querySelector(".qty-val");
+  const badge = card.querySelector(".badge-qty");
 
   if (qty > 0) {
-    addBtn.classList.add("d-none");
-    qtyControl.classList.remove("d-none");
-    qtyVal.textContent = qty;
-    card.classList.add("border-primary");
+    card.classList.add("active");
+    badge.textContent = qty;
+    badge.classList.remove("d-none");
   } else {
-    addBtn.classList.remove("d-none");
-    qtyControl.classList.add("d-none");
-    card.classList.remove("border-primary");
+    card.classList.remove("active");
+    badge.classList.add("d-none");
   }
 }
 
@@ -279,28 +277,26 @@ function renderCart() {
 
   if (itemCount === 0) {
     els.liveCartList.classList.add("d-none");
-    document.querySelector(".empty-cart-state").classList.remove("d-none");
+    document.querySelector(".empty-ticket-state").classList.remove("d-none");
   } else {
     els.liveCartList.classList.remove("d-none");
-    document.querySelector(".empty-cart-state").classList.add("d-none");
+    document.querySelector(".empty-ticket-state").classList.add("d-none");
 
     items.forEach(([name, item]) => {
       subTotal += item.qty * item.price;
       const li = document.createElement("li");
-      li.className = "cart-item fade-in";
+      li.className = "ticket-item";
       li.innerHTML = `
-        <div class="flex-grow-1">
-          <span class="cart-item-title">${name}</span>
-          <div class="cart-item-meta text-muted">
-            ${item.price} $ x ${item.qty}
-          </div>
+        <div class="d-flex justify-content-between align-items-start w-100">
+           <div class="me-2">
+              <span class="ticket-qty text-white bg-dark rounded px-1 me-1">${item.qty}</span>
+              <span class="ticket-name fw-bold">${name}</span>
+           </div>
+           <span class="fw-bold">${item.qty * item.price}</span>
         </div>
-        <div class="text-end ms-3">
-          <div class="fw-bold mb-1">${item.qty * item.price} $</div>
-          <button class="btn btn-link btn-sm p-0 text-danger remove-item-btn" data-name="${name}">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
+        <button class="btn btn-sm text-danger p-0 ms-auto d-block remove-item-btn" data-name="${name}">
+           <i class="bi bi-x-circle-fill"></i> Sil
+        </button>
       `;
       els.liveCartList.appendChild(li);
     });
@@ -309,11 +305,8 @@ function renderCart() {
   // Update Totals
   const total = subTotal > 0 ? subTotal + SERVICE_FEE : 0;
 
-  els.cartItemCount.textContent = itemCount;
-  els.mobileCartCount.textContent = itemCount;
   els.subTotal.textContent = `${subTotal} $`;
   els.totalPrice.textContent = `${total} $`;
-  els.mobileCartTotal.textContent = `${total} $`;
 }
 
 /* =========================================
@@ -321,7 +314,7 @@ function renderCart() {
    ========================================= */
 async function handleSaveOrder() {
   const name = els.calcName.value.trim();
-  if (!name) return showToast("Lütfen bir masa veya kişi adı girin.", "warning");
+  if (!name) return showToast("Masa numarasını veya müşteri adını girin!", "warning");
 
   const items = Object.entries(state.cart).map(([n, i]) => ({
     name: n,
@@ -329,7 +322,7 @@ async function handleSaveOrder() {
     price: i.price
   }));
 
-  if (items.length === 0) return showToast("Sepetiniz boş!", "warning");
+  if (items.length === 0) return showToast("Adisyon boş!", "warning");
 
   if (!state.activeWaiter) {
     return els.waiterModal.show();
@@ -352,32 +345,172 @@ async function handleSaveOrder() {
       ? state.orders.find(o => o.id === state.editingOrderId)?.timestamp
       : Date.now(),
     date: new Date().toLocaleString("tr-TR"),
-    waiterName: state.activeWaiter
+    waiterName: state.activeWaiter,
+    delivered: false // Important for new logic
   };
 
   els.saveButton.disabled = true;
-  els.saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Kaydediliyor...';
+  els.saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> İletiliyor...';
 
   try {
     if (state.editingOrderId) {
+      // Preserve delivered status if editing
+      const oldOrder = state.orders.find(o => o.id === state.editingOrderId);
+      if (oldOrder) orderData.delivered = oldOrder.delivered;
+
       await updateOrder(state.editingOrderId, orderData);
       showToast("Sipariş güncellendi!");
     } else {
       await addOrder(orderData);
-      showToast("Sipariş başarıyla oluşturuldu!");
-
-      // Update local stats optimistically
+      showToast("Sipariş mutfağa iletildi!");
       updateWaiterStatsLocally(state.activeWaiter, 1);
     }
     resetCart();
   } catch (err) {
     console.error(err);
-    showToast("Bir hata oluştu.", "danger");
+    showToast("Bağlantı hatası!", "danger");
   } finally {
     els.saveButton.disabled = false;
-    els.saveButton.innerHTML = 'Siparişi Oluştur <i class="bi bi-arrow-right-short fs-4 align-middle"></i>';
+    els.saveButton.innerHTML = 'MUTFAĞA İLET <i class="bi bi-send-fill ms-2"></i>';
     state.editingOrderId = null;
   }
+}
+
+function handleOrderAction(id, action) {
+  const order = state.orders.find(o => o.id === id);
+  if (!order) return;
+
+  const isMaster = MASTER_WAITERS.includes(state.activeWaiter.toLowerCase());
+
+  if (action === "delete") {
+    if (!order.delivered && !isMaster) {
+      return showToast("Yetkisiz işlem: Sadece Şef Garson silebilir.", "danger");
+    }
+    if (confirm("Bu kayıt silinecek. Onaylıyor musunuz?")) {
+      deleteOrder(id);
+      if (!order.delivered) updateWaiterStatsLocally(order.waiterName, -1);
+    }
+  }
+  else if (action === "edit") {
+    loadOrderToCart(order);
+    state.editingOrderId = id;
+    els.saveButton.textContent = "GÜNCELLE";
+    // Hide both modals just in case
+    els.historyModal.hide();
+    els.activeOrdersModal.hide();
+  }
+  else if (action === "deliver") {
+    // Close table action
+    orderDelivered(id);
+    showToast("Masa hesabı kapatıldı. Geçmişe taşındı.");
+    updateWaiterStatsLocally(order.waiterName, -1);
+  }
+  else if (action === "copy") {
+    copyOrderText(order);
+  }
+  else if (action === "download") {
+    downloadReceipt(order);
+  }
+}
+
+function loadOrderToCart(order) {
+  state.cart = {};
+  order.items.forEach(item => {
+    if (item.name !== "Servis Hizmeti") {
+      state.cart[item.name] = { price: item.price, qty: item.qty };
+    }
+  });
+  els.calcName.value = order.name;
+  renderCart();
+  // Update UI
+  document.querySelectorAll(".product-card").forEach(card => {
+    updateProductCardUI(card.dataset.name);
+  });
+}
+
+function renderActiveOrders() {
+  // Filter only NON-delivered orders
+  const active = [...state.orders]
+    .filter(o => !o.delivered)
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  els.activeOrderBadge.textContent = active.length;
+  els.activeOrderBadge.classList.toggle("d-none", active.length === 0);
+
+  if (active.length === 0) {
+    els.activeOrdersList.innerHTML = '<li class="list-group-item text-center text-muted py-4">Açık masa yok.</li>';
+    return;
+  }
+
+  els.activeOrdersList.innerHTML = "";
+  active.forEach(order => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center p-3";
+    li.innerHTML = `
+         <div>
+            <h5 class="fw-bold mb-1">${order.name}</h5>
+            <small class="text-secondary">${order.waiterName} • ${order.total}$</small>
+         </div>
+         <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
+              <i class="bi bi-pencil-fill"></i> Düzelt
+            </button>
+            <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
+              <i class="bi bi-check-lg"></i> Kapat
+            </button>
+         </div>
+      `;
+    els.activeOrdersList.appendChild(li);
+  });
+}
+
+function renderClosedHistory() {
+  // Filter ONLY delivered (closed) orders
+  const closed = [...state.orders]
+    .filter(o => o.delivered)
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  els.historyList.innerHTML = "";
+
+  if (closed.length === 0) {
+    els.historyList.innerHTML = '<li class="text-center text-muted py-3">Henüz kapanan işlem yok.</li>';
+    return;
+  }
+
+  closed.forEach(order => {
+    const li = document.createElement("li");
+    li.className = "history-item bg-white border p-3 rounded";
+
+    li.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h6 class="mb-0 fw-bold text-dark">${order.name}</h6>
+          <small class="text-muted">${order.date} • ${order.waiterName}</small>
+        </div>
+        <span class="badge bg-success">Ödendi</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+         <span class="fw-bold">${order.total} $</span>
+         <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-dark action-btn" data-id="${order.id}" data-action="download">
+               <i class="bi bi-receipt"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger action-btn" data-id="${order.id}" data-action="delete">
+               <i class="bi bi-trash"></i>
+            </button>
+         </div>
+      </div>
+    `;
+    els.historyList.appendChild(li);
+  });
+}
+
+function resetCart() {
+  state.cart = {};
+  els.calcName.value = "";
+  renderCart();
+  document.querySelectorAll(".product-card").forEach(card => card.classList.remove("active"));
+  document.querySelectorAll(".badge-qty").forEach(b => b.classList.add("d-none"));
 }
 
 /* =========================================
@@ -520,203 +653,47 @@ async function downloadReceipt(order) {
   link.click();
 }
 
-function handleOrderAction(id, action) {
-  const order = state.orders.find(o => o.id === id);
-  if (!order) return;
-
-  const isMaster = MASTER_WAITERS.includes(state.activeWaiter.toLowerCase());
-
-  if (action === "delete") {
-    if (!order.delivered && !isMaster) {
-      return showToast("Henüz teslim edilmemiş siparişi sadece yöneticiler silebilir.", "danger");
-    }
-    if (confirm("Bu siparişi silmek istediğinize emin misiniz?")) {
-      deleteOrder(id);
-      if (!order.delivered) updateWaiterStatsLocally(order.waiterName, -1);
-    }
-  }
-  else if (action === "edit") {
-    loadOrderToCart(order);
-    state.editingOrderId = id;
-    els.saveButton.textContent = "Güncelle";
-    els.historyModal.hide();
-  }
-  else if (action === "deliver") {
-    orderDelivered(id);
-    showToast("Sipariş teslim edildi olarak işaretlendi.");
-    updateWaiterStatsLocally(order.waiterName, -1); // Aktif sayısı düş
-  }
-  else if (action === "copy") {
-    copyOrderText(order);
-  }
-  else if (action === "download") {
-    downloadReceipt(order);
-  }
-}
-
-function loadOrderToCart(order) {
-  state.cart = {};
-  order.items.forEach(item => {
-    if (item.name !== "Servis Hizmeti") {
-      state.cart[item.name] = { price: item.price, qty: item.qty };
-    }
-  });
-  els.calcName.value = order.name;
-  renderCart();
-  // Update all product cards to reflect new cart state
-  document.querySelectorAll(".product-card").forEach(card => {
-    updateProductCardUI(card.dataset.name);
-  });
-}
-
-function renderHistory() {
-  els.historyList.innerHTML = "";
-
-  // Sort by date desc
-  const sorted = [...state.orders].sort((a, b) => b.timestamp - a.timestamp);
-
-  if (sorted.length === 0) {
-    els.historyList.innerHTML = '<li class="text-center text-muted py-3">Henüz kayıtlı sipariş yok.</li>';
-    return;
-  }
-
-  sorted.forEach(order => {
-    const isDelivered = order.delivered;
-    const li = document.createElement("li");
-    li.className = `history-item ${isDelivered ? 'delivered' : 'pending'}`;
-
-    // Calculate items count without service fee
-    const itemCount = order.items.filter(i => i.name !== "Servis Hizmeti").reduce((acc, i) => acc + i.qty, 0);
-
-    li.innerHTML = `
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <h5 class="mb-0 fw-bold">${order.name}</h5>
-          <small class="text-muted"><i class="bi bi-person"></i> ${order.waiterName} • ${order.date}</small>
-        </div>
-        <span class="badge ${isDelivered ? 'bg-success' : 'bg-warning text-dark'}">
-          ${isDelivered ? 'Teslim Edildi' : 'Hazırlanıyor'}
-        </span>
-      </div>
-      
-      <div class="small text-secondary mb-3">
-         ${itemCount} parça ürün • Toplam <strong>${order.total} $</strong>
-      </div>
-
-      <div class="d-flex gap-2 justify-content-end">
-         <button class="btn btn-sm btn-outline-dark action-btn" data-id="${order.id}" data-action="download">
-            <i class="bi bi-download"></i> İndir
-         </button>
-         ${!isDelivered ? `
-           <button class="btn btn-sm btn-outline-success action-btn" data-id="${order.id}" data-action="deliver">
-             <i class="bi bi-check-lg"></i> Teslim
-           </button>
-           <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
-             <i class="bi bi-pencil"></i>
-           </button>
-         ` : ''}
-         <button class="btn btn-sm btn-outline-secondary action-btn" data-id="${order.id}" data-action="copy">
-            <i class="bi bi-clipboard"></i>
-         </button>
-         <button class="btn btn-sm btn-outline-danger action-btn" data-id="${order.id}" data-action="delete">
-            <i class="bi bi-trash"></i>
-         </button>
-      </div>
-    `;
-    els.historyList.appendChild(li);
-  });
-}
-
-function resetCart() {
-  state.cart = {};
-  els.calcName.value = "";
-  renderCart();
-  document.querySelectorAll(".product-card").forEach(card => {
-    updateProductCardUI(card.dataset.name);
-  });
-}
 
 /* =========================================
    STATS & HELPERS
    ========================================= */
 function updateWaiterStatsLocally(name, delta) {
-  // Stats are generally synced from Firebase, but for immediate UI feedback we can act locally
-  // However, since we listen to Firebase, optimisitc UI updates might be overwritten quickly.
-  // Best to rely on listener or implement proper optimistic update.
-  // For now, simpler to just rely on Firebase listener unless latency is an issue.
+  // handled by listener mostly
 }
 
 function syncStats() {
-  // Logic to calculate stats from orders and update firebase if master
-  // Simplified: The original app had logic to recalculate stats from all orders.
-  // We can keep it or trust existing stats.
-  // Adapting original logic:
-
   const currentStats = state.waiterStats || {};
   const newCounts = {};
 
   state.orders.forEach(order => {
-    // Only count active (non-delivered) orders for "Active Orders" count?
-    // Or total orders? Original app seemed to count active orders for "count" 
-    // but leaderboard implied total performance.
-    // Let's assume leaderboard is currently active orders for this session.
+    // Leaderboard tracks ONLY active orders? OR All time?
+    // Let's assume Leaderboard = Active Shifts Performance
+    // For now, let's track everything today
 
-    if (!order.delivered) {
-      const key = order.waiterName.toLowerCase().trim();
-      if (!newCounts[key]) newCounts[key] = { name: order.waiterName, count: 0 };
-      newCounts[key].count++;
-    }
+    const key = order.waiterName.toLowerCase().trim();
+    if (!newCounts[key]) newCounts[key] = { name: order.waiterName, count: 0 };
+    newCounts[key].count++;
   });
 
-  // Checking auth again
   if (state.activeWaiter) {
     const myKey = state.activeWaiter.toLowerCase().trim();
     const myStats = newCounts[myKey] || { count: 0 };
-    els.waiterOrderCount.textContent = myStats.count;
+    els.waiterOrderCount.textContent = `${myStats.count} Sipariş`;
     els.waiterServiceShare.textContent = `${(myStats.count * SERVICE_FEE * SERVICE_SHARE_RATIO).toFixed(0)} $`;
   }
-
-  renderLeaderboard(newCounts);
 }
 
 function updateDashboardStats() {
   syncStats();
 }
 
-
-function renderLeaderboard(stats) {
-  els.leaderboardList.innerHTML = "";
-  const sorted = Object.values(stats).sort((a, b) => b.count - a.count);
-
-  if (sorted.length === 0) {
-    els.leaderboardList.innerHTML = '<li class="list-group-item bg-transparent text-muted text-center">Aktif sipariş yok</li>';
-    return;
-  }
-
-  sorted.forEach((s, idx) => {
-    const li = document.createElement("li");
-    li.className = "list-group-item bg-transparent d-flex justify-content-between align-items-center";
-    li.innerHTML = `
-      <div>
-        <span class="badge bg-primary rounded-pill me-2">#${idx + 1}</span>
-        <span class="fw-bold">${s.name}</span>
-      </div>
-      <span class="badge bg-light text-dark border">${s.count} Sipariş</span>
-    `;
-    els.leaderboardList.appendChild(li);
-  });
-}
-
-
 function updateProfileDisplay() {
   if (state.activeWaiter) {
     els.waiterNameDisplay.textContent = state.activeWaiter;
     const isMaster = MASTER_WAITERS.includes(state.activeWaiter.toLowerCase());
     els.waiterRankDisplay.textContent = isMaster ? "Şef Garson" : "Garson";
-    els.waiterRankDisplay.className = isMaster ? "mb-0 x-small text-primary fw-bold" : "mb-0 x-small text-secondary";
   }
 }
-
 
 function filterProducts(query) {
   const term = query.toLowerCase();
@@ -727,9 +704,9 @@ function filterProducts(query) {
   });
 }
 
-function animateButton(btn) {
-  btn.classList.add("scale-95");
-  setTimeout(() => btn.classList.remove("scale-95"), 100);
+function animateCard(card) {
+  card.classList.add("scale-click");
+  setTimeout(() => card.classList.remove("scale-click"), 100);
 }
 
 /* =========================================
@@ -744,7 +721,7 @@ function showToast(msg, type = "success") {
   const html = `
     <div id="${id}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
-        <div class="toast-body">
+        <div class="toast-body fs-6">
           ${msg}
         </div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>

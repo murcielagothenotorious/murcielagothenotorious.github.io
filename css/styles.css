@@ -1,47 +1,44 @@
 :root {
-  /* Renk Paleti - Italyan Bayrağı & Modern Lüks */
-  --color-primary: #006847;
-  /* Derin İtalyan Yeşili */
-  --color-primary-dark: #004d35;
-  --color-secondary: #ce2b37;
-  /* Canlı İtalyan Kırmızı */
-  --color-accent: #e5b95f;
-  /* Altın Sarısı */
+  /* Renk Paleti - Tuscan Evening POS */
+  --pos-bg-dark: #1a1f2c;
+  /* Ana Arka Plan */
+  --pos-bg-panel: #ffffff;
+  /* Paneller */
+  --pos-bg-header: #f8f9fa;
+  /* Panel Başlıkları */
 
-  --color-bg-light: #f8fafc;
-  --color-text-main: #1e293b;
-  --color-text-muted: #64748b;
-  --color-border: rgba(255, 255, 255, 0.2);
+  --pos-primary: #e63946;
+  /* Aksiyon (Kırmızı/Turuncu) */
+  --pos-secondary: #2a9d8f;
+  /* Onay (Yeşil) */
+  --pos-accent: #f4a261;
+  /* Vurgu (Sarı) */
+  --pos-text-main: #264653;
+  /* Ana Metin */
+  --pos-text-muted: #6c757d;
 
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  /* Biraz daha opak */
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.05);
-  /* Gölge azaltıldı */
+  --border-color: #e9ecef;
 
+  --ticket-bg: #fffdf8;
+  /* Hafif sarımtırak fiş kağıdı */
+
+  /* Typography */
   --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Inconsolata', monospace;
 
-  /* Compact Sizes */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-
-  --sidebar-width: 340px;
-  /* Daraltıldı */
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-up: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Temel Ayarlar */
+/* POS Reset & Base */
 body {
-  font-family: var(--font-body);
-  color: var(--color-text-main);
-  background-color: #f1f5f9;
-  overflow: hidden;
-  /* App-like feel */
+  font-family: var(--font-heading);
+  background-color: var(--pos-bg-dark);
+  color: var(--pos-text-main);
   height: 100vh;
-  font-size: 0.9rem;
-  /* Geneli küçült */
+  overflow: hidden;
+  user-select: none;
+  /* Dokunmatik hissi için seçim engelleme */
 }
 
 h1,
@@ -120,19 +117,39 @@ h6 {
   }
 }
 
-/* Uygulama İskeleti */
+/* Layout */
 .app-wrapper {
+  background-color: var(--pos-bg-dark);
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
+.bg-light-gray {
+  background-color: #f0f2f5;
+}
+
+/* Navigation - Minimal & Dark */
 .app-nav {
   height: 60px;
-  /* Küçültüldü */
+  background-color: #11151d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--color-border);
+}
+
+.btn-dark-glass {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  transition: all 0.2s;
+}
+
+.btn-dark-glass:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .app-content {
@@ -260,25 +277,26 @@ h6 {
   font-size: 0.9rem;
 }
 
-/* Kategori ve Ürünler */
+/* Category & Product Setup */
 .category-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-primary-dark);
+  color: var(--pos-text-muted);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
 }
 
+/* Product Cards - BUTTON STYLE */
 .product-card {
   background: white;
-  border-radius: var(--radius-md);
-  padding: 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.2s;
+  /* No border initially */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.1s ease-in-out;
   position: relative;
   overflow: hidden;
   height: 100%;
@@ -287,39 +305,59 @@ h6 {
   justify-content: space-between;
 }
 
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.1);
-  border-color: rgba(0, 104, 71, 0.15);
+.product-card:active {
+  transform: scale(0.96);
 }
 
-.product-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 0;
-  background: var(--color-primary);
-  transition: height 0.2s;
+.product-card.active {
+  border: 2px solid var(--pos-secondary);
+  background-color: #f0fdf4;
 }
 
-.product-card:hover::before {
+.product-content {
+  padding: 1rem;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.product-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .product-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 0.2rem;
-  color: var(--color-text-main);
-  line-height: 1.3;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  color: var(--pos-text-main);
 }
 
 .product-price {
-  font-weight: 700;
-  color: var(--color-primary);
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pos-secondary);
+}
+
+.badge-qty {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--pos-secondary);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn-add-cart {
@@ -446,6 +484,103 @@ h6 {
   font-size: 1.2rem;
 }
 
+/* Ticket (Adisyon) Panel */
+.ticket-panel {
+  z-index: 50;
+}
+
+.bg-paper {
+  background-color: var(--ticket-bg);
+  background-image: radial-gradient(#e5e5f7 0.5px, transparent 0.5px);
+  background-size: 10px 10px;
+}
+
+.ticket-header input {
+  font-family: var(--font-mono);
+  letter-spacing: -0.5px;
+}
+
+.ticket-list {
+  font-family: var(--font-mono);
+}
+
+.ticket-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed #d1d5db;
+  font-size: 0.95rem;
+}
+
+.ticket-item:last-child {
+  border-bottom: none;
+}
+
+.ticket-qty {
+  min-width: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.shadow-up {
+  box-shadow: var(--shadow-up);
+}
+
+/* Action Buttons */
+#saveButton {
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+#saveButton:active {
+  transform: scale(0.98);
+}
+
+/* Modals & Popups */
+.modal-content {
+  border-radius: 12px;
+}
+
+.list-group-item {
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+  border-radius: 8px !important;
+}
+
+/* Animations */
+.scale-click {
+  animation: clickPulse 0.2s;
+}
+
+@keyframes clickPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Scrollbar Styling */
+.customize-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customize-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customize-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 100px;
+}
+
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
@@ -497,6 +632,17 @@ h6 {
     width: 100%;
     z-index: 1000;
     border-top: 1px solid var(--glass-border);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-icon {
+    font-size: 2rem;
+  }
+
+  .product-name {
+    font-size: 0.9rem;
   }
 }
 
