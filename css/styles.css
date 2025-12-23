@@ -1,274 +1,101 @@
+/* =========================================
+   CASA CARMARETTI - PREMIUM POS THEME v4.0
+   ========================================= */
+
 :root {
-  /* Color Palette - Professional POS */
-  --pos-dark: #1a1d24;
-  --pos-darker: #12151a;
-  --pos-green: #10b981;
-  --pos-yellow: #fbbf24;
-  --pos-red: #ef4444;
-  --pos-text: #1f2937;
-  --pos-muted: #6b7280;
-  --pos-border: #e5e7eb;
-  --pos-paper: #fffbf5;
+  --bg-dark: #121212;
+  --bg-darker: #0d0d0d;
+  --bg-surface: #1e1e1e;
+  --bg-paper: #252525;
 
-  --font-main: 'Outfit', sans-serif;
-  --font-mono: 'Inconsolata', monospace;
+  --color-gold: #D4AF37;
+  --color-gold-dim: #9c8026;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #A0A0A0;
+
+  --bs-body-bg: var(--bg-dark);
+  --bs-body-color: var(--color-text-main);
 }
 
-/* Base Styles */
 body {
-  font-family: var(--font-main);
-  background-color: var(--pos-dark);
-  color: var(--pos-text);
+  font-family: 'Outfit', sans-serif;
   overflow: hidden;
-  height: 100vh;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-main);
-}
-
-.x-small {
-  font-size: 0.7rem;
+  /* App-like feel */
+  background-color: var(--bg-dark);
 }
 
 .font-mono {
-  font-family: var(--font-mono);
+  font-family: 'Inconsolata', monospace;
 }
 
-/* Main Layout */
-.app-wrapper {
-  background-color: var(--pos-dark);
+.x-small {
+  font-size: 0.75rem;
 }
 
-/* Navigation */
-.app-nav {
-  height: 56px;
-  background-color: var(--pos-darker);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.tracking-wide {
+  letter-spacing: 1px;
 }
 
-.brand-logo {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--pos-red), #f97316);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1rem;
+/* UTILS */
+.text-gold {
+  color: var(--color-gold) !important;
 }
 
-.avatar {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1rem;
+.bg-gold {
+  background-color: var(--color-gold) !important;
 }
 
-.search-bar input {
-  width: 120px;
-  outline: none;
+.bg-darker {
+  background-color: var(--bg-darker) !important;
 }
 
-.search-bar input:focus {
-  width: 180px;
+.bg-surface {
+  background-color: var(--bg-surface) !important;
 }
 
-/* Product Grid */
-.category-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--pos-muted);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--pos-border);
+/* BUTTONS */
+.btn-gold {
+  background-color: var(--color-gold);
+  border: none;
+  color: #000;
+  transition: all 0.2s;
 }
 
+.btn-gold:hover,
+.btn-gold:active {
+  background-color: #f0c541;
+  transform: translateY(-1px);
+}
+
+.btn-outline-gold {
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+}
+
+.btn-outline-gold:hover {
+  background-color: var(--color-gold);
+  color: #000;
+}
+
+/* CARDS */
 .product-card {
-  background: white;
+  background-color: var(--bg-surface);
+  border: 1px solid #333;
   border-radius: 12px;
-  padding: 1rem;
+  overflow: hidden;
+  transition: transform 0.1s, border-color 0.2s;
   cursor: pointer;
-  border: 2px solid transparent;
-  transition: all 0.15s;
   position: relative;
-  text-align: center;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
 .product-card:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
+  border-color: var(--color-gold);
 }
 
-.product-card.active {
-  border-color: var(--pos-green);
-  background-color: #f0fdf4;
-}
-
-.product-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.product-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  color: var(--pos-text);
-}
-
-.product-price {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--pos-green);
-}
-
-.badge-qty {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: var(--pos-green);
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
-}
-
-/* Ticket Panel */
-.bg-paper {
-  background-color: var(--pos-paper);
-}
-
-.ticket-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 0;
-  border-bottom: 1px dashed #d4d4d4;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-}
-
-.ticket-item:last-child {
-  border-bottom: none;
-}
-
-/* Buttons */
-#saveButton {
-  transition: transform 0.1s;
-}
-
-#saveButton:active {
-  transform: scale(0.98);
-}
-
-/* KDS Styles */
-#kds-view {
-  background-color: #111;
-}
-
-.kds-card {
-  background-color: #222;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.kds-card-header {
-  padding: 1rem;
-  background-color: #333;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.kds-card-header.medium {
-  background-color: #d97706;
-}
-
-.kds-card-header.late {
-  background-color: #dc2626;
-}
-
-.kds-card-body {
-  padding: 1rem;
-  background-color: white;
-  color: #000;
-  min-height: 150px;
-}
-
-.kds-item {
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
-  font-weight: 700;
-  padding: 0.4rem 0;
-  border-bottom: 1px dashed #ccc;
-}
-
-.kds-item:last-child {
-  border-bottom: none;
-}
-
-.kds-time {
-  font-family: var(--font-mono);
-  font-weight: bold;
-}
-
-.kds-action {
-  padding: 0.75rem;
-  background-color: #222;
-}
-
-/* Modals */
-.modal-content {
-  border-radius: 12px;
-}
-
-.list-group-item {
-  border: none;
-  border-bottom: 1px solid var(--pos-border);
-  padding: 1rem;
-}
-
-.list-group-item:last-child {
-  border-bottom: none;
-}
-
-/* History Item */
-.history-item {
-  background: white;
-  border: 1px solid var(--pos-border);
-  border-radius: 8px;
-  padding: 0.75rem;
-}
-
-/* Animations */
 .scale-click {
-  animation: clickPulse 0.15s ease-out;
+  animation: clickPulse 0.15s ease-in-out;
 }
 
 @keyframes clickPulse {
@@ -285,31 +112,128 @@ h6 {
   }
 }
 
-/* Scrollbar */
+/* CATEGORIES */
+.category-header {
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: var(--color-gold);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+/* SCROLLBARS */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-darker);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.15);
-  border-radius: 100px;
+  background: #444;
+  border-radius: 3px;
 }
 
-/* Responsive */
-@media (max-width: 991px) {
-  .search-bar input {
-    width: 100px;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
 
-  .product-icon {
-    font-size: 2rem;
-  }
+/* TICKET / CART */
+.ticket-sidebar {
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
 
-  .product-name {
-    font-size: 0.8rem;
-  }
+.ticket-item {
+  background-color: var(--bg-surface);
+  border-left: 3px solid var(--color-gold);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* BOTTOM NAV (Mobile) */
+.mobile-nav {
+  z-index: 1000;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-nav .nav-item {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  min-width: 60px;
+}
+
+.mobile-nav .nav-item.active {
+  color: var(--color-gold);
+}
+
+.mobile-nav .nav-item i {
+  margin-bottom: 2px;
+}
+
+/* KDS CARDS */
+.kds-card {
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.kds-card-header {
+  padding: 10px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+}
+
+.kds-card-header.medium {
+  background-color: #d35400;
+}
+
+/* Orange Warning */
+.kds-card-header.late {
+  background-color: #c0392b;
+}
+
+/* Red Alert */
+
+.kds-card-body {
+  padding: 10px;
+  min-height: 100px;
+}
+
+.kds-item {
+  font-size: 1.1rem;
+  border-bottom: 1px dashed #444;
+  padding: 5px 0;
+  color: #ddd;
+}
+
+/* MODALS */
+.modal-content {
+  background-color: var(--bg-surface);
+  border: 1px solid #444;
+}
+
+.list-group-item {
+  background-color: var(--bg-surface);
+  color: white;
+  border-color: #333;
+}
+
+/* OFFCANVAS */
+.offcanvas {
+  background-color: var(--bg-dark);
 }

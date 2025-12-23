@@ -82,12 +82,25 @@ let state = {
    ========================================= */
 const els = {
   categories: document.getElementById("categories"),
-  cartItemsContainer: document.getElementById("ticketItemsContainer"),
+  // Desktop Ticket Elements
   liveCartList: document.getElementById("liveCartList"),
   subTotal: document.getElementById("subTotal"),
   totalPrice: document.getElementById("totalPrice"),
   calcName: document.getElementById("calcName"),
   saveButton: document.getElementById("saveButton"),
+
+  // Mobile Ticket Elements
+  mobileTicketItems: document.getElementById("mobile-ticket-items"),
+  mobileTotalPrice: document.getElementById("mobileTotalPrice"),
+  mobileCalcName: document.getElementById("mobileCalcName"),
+  mobileSaveButton: document.getElementById("mobileSaveButton"),
+  mobileCartBadge: document.getElementById("mobileCartBadge"),
+  mobileActiveWaiter: document.getElementById("mobileActiveWaiter"),
+
+  // Mobile Nav Buttons (for dynamic visibility if needed)
+  mobileBtnKDS: document.getElementById("mobile-btn-kds"),
+  mobileBtnCashier: document.getElementById("mobile-btn-cashier"),
+
   waiterNameDisplay: document.getElementById("activeWaiterName"),
   waiterRankDisplay: document.getElementById("waiterRank"),
   waiterOrderCount: document.getElementById("waiterOrderCount"),
@@ -103,7 +116,7 @@ const els = {
   kdsView: document.getElementById("kds-view"),
   cashierView: document.getElementById("cashier-view"),
 
-  // Toggle buttons
+  // Toggle buttons (Desktop)
   btnToggleKDS: document.getElementById("btn-toggle-kds"),
   btnToggleCashier: document.getElementById("btn-toggle-cashier"),
 
@@ -214,7 +227,35 @@ function setupEventListeners() {
   });
 
   // Save Order
+  // Save Order (Desktop & Mobile)
   els.saveButton.addEventListener("click", handleSaveOrder);
+  els.mobileSaveButton?.addEventListener("click", handleSaveOrder);
+
+  // Remove Item Delegation (Desktop)
+  els.liveCartList.addEventListener("click", (e) => {
+    const btn = e.target.closest(".remove-item-btn");
+    if (btn) {
+      const name = btn.dataset.name;
+      removeFromCart(name);
+    }
+  });
+
+  // Remove Item Delegation (Mobile)
+  els.mobileTicketItems?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".remove-item-btn");
+    if (btn) {
+      const name = btn.dataset.name;
+      removeFromCart(name);
+    }
+  });
+
+  // Sync Name Inputs
+  els.calcName.addEventListener("input", (e) => {
+    if (els.mobileCalcName) els.mobileCalcName.value = e.target.value;
+  });
+  els.mobileCalcName?.addEventListener("input", (e) => {
+    els.calcName.value = e.target.value;
+  });
 
   // View Toggle Buttons
   els.btnToggleKDS?.addEventListener("click", () => switchView('kds'));
@@ -350,31 +391,48 @@ function renderCart() {
   let subTotal = 0;
 
   els.liveCartList.innerHTML = "";
+  if (els.mobileTicketItems) els.mobileTicketItems.innerHTML = "";
 
   if (itemCount === 0) {
-    els.liveCartList.classList.add("d-none");
-    document.querySelector(".empty-ticket-state").classList.remove("d-none");
+    els.liveCartList.innerHTML = '<li class="text-center text-muted py-4 small">Sepet Boş</li>';
+    if (els.mobileTicketItems) els.mobileTicketItems.innerHTML = '<div class="text-center text-muted py-5"><i class="bi bi-cart-x display-1 opacity-25"></i><p class="mt-3">Sepet Boş</p></div>';
+    if (els.mobileCartBadge) els.mobileCartBadge.classList.add("d-none");
   } else {
-    els.liveCartList.classList.remove("d-none");
-    document.querySelector(".empty-ticket-state").classList.add("d-none");
+    // Show Badge
+    if (els.mobileCartBadge) {
+      els.mobileCartBadge.textContent = itemCount;
+      els.mobileCartBadge.classList.remove("d-none");
+    }
 
     items.forEach(([name, item]) => {
       subTotal += item.qty * item.price;
+
+      const itemHTML = `
+        <div class="d-flex align-items-center justify-content-between w-100">
+           <div class="me-2">
+              <span class="badge bg-gold text-dark rounded-pill me-2">${item.qty}x</span>
+              <span class="fw-bold">${name}</span>
+           </div>
+           <span class="fw-bold ms-auto me-3">${item.qty * item.price}$</span>
+           <button class="btn btn-sm btn-outline-danger border-0 p-1 remove-item-btn" data-name="${name}">
+              <i class="bi bi-trash-fill"></i>
+           </button>
+        </div>
+      `;
+
+      // Desktop
       const li = document.createElement("li");
       li.className = "ticket-item";
-      li.innerHTML = `
-        <div class="d-flex justify-content-between align-items-start w-100">
-           <div class="me-2">
-              <span class="ticket-qty text-white bg-dark rounded px-1 me-1">${item.qty}</span>
-              <span class="ticket-name fw-bold">${name}</span>
-           </div>
-           <span class="fw-bold">${item.qty * item.price}</span>
-        </div>
-        <button class="btn btn-sm text-danger p-0 ms-auto d-block remove-item-btn" data-name="${name}">
-           <i class="bi bi-x-circle-fill"></i> Sil
-        </button>
-      `;
+      li.innerHTML = itemHTML;
       els.liveCartList.appendChild(li);
+
+      // Mobile
+      if (els.mobileTicketItems) {
+        const div = document.createElement("div");
+        div.className = "ticket-item bg-darker border-start-0 border-bottom border-secondary rounded-0 mb-0 py-3";
+        div.innerHTML = itemHTML;
+        els.mobileTicketItems.appendChild(div);
+      }
     });
   }
 
@@ -383,6 +441,7 @@ function renderCart() {
 
   els.subTotal.textContent = `${subTotal} $`;
   els.totalPrice.textContent = `${total} $`;
+  if (els.mobileTotalPrice) els.mobileTotalPrice.textContent = `${total} $`;
 }
 
 /* =========================================
@@ -777,21 +836,23 @@ function switchView(view) {
 
   // Hide all views
   els.posView.classList.add("d-none");
+  els.posView.classList.remove("d-flex"); // Remove flex since we hide it
   els.kdsView.classList.add("d-none");
   els.cashierView.classList.add("d-none");
 
   // Show selected view
   if (view === 'kds') {
     els.kdsView.classList.remove("d-none");
-    document.body.style.backgroundColor = "#111";
+    document.body.style.backgroundColor = "#000";
     renderKDS();
     startKDSClock();
   } else if (view === 'cashier') {
     els.cashierView.classList.remove("d-none");
-    document.body.style.backgroundColor = "#111";
+    document.body.style.backgroundColor = "#000";
     renderCashierView();
   } else {
     els.posView.classList.remove("d-none");
+    els.posView.classList.add("d-flex"); // Restore flex
     document.body.style.backgroundColor = "";
     stopKDSClock();
   }

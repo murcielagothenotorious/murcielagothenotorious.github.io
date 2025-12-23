@@ -75,11 +75,22 @@ export function listenMasters(callback) {
   return onValue(mastersRef, (snapshot) => {
     const data = snapshot.val();
     let masters = [];
-    if (Array.isArray(data)) {
-      masters = data.map(n => n.toLowerCase().trim());
-    } else if (data && typeof data === 'object') {
-      masters = Object.values(data).map(n => String(n).toLowerCase().trim());
+
+    if (!data) {
+      // Fallback & Auto-create if empty
+      const defaultMasters = ["Samuel Pugliani", "Austin Marcelli"]; // Default defaults
+      masters = defaultMasters.map(n => n.toLowerCase().trim());
+      // Auto-populate DB for convenience
+      update(ref(db), { "masters": defaultMasters }).catch(err => console.warn("Auto-create masters failed", err));
+      console.log("Masters DB empty, using defaults and auto-creating...");
+    } else {
+      if (Array.isArray(data)) {
+        masters = data.map(n => n.toLowerCase().trim());
+      } else if (typeof data === 'object') {
+        masters = Object.values(data).map(n => String(n).toLowerCase().trim());
+      }
     }
+
     callback?.(masters);
   });
 }
@@ -89,11 +100,22 @@ export function listenCashiers(callback) {
   return onValue(cashiersRef, (snapshot) => {
     const data = snapshot.val();
     let cashiers = [];
-    if (Array.isArray(data)) {
-      cashiers = data.map(n => n.toLowerCase().trim());
-    } else if (data && typeof data === 'object') {
-      cashiers = Object.values(data).map(n => String(n).toLowerCase().trim());
+
+    if (!data) {
+      // Fallback & Auto-create if empty
+      const defaultCashiers = ["Frederick Scarcelli", "Serena Castello"]; // Default defaults
+      cashiers = defaultCashiers.map(n => n.toLowerCase().trim());
+      // Auto-populate DB for convenience
+      update(ref(db), { "cashiers": defaultCashiers }).catch(err => console.warn("Auto-create cashiers failed", err));
+      console.log("Cashiers DB empty, using defaults and auto-creating...");
+    } else {
+      if (Array.isArray(data)) {
+        cashiers = data.map(n => n.toLowerCase().trim());
+      } else if (typeof data === 'object') {
+        cashiers = Object.values(data).map(n => String(n).toLowerCase().trim());
+      }
     }
+
     callback?.(cashiers);
   });
 }
