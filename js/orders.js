@@ -7,6 +7,9 @@ const waiterStatsRef = ref(db, "waiterStats");
 // Masters (Şef Garsonlar) reference in DB
 const mastersRef = ref(db, "masters");
 
+// Cashiers (Kasiyerler) reference in DB
+const cashiersRef = ref(db, "cashiers");
+
 // Yeni sipariş ekleme
 export async function addOrder(order) {
   if (!order) return null;
@@ -29,6 +32,12 @@ export async function orderDelivered(orderId) {
 export async function orderReady(orderId) {
   if (!orderId) return null;
   return await update(child(ordersRef, orderId), { ready: true });
+}
+
+// Sipariş ödendi olarak işaretleme (Kasa tarafından)
+export async function orderPaid(orderId) {
+  if (!orderId) return null;
+  return await update(child(ordersRef, orderId), { paid: true });
 }
 
 // Sipariş silme
@@ -65,7 +74,6 @@ export async function setWaiterStats(stats) {
 export function listenMasters(callback) {
   return onValue(mastersRef, (snapshot) => {
     const data = snapshot.val();
-    // Expecting either an array or object with names
     let masters = [];
     if (Array.isArray(data)) {
       masters = data.map(n => n.toLowerCase().trim());
@@ -75,3 +83,18 @@ export function listenMasters(callback) {
     callback?.(masters);
   });
 }
+
+// Listen to cashiers list for dynamic authorization
+export function listenCashiers(callback) {
+  return onValue(cashiersRef, (snapshot) => {
+    const data = snapshot.val();
+    let cashiers = [];
+    if (Array.isArray(data)) {
+      cashiers = data.map(n => n.toLowerCase().trim());
+    } else if (data && typeof data === 'object') {
+      cashiers = Object.values(data).map(n => String(n).toLowerCase().trim());
+    }
+    callback?.(cashiers);
+  });
+}
+

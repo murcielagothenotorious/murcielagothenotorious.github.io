@@ -1,4 +1,4 @@
-import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, orderReady, listenWaiterStats, setWaiterStats, listenMasters } from "./orders.js";
+import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, orderReady, orderPaid, listenWaiterStats, setWaiterStats, listenMasters, listenCashiers } from "./orders.js";
 
 /* =========================================
    CONSTANTS & CONFIG
@@ -53,12 +53,18 @@ const WAITER_STORAGE_KEY = "waiterName";
 // Default masters (fallback if Firebase has no data)
 let MASTER_WAITERS = ["samuel pugliani", "austin marcelli", "frederick scarcelli", "serena castello"];
 
+// Cashiers list (dynamic from Firebase)
+let CASHIERS = [];
+
 // Audio for new orders
 const bellAudio = new Audio('./artifacts/bell.wav');
 bellAudio.volume = 0.7;
 
 // Track order count for new order detection
 let previousOrderCount = 0;
+
+// Current view mode: 'pos' | 'kds' | 'cashier'
+let currentView = 'pos';
 
 /* =========================================
    STATE MANAGEMENT
@@ -87,7 +93,7 @@ const els = {
   waiterOrderCount: document.getElementById("waiterOrderCount"),
   waiterServiceShare: document.getElementById("waiterServiceShare"),
   productSearch: document.getElementById("productSearch"),
-  leaderboardList: document.getElementById("leaderboardList"), // Hidden but kept for logic
+  leaderboardList: document.getElementById("leaderboardList"),
   historyList: document.getElementById("calcList"),
   activeOrdersList: document.getElementById("activeOrdersList"),
   activeOrderBadge: document.getElementById("activeOrderBadge"),
@@ -95,10 +101,18 @@ const els = {
   // Views
   posView: document.getElementById("pos-view"),
   kdsView: document.getElementById("kds-view"),
-  btnToggleMode: document.getElementById("btn-toggle-mode"),
-  modeText: document.getElementById("mode-text"),
+  cashierView: document.getElementById("cashier-view"),
+
+  // Toggle buttons
+  btnToggleKDS: document.getElementById("btn-toggle-kds"),
+  btnToggleCashier: document.getElementById("btn-toggle-cashier"),
+
+  // KDS elements
   kdsGrid: document.getElementById("kds-grid"),
   kdsClock: document.getElementById("kds-clock"),
+
+  // Cashier elements
+  cashierGrid: document.getElementById("cashier-grid"),
 
   // Modals
   waiterModal: new bootstrap.Modal('#waiterModal'),
@@ -148,6 +162,8 @@ function init() {
     renderActiveOrders(); // Açık Masalar
     renderClosedHistory(); // Kapananlar
     renderKDS(); // Update Kitchen Screen if active
+    renderCashierView(); // Update Cashier Screen if active
+    renderLeaderboard(); // Update leaderboard
     syncStats();
   });
 
@@ -161,7 +177,13 @@ function init() {
     if (masters && masters.length > 0) {
       MASTER_WAITERS = masters;
     }
-    updateProfileDisplay(); // Refresh KDS toggle visibility
+    updateProfileDisplay(); // Refresh toggle visibility
+  });
+
+  // Listen to dynamic cashiers from Firebase
+  listenCashiers((cashiers) => {
+    CASHIERS = cashiers || [];
+    updateProfileDisplay(); // Refresh toggle visibility
   });
 }
 
@@ -194,8 +216,9 @@ function setupEventListeners() {
   // Save Order
   els.saveButton.addEventListener("click", handleSaveOrder);
 
-  // KDS Toggle
-  els.btnToggleMode.addEventListener("click", toggleMode);
+  // View Toggle Buttons
+  els.btnToggleKDS?.addEventListener("click", () => switchView('kds'));
+  els.btnToggleCashier?.addEventListener("click", () => switchView('cashier'));
 
   // Global Click Event Delegation (Performance)
   document.addEventListener("click", (e) => {
@@ -458,9 +481,14 @@ function handleOrderAction(id, action) {
     showToast(`🍽️ "${order.name}" hazır! Garsonlar bilgilendirildi.`);
   }
   else if (action === "deliver") {
-    // Waiter delivers and closes the table
+    // Waiter marks as delivered (goes to cashier, NOT closed yet)
     orderDelivered(id);
-    showToast("Masa hesabı kapatıldı. Geçmişe taşındı.");
+    showToast(`✅ "${order.name}" teslim edildi. Kasa'ya düştü.`);
+  }
+  else if (action === "paid") {
+    // Cashier marks as paid (now it's truly closed)
+    orderPaid(id);
+    showToast(`💰 "${order.name}" ödendi. Geçmişe taşındı.`);
     updateWaiterStatsLocally(order.waiterName, -1);
   }
   else if (action === "copy") {
@@ -547,9 +575,9 @@ function renderActiveOrders() {
 }
 
 function renderClosedHistory() {
-  // Filter ONLY delivered (closed) orders
+  // Filter ONLY PAID orders (truly closed)
   const closed = [...state.orders]
-    .filter(o => o.delivered)
+    .filter(o => o.paid === true)
     .sort((a, b) => b.timestamp - a.timestamp);
 
   els.historyList.innerHTML = "";
@@ -737,25 +765,34 @@ async function downloadReceipt(order) {
 
 
 /* =========================================
-   KITCHEN DISPLAY SYSTEM (KDS)
+   VIEW SWITCHING (POS / KDS / CASHIER)
    ========================================= */
-let isKDSMode = false;
+function switchView(view) {
+  // Toggle: if already on this view, go back to POS
+  if (currentView === view) {
+    view = 'pos';
+  }
 
-function toggleMode() {
-  isKDSMode = !isKDSMode;
+  currentView = view;
 
-  if (isKDSMode) {
-    els.posView.classList.add("d-none");
+  // Hide all views
+  els.posView.classList.add("d-none");
+  els.kdsView.classList.add("d-none");
+  els.cashierView.classList.add("d-none");
+
+  // Show selected view
+  if (view === 'kds') {
     els.kdsView.classList.remove("d-none");
-    els.modeText.textContent = "Sipariş Ekranı";
-    document.body.style.backgroundColor = "#111"; // Full dark for kitchen
+    document.body.style.backgroundColor = "#111";
     renderKDS();
     startKDSClock();
+  } else if (view === 'cashier') {
+    els.cashierView.classList.remove("d-none");
+    document.body.style.backgroundColor = "#111";
+    renderCashierView();
   } else {
     els.posView.classList.remove("d-none");
-    els.kdsView.classList.add("d-none");
-    els.modeText.textContent = "Mutfak Ekranı";
-    document.body.style.backgroundColor = ""; // Reset
+    document.body.style.backgroundColor = "";
     stopKDSClock();
   }
 }
@@ -766,8 +803,8 @@ function startKDSClock() {
   kdsClockInterval = setInterval(() => {
     const now = new Date();
     els.kdsClock.textContent = now.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
-    renderKDS(); // Re-render to update elapsed times
-  }, 60000); // Update every minute
+    renderKDS();
+  }, 60000);
 }
 
 function stopKDSClock() {
@@ -775,11 +812,11 @@ function stopKDSClock() {
 }
 
 function renderKDS() {
-  if (!isKDSMode) return;
+  if (currentView !== 'kds') return;
 
   // Only show orders that are NOT ready yet (still being prepared)
   const pendingOrders = state.orders
-    .filter(o => !o.delivered && !o.ready)
+    .filter(o => !o.delivered && !o.ready && !o.paid)
     .sort((a, b) => a.timestamp - b.timestamp);
 
   els.kdsGrid.innerHTML = "";
@@ -801,33 +838,76 @@ function renderKDS() {
     let itemsHtml = "";
     order.items.forEach(item => {
       if (item.name === "Servis Hizmeti") return;
-      itemsHtml += `
-            <div class="kds-item">
-               <span>${item.qty}x ${item.name}</span>
-            </div>
-         `;
+      itemsHtml += `<div class="kds-item"><span>${item.qty}x ${item.name}</span></div>`;
     });
 
     col.innerHTML = `
-         <div class="kds-card h-100">
-            <div class="kds-card-header ${headerClass}">
-               <div>
-                  <h5 class="mb-0 fw-bold title-font">${order.name}</h5>
-                  <small class="x-small text-white-50">${order.waiterName}</small>
-               </div>
-               <div class="kds-time fs-4">${minsElapsed} dk</div>
-            </div>
-            <div class="kds-card-body">
-               ${itemsHtml}
-            </div>
-            <div class="kds-action">
-               <button class="btn btn-warning w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="ready">
-                  <i class="bi bi-bell-fill me-2"></i> HAZIR
-               </button>
-            </div>
-         </div>
-      `;
+      <div class="kds-card h-100">
+        <div class="kds-card-header ${headerClass}">
+          <div>
+            <h5 class="mb-0 fw-bold">${order.name}</h5>
+            <small class="x-small text-white-50">${order.waiterName}</small>
+          </div>
+          <div class="kds-time fs-4">${minsElapsed} dk</div>
+        </div>
+        <div class="kds-card-body">${itemsHtml}</div>
+        <div class="kds-action">
+          <button class="btn btn-warning w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="ready">
+            <i class="bi bi-bell-fill me-2"></i> HAZIR
+          </button>
+        </div>
+      </div>
+    `;
     els.kdsGrid.appendChild(col);
+  });
+}
+
+/* =========================================
+   CASHIER VIEW (Kasa Ekranı)
+   ========================================= */
+function renderCashierView() {
+  if (currentView !== 'cashier') return;
+
+  // Show only DELIVERED but NOT PAID orders
+  const unpaidOrders = state.orders
+    .filter(o => o.delivered && !o.paid)
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  els.cashierGrid.innerHTML = "";
+
+  if (unpaidOrders.length === 0) {
+    els.cashierGrid.innerHTML = '<div class="col-12 text-center text-secondary py-5"><h3>Bekleyen Ödeme Yok</h3><p>Tüm hesaplar kapatıldı!</p></div>';
+    return;
+  }
+
+  unpaidOrders.forEach(order => {
+    const col = document.createElement("div");
+    col.className = "col-md-6 col-xl-4 col-xxl-3";
+
+    let itemsHtml = "";
+    order.items.forEach(item => {
+      if (item.name === "Servis Hizmeti") return;
+      itemsHtml += `<div class="kds-item"><span>${item.qty}x ${item.name}</span><span>${item.qty * item.price}$</span></div>`;
+    });
+
+    col.innerHTML = `
+      <div class="kds-card h-100">
+        <div class="kds-card-header bg-success">
+          <div>
+            <h5 class="mb-0 fw-bold">${order.name}</h5>
+            <small class="x-small text-white-50">${order.waiterName}</small>
+          </div>
+          <div class="fs-3 fw-bold">${order.total}$</div>
+        </div>
+        <div class="kds-card-body">${itemsHtml}</div>
+        <div class="kds-action">
+          <button class="btn btn-success w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="paid">
+            <i class="bi bi-cash-coin me-2"></i> ÖDENDİ
+          </button>
+        </div>
+      </div>
+    `;
+    els.cashierGrid.appendChild(col);
   });
 }
 
@@ -860,6 +940,46 @@ function syncStats() {
   }
 }
 
+function renderLeaderboard() {
+  if (!els.leaderboardList) return;
+
+  // Count orders per waiter
+  const counts = {};
+  state.orders.forEach(order => {
+    const key = order.waiterName.toLowerCase().trim();
+    if (!counts[key]) counts[key] = { name: order.waiterName, count: 0, total: 0 };
+    counts[key].count++;
+    counts[key].total += order.total || 0;
+  });
+
+  // Sort by count descending
+  const sorted = Object.values(counts).sort((a, b) => b.count - a.count);
+
+  els.leaderboardList.innerHTML = "";
+
+  if (sorted.length === 0) {
+    els.leaderboardList.innerHTML = '<li class="list-group-item text-center text-muted py-4">Henüz sipariş yok.</li>';
+    return;
+  }
+
+  sorted.forEach((waiter, index) => {
+    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `
+      <div class="d-flex align-items-center gap-2">
+        <span class="fs-5">${medal}</span>
+        <span class="fw-bold">${waiter.name}</span>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-primary rounded-pill">${waiter.count} sipariş</span>
+        <span class="badge bg-success rounded-pill ms-1">${waiter.total}$</span>
+      </div>
+    `;
+    els.leaderboardList.appendChild(li);
+  });
+}
+
 function updateDashboardStats() {
   syncStats();
 }
@@ -867,14 +987,29 @@ function updateDashboardStats() {
 function updateProfileDisplay() {
   if (state.activeWaiter) {
     els.waiterNameDisplay.textContent = state.activeWaiter;
-    const isMaster = MASTER_WAITERS.includes(state.activeWaiter.toLowerCase());
-    els.waiterRankDisplay.textContent = isMaster ? "Şef Garson" : "Garson";
+    const waiterLower = state.activeWaiter.toLowerCase().trim();
+    const isMaster = MASTER_WAITERS.includes(waiterLower);
+    const isCashier = CASHIERS.includes(waiterLower);
 
-    // Toggle KDS Button
+    // Set rank display
+    let rank = "Garson";
+    if (isMaster && isCashier) rank = "Şef Garson & Kasiyer";
+    else if (isMaster) rank = "Şef Garson";
+    else if (isCashier) rank = "Kasiyer";
+    els.waiterRankDisplay.textContent = rank;
+
+    // Toggle KDS Button (for Masters / Chefs)
     if (isMaster) {
-      els.btnToggleMode.classList.remove("d-none");
+      els.btnToggleKDS?.classList.remove("d-none");
     } else {
-      els.btnToggleMode.classList.add("d-none");
+      els.btnToggleKDS?.classList.add("d-none");
+    }
+
+    // Toggle Cashier Button (for Cashiers)
+    if (isCashier) {
+      els.btnToggleCashier?.classList.remove("d-none");
+    } else {
+      els.btnToggleCashier?.classList.add("d-none");
     }
   }
 }

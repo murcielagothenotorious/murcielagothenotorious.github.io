@@ -40,8 +40,13 @@
       <!-- Right: Actions & User -->
       <div class="d-flex align-items-center gap-2 gap-lg-3">
         <!-- KDS Toggle Button (only for masters) -->
-        <button id="btn-toggle-mode" class="btn btn-outline-light btn-sm d-none">
-          <i class="bi bi-display me-1"></i> <span id="mode-text">Mutfak</span>
+        <button id="btn-toggle-kds" class="btn btn-outline-light btn-sm d-none">
+          <i class="bi bi-display me-1"></i> <span class="d-none d-md-inline">Mutfak</span>
+        </button>
+
+        <!-- Cashier Toggle Button (only for cashiers) -->
+        <button id="btn-toggle-cashier" class="btn btn-outline-success btn-sm d-none">
+          <i class="bi bi-cash-stack me-1"></i> <span class="d-none d-md-inline">Kasa</span>
         </button>
 
         <!-- Açık Masalar -->
@@ -57,6 +62,11 @@
         <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#historyModal">
           <i class="bi bi-journal-check"></i>
           <span class="d-none d-md-inline ms-1">Geçmiş</span>
+        </button>
+
+        <!-- Leaderboard -->
+        <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
+          <i class="bi bi-trophy"></i>
         </button>
 
         <div class="vr bg-white opacity-25 d-none d-lg-block"></div>
@@ -164,6 +174,17 @@
         </div>
       </div>
 
+      <!-- VIEW: CASHIER (Kasa Ekranı) -->
+      <div id="cashier-view" class="d-none h-100 bg-dark text-white p-3 overflow-y-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+          <h2 class="h3 fw-bold mb-0"><i class="bi bi-cash-stack text-success me-2"></i>KASA EKRANI</h2>
+          <div class="fs-5 text-white-50">Teslim Edilen Ödenmemiş Siparişler</div>
+        </div>
+        <div id="cashier-grid" class="row g-3">
+          <!-- JS fills this -->
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -209,6 +230,21 @@
         </div>
         <div class="modal-body p-3 bg-light">
           <ul id="calcList" class="list-unstyled d-flex flex-column gap-2 mb-0"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div class="modal fade" id="leaderboardModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-info bg-opacity-25">
+          <h5 class="modal-title fw-bold text-info"><i class="bi bi-trophy me-2"></i>Leaderboard</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0">
+          <ul id="leaderboardList" class="list-group list-group-flush"></ul>
         </div>
       </div>
     </div>
