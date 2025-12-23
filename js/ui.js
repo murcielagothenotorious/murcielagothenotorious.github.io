@@ -5,44 +5,44 @@ import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, order
    ========================================= */
 const PRODUCTS = {
   Pizza: [
-    { name: "Margherita", price: 350, icon: "🍕" },
-    { name: "Pepperoni", price: 300, icon: "🍕" },
-    { name: "Spicy Arrabbiata", price: 200, icon: "🌶️" },
+    { name: "Margherita", price: 350, icon: "🍕", desc: "Taze mozzarella, San Marzano domates sosu, fesleğen" },
+    { name: "Pepperoni", price: 300, icon: "🍕", desc: "Baharatlı İtalyan pepperoni, mozzarella, domates sosu" },
+    { name: "Spicy Arrabbiata", price: 200, icon: "🌶️", desc: "Acı biber, sarımsak, domates, zeytinyağı" },
   ],
   "Spesiyal Makarna": [
-    { name: "Trufa al Maretti", price: 250, icon: "🍝" },
-    { name: "Mare", price: 290, icon: "🦐" },
-    { name: "Shrimp Fra Diavolo", price: 260, icon: "🍤" },
-    { name: "Penne San Remo", price: 200, icon: "🍜" },
+    { name: "Trufa al Maretti", price: 250, icon: "🍝", desc: "Siyah trüf mantarı, parmesan, krema sosu" },
+    { name: "Mare", price: 290, icon: "🦐", desc: "Karides, midye, kalamar, beyaz şarap sosu" },
+    { name: "Shrimp Fra Diavolo", price: 260, icon: "🍤", desc: "Jumbo karides, acı domates sosu, sarımsak" },
+    { name: "Penne San Remo", price: 200, icon: "🍜", desc: "Güneşte kurutulmuş domates, zeytinyağı, fesleğen" },
   ],
   "Ana Yemek": [
-    { name: "Rosso", price: 250, icon: "🥩" },
-    { name: "Dolce Agnello", price: 240, icon: "🍖" },
-    { name: "Mozzarella Caprese", price: 230, icon: "🧀" },
-    { name: "Fried Calamari", price: 220, icon: "🦑" },
+    { name: "Rosso", price: 250, icon: "🥩", desc: "Dana bonfile, kırmızı şarap sosu, biberiye" },
+    { name: "Dolce Agnello", price: 240, icon: "🍖", desc: "Kuzu pirzola, nane sosu, fırınlanmış patates" },
+    { name: "Mozzarella Caprese", price: 230, icon: "🧀", desc: "Buffalo mozzarella, domates, fesleğen, balzamik" },
+    { name: "Fried Calamari", price: 220, icon: "🦑", desc: "Çıtır kalamar, limonlu aioli, maydanoz" },
   ],
   Tatlılar: [
-    { name: "Tiramì", price: 250, icon: "🍰" },
-    { name: "Panna", price: 200, icon: "🍮" },
-    { name: "Cannolì", price: 300, icon: "🥐" },
+    { name: "Tiramì", price: 250, icon: "🍰", desc: "Mascarpone, espresso, kakao, savoiardi bisküvi" },
+    { name: "Panna", price: 200, icon: "🍮", desc: "İtalyan panna cotta, vanilya, orman meyveleri" },
+    { name: "Cannolì", price: 300, icon: "🥐", desc: "Çıtır hamur, ricotta kreması, fıstık" },
   ],
   İçecekler: [
-    { name: "Arancìa", price: 250, icon: "🍊" },
-    { name: "Sprìtz", price: 200, icon: "🍹" },
-    { name: "Fresco", price: 190, icon: "🥤" },
-    { name: "Grappa", price: 160, icon: "🍇" },
+    { name: "Arancìa", price: 250, icon: "🍊", desc: "Taze sıkılmış portakal suyu, buz" },
+    { name: "Sprìtz", price: 200, icon: "🍹", desc: "Aperol, prosecco, soda, portakal dilimi" },
+    { name: "Fresco", price: 190, icon: "🥤", desc: "Limonata, nane, buz, taze limon" },
+    { name: "Grappa", price: 160, icon: "🍇", desc: "İtalyan üzüm brendi, 40% alkol" },
   ],
   Salatalar: [
-    { name: "Capres", price: 180, icon: "🥗" },
-    { name: "Arugula", price: 200, icon: "🥬" },
-    { name: "Insalata di Mare", price: 150, icon: "🥒" },
-    { name: "Panzanella", price: 100, icon: "🍅" },
+    { name: "Capres", price: 180, icon: "🥗", desc: "Akdeniz salatası, kapari, zeytin, feta" },
+    { name: "Arugula", price: 200, icon: "🥬", desc: "Roka, parmesan, ceviz, balzamik sos" },
+    { name: "Insalata di Mare", price: 150, icon: "🥒", desc: "Deniz ürünleri, limon, zeytinyağı, maydanoz" },
+    { name: "Panzanella", price: 100, icon: "🍅", desc: "Toskana ekmeği, domates, soğan, fesleğen" },
   ],
   Noel: [
-    { name: "Hindi", price: 700, icon: "🦃" },
-    { name: "Sıcak Şarap", price: 300, icon: "🍷" },
-    { name: "Noel Kurabiyeleri", price: 300, icon: "🍪" },
-    { name: "Üzümlü Kek", price: 400, icon: "🍰" },
+    { name: "Hindi", price: 700, icon: "🦃", desc: "Fırınlanmış hindi, kestane dolması, cranberry sos" },
+    { name: "Sıcak Şarap", price: 300, icon: "🍷", desc: "Kırmızı şarap, tarçın, karanfil, portakal" },
+    { name: "Noel Kurabiyeleri", price: 300, icon: "🍪", desc: "Zencefilli kurabiye, krema süslemeli" },
+    { name: "Üzümlü Kek", price: 400, icon: "🍰", desc: "Geleneksel panettone, kuru üzüm, portakal kabuğu" },
   ],
 };
 
@@ -296,17 +296,9 @@ function setupEventListeners() {
   });
   updateTheme();
 
+
   // Global Click Event Delegation (Performance)
   document.addEventListener("click", (e) => {
-    // POS Style: Click product card to add
-    if (e.target.closest(".product-card")) {
-      const card = e.target.closest(".product-card");
-      // Don't trigger if clicked on qty controls
-      if (!e.target.closest(".qty-btn")) {
-        addToCart(card.dataset.name, parseFloat(card.dataset.price));
-        animateCard(card);
-      }
-    }
 
     // Quantity Controls in Product Card
     const qtyBtn = e.target.closest(".qty-btn");
@@ -316,6 +308,7 @@ function setupEventListeners() {
       const name = card.dataset.name;
       const price = parseFloat(card.dataset.price);
       const delta = qtyBtn.classList.contains("qty-plus") ? 1 : -1;
+      console.log("QTY Button clicked:", name, price, delta);
       updateCartItem(name, price, delta);
     }
 
@@ -358,11 +351,19 @@ function loadProducts() {
 
       col.innerHTML = `
          <div class="product-card h-100" data-name="${item.name}" data-price="${item.price}">
+            <button class="product-info-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="${item.desc || ''}">
+               <i class="bi bi-info-circle"></i>
+            </button>
             <div class="product-content">
                <span class="product-icon">${item.icon || '🍽️'}</span>
                <h4 class="product-name">${item.name}</h4>
                <span class="product-price">${item.price}$</span>
                <div class="badge-qty d-none">0</div>
+            </div>
+            <div class="product-controls">
+               <button class="qty-btn qty-minus"><i class="bi bi-dash"></i></button>
+               <span class="qty-display">0</span>
+               <button class="qty-btn qty-plus"><i class="bi bi-plus"></i></button>
             </div>
          </div>
       `;
@@ -370,6 +371,10 @@ function loadProducts() {
     });
     els.categories.appendChild(row);
   });
+
+  // Initialize Bootstrap tooltips
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
 }
 
 function addToCart(name, price) {
@@ -380,6 +385,18 @@ function addToCart(name, price) {
   renderCart();
   updateProductCardUI(name);
 }
+
+
+function setTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const timeString = `${hours}:${minutes}`;
+
+  els.kdsClock.textContent = timeString;
+}
+
+setInterval(setTime, 1000);
 
 function updateCartItem(name, price, delta) {
   // Not used directly from card anymore in POS mode, but good for logic
