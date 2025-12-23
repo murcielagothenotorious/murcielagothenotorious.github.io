@@ -19,10 +19,16 @@ export async function updateOrder(orderId, order) {
   return await update(child(ordersRef, orderId), order);
 }
 
-// Sipariş teslim edildi olarak işaretleme
+// Sipariş teslim edildi olarak işaretleme (Garson tarafından - hesap kapatma)
 export async function orderDelivered(orderId) {
   if (!orderId) return null;
   return await update(child(ordersRef, orderId), { delivered: true });
+}
+
+// Sipariş hazır olarak işaretleme (Mutfak tarafından - yemek hazır)
+export async function orderReady(orderId) {
+  if (!orderId) return null;
+  return await update(child(ordersRef, orderId), { ready: true });
 }
 
 // Sipariş silme

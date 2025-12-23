@@ -1,4 +1,4 @@
-import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, listenWaiterStats, setWaiterStats, listenMasters } from "./orders.js";
+import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, orderReady, listenWaiterStats, setWaiterStats, listenMasters } from "./orders.js";
 
 /* =========================================
    CONSTANTS & CONFIG
@@ -452,8 +452,13 @@ function handleOrderAction(id, action) {
     els.historyModal.hide();
     els.activeOrdersModal.hide();
   }
+  else if (action === "ready") {
+    // Kitchen marks as ready (NOT delivered)
+    orderReady(id);
+    showToast(`🍽️ "${order.name}" hazır! Garsonlar bilgilendirildi.`);
+  }
   else if (action === "deliver") {
-    // Close table action
+    // Waiter delivers and closes the table
     orderDelivered(id);
     showToast("Masa hesabı kapatıldı. Geçmişe taşındı.");
     updateWaiterStatsLocally(order.waiterName, -1);
@@ -504,25 +509,37 @@ function renderActiveOrders() {
       .join("");
 
     const minsElapsed = Math.floor((Date.now() - order.timestamp) / 60000);
+    const isReady = order.ready === true;
+
+    // Status badge
+    const statusBadge = isReady
+      ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Hazır</span>'
+      : '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Hazırlanıyor</span>';
 
     const li = document.createElement("li");
-    li.className = "list-group-item p-3";
+    li.className = `list-group-item p-3 ${isReady ? 'border-success border-2' : ''}`;
     li.innerHTML = `
       <div class="d-flex justify-content-between align-items-start mb-2">
          <div>
             <h5 class="fw-bold mb-0">${order.name}</h5>
             <small class="text-secondary">${order.waiterName} • ${minsElapsed} dk önce</small>
          </div>
-         <span class="badge bg-warning text-dark">${order.total}$</span>
+         <div class="d-flex flex-column align-items-end gap-1">
+            ${statusBadge}
+            <span class="badge bg-dark">${order.total}$</span>
+         </div>
       </div>
       <div class="mb-2">${itemsHtml}</div>
       <div class="d-flex gap-2 justify-content-end">
-         <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
-           <i class="bi bi-pencil-fill"></i> Düzelt
-         </button>
-         <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
-           <i class="bi bi-check-lg"></i> Kapat
-         </button>
+         ${!isReady ? `
+           <button class="btn btn-sm btn-outline-primary action-btn" data-id="${order.id}" data-action="edit">
+             <i class="bi bi-pencil-fill"></i> Düzelt
+           </button>
+         ` : `
+           <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
+             <i class="bi bi-bag-check-fill"></i> Teslim Et
+           </button>
+         `}
       </div>
     `;
     els.activeOrdersList.appendChild(li);
@@ -760,15 +777,19 @@ function stopKDSClock() {
 function renderKDS() {
   if (!isKDSMode) return;
 
-  const activeOrders = state.orders.filter(o => !o.delivered).sort((a, b) => a.timestamp - b.timestamp);
+  // Only show orders that are NOT ready yet (still being prepared)
+  const pendingOrders = state.orders
+    .filter(o => !o.delivered && !o.ready)
+    .sort((a, b) => a.timestamp - b.timestamp);
+
   els.kdsGrid.innerHTML = "";
 
-  if (activeOrders.length === 0) {
-    els.kdsGrid.innerHTML = '<div class="col-12 text-center text-secondary py-5"><h3>Aktif Sipariş Yok</h3><p>Şu an mutfak sakin.</p></div>';
+  if (pendingOrders.length === 0) {
+    els.kdsGrid.innerHTML = '<div class="col-12 text-center text-secondary py-5"><h3>Bekleyen Sipariş Yok</h3><p>Tüm siparişler hazır!</p></div>';
     return;
   }
 
-  activeOrders.forEach(order => {
+  pendingOrders.forEach(order => {
     const minsElapsed = Math.floor((Date.now() - order.timestamp) / 60000);
     let headerClass = "";
     if (minsElapsed > 20) headerClass = "late";
@@ -800,8 +821,8 @@ function renderKDS() {
                ${itemsHtml}
             </div>
             <div class="kds-action">
-               <button class="btn btn-success w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="deliver">
-                  <i class="bi bi-check-lg me-2"></i> HAZIR / TESLİM
+               <button class="btn btn-warning w-100 fw-bold py-2 action-btn" data-id="${order.id}" data-action="ready">
+                  <i class="bi bi-bell-fill me-2"></i> HAZIR
                </button>
             </div>
          </div>
