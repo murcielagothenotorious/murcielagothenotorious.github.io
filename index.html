@@ -22,60 +22,67 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
-<body class="bg-dark text-white">
+<body class="app-theme">
 
   <!-- App Container -->
-  <div class="app-layout d-flex flex-column h-100">
+  <div class="app-shell">
 
     <!-- 1. Header (Desktop & Mobile) -->
-    <header
-      class="app-header d-flex align-items-center justify-content-between px-3 py-2 border-bottom border-secondary bg-darker">
-      <div class="d-flex align-items-center gap-2">
-        <div class="brand-logo text-gold fs-4"><i class="bi bi-fire"></i></div>
+    <header class="topbar">
+      <div class="topbar-brand">
+        <div class="brand-mark"><i class="bi bi-fire"></i></div>
         <div>
-          <h1 class="h6 fw-bold mb-0 text-white tracking-wide">CASA CARMARETTI</h1>
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-gold text-dark x-small">POS v4.0</span>
-            <span id="kds-clock" class="text-white-50 x-small font-mono d-none d-lg-block">--:--</span>
+          <h1 class="brand-title">CASA CARMARETTI</h1>
+          <div class="brand-meta">
+            <span class="badge badge-gold">POS v4.0</span>
+            <span id="kds-clock" class="clock-tag d-none d-lg-inline-flex">--:--</span>
           </div>
         </div>
       </div>
 
+      <div class="topbar-actions d-none d-lg-flex">
+        <button id="btn-toggle-kds" class="action-pill d-none d-lg-inline-flex">
+          <i class="bi bi-display"></i>Mutfak
+        </button>
+        <button id="btn-toggle-cashier" class="action-pill alt d-none d-lg-inline-flex">
+          <i class="bi bi-cash-stack"></i>Kasa
+        </button>
+      </div>
+
       <!-- User Profile (Desktop Only - Mobile uses 'More' tab) -->
-      <div class="d-none d-lg-flex align-items-center gap-4">
-        <!-- Desktop Stats -->
-        <div class="d-flex align-items-center gap-3 border-end border-secondary pe-4">
-          <div class="text-end">
-            <span class="d-block x-small text-white-50">SİPARİŞ</span>
-            <strong id="waiterOrderCount" class="text-white">0</strong>
+      <div class="topbar-profile d-none d-lg-flex">
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-label">SİPARİŞ</span>
+            <strong id="waiterOrderCount">0</strong>
           </div>
-          <div class="text-end">
-            <span class="d-block x-small text-white-50">SERVİS</span>
-            <strong id="waiterServiceShare" class="text-success">0 $</strong>
+          <div class="stat">
+            <span class="stat-label">SERVİS</span>
+            <strong id="waiterServiceShare" class="stat-positive">0 $</strong>
           </div>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-          <div class="text-end">
-            <p class="mb-0 fw-bold small text-white" id="activeWaiterName">Giriş Yap</p>
-            <p class="mb-0 x-small text-gold" id="waiterRank">-</p>
+        <div class="profile-info">
+          <div class="profile-text">
+            <p class="profile-name" id="activeWaiterName">Giriş Yap</p>
+            <p class="profile-rank" id="waiterRank">-</p>
           </div>
-          <div class="avatar bg-gold text-dark"><i class="bi bi-person-fill"></i></div>
+          <div class="profile-avatar"><i class="bi bi-person-fill"></i></div>
         </div>
       </div>
     </header>
 
     <!-- 2. Main Content Area -->
-    <main class="flex-grow-1 overflow-hidden position-relative d-flex">
+    <main class="app-main">
 
       <!-- VIEW: POS (Menu & Ticket) -->
-      <div id="pos-view" class="d-flex w-100 h-100">
+      <div id="pos-view" class="pos-view">
 
         <!-- Left: Product Grid (Full width on mobile) -->
-        <div class="flex-grow-1 d-flex flex-column h-100 bg-dark">
+        <div class="pos-grid">
           <!-- Categories / Filter Bar -->
-          <div class="filter-bar d-flex gap-2 p-3 overflow-x-auto border-bottom border-dark-subtle">
-            <div class="search-wrapper flex-grow-1 flex-md-grow-0" style="min-width: 200px;">
+          <div class="filter-rail">
+            <div class="search-wrapper">
               <div class="input-group input-group-sm">
                 <span class="input-group-text bg-darker border-secondary text-secondary"><i
                     class="bi bi-search"></i></span>
@@ -83,26 +90,17 @@
                   placeholder="Ürün Ara...">
               </div>
             </div>
-            <!-- Toggle Views Buttons (Desktop) -->
-            <button id="btn-toggle-kds"
-              class="btn btn-outline-light btn-sm d-none d-lg-inline-flex align-items-center gap-2">
-              <i class="bi bi-display"></i> Mutfak
-            </button>
-            <button id="btn-toggle-cashier"
-              class="btn btn-outline-success btn-sm d-none d-lg-inline-flex align-items-center gap-2">
-              <i class="bi bi-cash-stack"></i> Kasa
-            </button>
+            <div class="filter-hint">Favoriler • Günlük Menü • Önerilen</div>
           </div>
 
           <!-- Products Scroll Area -->
-          <div id="categories" class="flex-grow-1 overflow-y-auto p-3 p-md-4">
+          <div id="categories" class="pos-categories">
             <!-- JS Injects Products Here -->
           </div>
         </div>
 
         <!-- Right: Ticket Sidebar (Desktop Only) -->
-        <aside class="ticket-sidebar d-none d-lg-flex flex-column bg-darker border-start border-secondary"
-          style="width: 350px;">
+        <aside class="ticket-sidebar d-none d-lg-flex">
           <!-- Content injected via common function or duplicated? 
                We will use the same container ID 'ticketItemsContainer' but we need to handle mobile offcanvas.
                Actually, let's use ONE container and move it based on screen size? 
@@ -112,40 +110,62 @@
                Strategy: The "Ticket" checks screen size. 
                For now, let's keep Desktop Sidebar separate structure for layout stability.
           -->
-          <div class="p-3 border-bottom border-secondary">
-            <input type="text" id="calcName"
-              class="form-control bg-dark text-white border-secondary text-center fw-bold"
+          <div class="ticket-header">
+            <div class="ticket-title">
+              <span class="ticket-label">Adisyon</span>
+              <span class="ticket-sub">Hızlı ödeme • Güncel</span>
+            </div>
+            <input type="text" id="calcName" class="form-control ticket-input"
               placeholder="MASA NO / MÜŞTERİ">
           </div>
 
-          <div id="desktop-ticket-items" class="flex-grow-1 overflow-y-auto p-3">
+          <div id="desktop-ticket-items" class="ticket-items">
             <ul id="liveCartList" class="list-unstyled mb-0"></ul>
           </div>
 
-          <div class="p-3 bg-dark border-top border-secondary">
-            <div class="d-flex justify-content-between mb-1 text-white-50 small"><span>Ara Toplam</span><span
-                id="subTotal">0 $</span></div>
-            <div class="d-flex justify-content-between mb-3 text-gold small"><span>Servis</span><span>+200 $</span>
+          <div class="ticket-footer">
+            <div class="ticket-row">
+              <span>Ara Toplam</span><span id="subTotal">0 $</span>
             </div>
-            <div class="d-flex justify-content-between mb-3 fs-4 fw-bold text-white"><span>TOPLAM</span><span
-                id="totalPrice">0 $</span></div>
+            <div class="ticket-row ticket-row-accent">
+              <span>Servis</span><span>+200 $</span>
+            </div>
+            <div class="ticket-total">
+              <span>TOPLAM</span><span id="totalPrice">0 $</span>
+            </div>
             <button id="saveButton" class="btn btn-gold w-100 fw-bold py-3 text-dark">SİPARİŞİ ONAYLA</button>
           </div>
         </aside>
       </div>
 
       <!-- VIEW: KDS -->
-      <div id="kds-view" class="d-none w-100 h-100 bg-black overflow-y-auto p-3">
-        <div class="container-fluid">
-          <h2 class="text-white fw-bold mb-4"><i class="bi bi-fire text-danger me-2"></i>MUTFAK EKRANI</h2>
+      <div id="kds-view" class="kds-view d-none">
+        <div class="view-shell">
+          <div class="view-header">
+            <div>
+              <span class="view-kicker">Mutfak</span>
+              <h2 class="view-title"><i class="bi bi-fire text-danger me-2"></i>MUTFAK EKRANI</h2>
+            </div>
+            <button class="btn btn-outline-light btn-sm" onclick="switchView('pos')">
+              <i class="bi bi-arrow-left"></i> POS'a Dön
+            </button>
+          </div>
           <div id="kds-grid" class="row g-3"></div>
         </div>
       </div>
 
       <!-- VIEW: CASHIER -->
-      <div id="cashier-view" class="d-none w-100 h-100 bg-black overflow-y-auto p-3">
-        <div class="container-fluid">
-          <h2 class="text-white fw-bold mb-4"><i class="bi bi-cash-stack text-success me-2"></i>KASA EKRANI</h2>
+      <div id="cashier-view" class="cashier-view d-none">
+        <div class="view-shell">
+          <div class="view-header">
+            <div>
+              <span class="view-kicker">Kasa</span>
+              <h2 class="view-title"><i class="bi bi-cash-stack text-success me-2"></i>KASA EKRANI</h2>
+            </div>
+            <button class="btn btn-outline-light btn-sm" onclick="switchView('pos')">
+              <i class="bi bi-arrow-left"></i> POS'a Dön
+            </button>
+          </div>
           <div id="cashier-grid" class="row g-3"></div>
         </div>
       </div>
@@ -153,14 +173,13 @@
     </main>
 
     <!-- 3. Bottom Navigation (Mobile Only) -->
-    <nav class="mobile-nav d-lg-none bg-darker border-top border-secondary d-flex justify-content-around py-2">
-      <button class="nav-item btn btn-link text-white-50 d-flex flex-column align-items-center active"
-        onclick="switchView('pos')">
+    <nav class="mobile-nav d-lg-none">
+      <button class="nav-item btn btn-link d-flex flex-column align-items-center active" onclick="switchView('pos')">
         <i class="bi bi-grid-fill fs-5"></i>
         <span class="x-small">Menü</span>
       </button>
 
-      <button class="nav-item btn btn-link text-white-50 d-flex flex-column align-items-center position-relative"
+      <button class="nav-item btn btn-link d-flex flex-column align-items-center position-relative"
         data-bs-toggle="offcanvas" data-bs-target="#ticketOffcanvas">
         <i class="bi bi-receipt fs-5"></i>
         <span class="x-small">Adisyon</span>
@@ -168,13 +187,13 @@
           class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-gold text-dark d-none">0</span>
       </button>
 
-      <button class="nav-item btn btn-link text-white-50 d-flex flex-column align-items-center" data-bs-toggle="modal"
+      <button class="nav-item btn btn-link d-flex flex-column align-items-center" data-bs-toggle="modal"
         data-bs-target="#activeOrdersModal">
         <i class="bi bi-clock-history fs-5"></i>
         <span class="x-small">Açık</span>
       </button>
 
-      <button class="nav-item btn btn-link text-white-50 d-flex flex-column align-items-center"
+      <button class="nav-item btn btn-link d-flex flex-column align-items-center"
         data-bs-toggle="offcanvas" data-bs-target="#moreMenuOffcanvas">
         <i class="bi bi-three-dots fs-5"></i>
         <span class="x-small">Diğer</span>
