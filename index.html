@@ -3,163 +3,274 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Casa Carmaretti</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Casa Carmaretti | Sipariş Sistemi</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Framework -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
-<body class="bg-body text-body">
-  <header class="bg-gradient position-relative overflow-hidden text-white">
-    <div class="gradient-overlay"></div>
-    <div class="container-xxl py-5 position-relative">
-      <div class="row g-4 align-items-center">
-        <div class="col-12 col-lg-9 d-flex flex-column gap-2">
-          <p class="hero-eyebrow mb-0 text-black">Casa Carmaretti</p>
-          <h1 class="fw-bold display-5 mb-2 text-black">Carmaretti Sipariş Arayüzü</h1>
-          <p class="text-light lead mb-0 text-black">Buon lavoro e buon servizio.</p>
-        </div>
-      </div>
-    </div>
-  </header>
+<body>
+  <!-- Background Elements -->
+  <div class="app-bg">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+  </div>
 
-  <main class="container-xxl py-5">
-    <div class="row g-4 g-xl-5 align-items-start">
-      <div class="col-12 col-lg-7 col-xxl-8">
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-xl-6">
-            <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
-              <div class="card-body p-4 d-flex flex-column gap-3">
-                <div class="d-flex justify-content-between align-items-start gap-3">
-                  <div>
-                    <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson</p>
-                    <h2 class="h5 mb-1">Garson bilgisi</h2>
-                    <p class="text-secondary mb-0">Adın siparişlere otomatik eklenir.</p>
-                  </div>
-                </div>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                  <div class="pill soft-pill">
-                    <span class="text-secondary">Aktif garson</span>
-                    <strong id="activeWaiterName">-</strong>
-                  </div>
-                  <div class="pill soft-pill">
-                    <span class="text-secondary">Toplam sipariş</span>
-                    <strong id="waiterOrderCount">0</strong>
-                  </div>
-                  <div class="pill soft-pill">
-                    <span class="text-secondary">Servis payı (20%)</span>
-                    <strong id="waiterServiceShare">0 $</strong>
-                  </div>
-                  <div class="pill soft-pill">
-                    <span class="text-secondary">Yetki Düzeyi</span>
-                    <strong id="waiterRank">Normal</strong>
-                  </div>
-                </div>
-              </div>
-            </section>
+  <!-- Main Application Wrapper -->
+  <div class="app-wrapper">
+
+    <!-- Top Navigation -->
+    <nav class="app-nav glass-panel">
+      <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between h-100">
+          <div class="brand d-flex align-items-center gap-3">
+            <div class="brand-logo">
+              <i class="bi bi-fire text-danger"></i>
+            </div>
+            <div>
+              <h1 class="h5 fw-bold mb-0">Casa Carmaretti</h1>
+              <p class="small text-secondary mb-0">Order System v2.0</p>
+            </div>
           </div>
-          <div class="col-12 col-xl-6">
-            <section class="card shadow-sm border-0 rounded-4 h-100 highlight-card">
-              <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                  <div>
-                    <p class="text-uppercase fw-semibold text-secondary small mb-1">Liderlik</p>
-                    <h2 class="h5 mb-0">Garson sıralaması</h2>
-                  </div>
-                  <span class="badge bg-info-subtle text-info-emphasis rounded-pill">Canlı</span>
-                </div>
-                <ul id="leaderboardList" class="leaderboard list-unstyled mb-0"></ul>
+
+          <div class="user-profile" id="userProfileBtn" role="button">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-end d-none d-md-block">
+                <p class="mb-0 fw-semibold small" id="activeWaiterName">Giriş Yapılmadı</p>
+                <p class="mb-0 text-secondary x-small" id="waiterRank">Garson</p>
               </div>
-            </section>
+              <div class="avatar">
+                <i class="bi bi-person-fill"></i>
+              </div>
+            </div>
           </div>
         </div>
-        <section class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
-          <div class="card-body p-4 p-md-5">
-            <div
-              class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
-              <div>
-                <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş oluştur</p>
-                <h2 class="h3 mb-2">Ürünleri seç, servisi ekle ve kaydet</h2>
-                <p class="text-secondary mb-0">Miktarları ayarla, siparişini oluştur, her şey hazır olsun.</p>
-              </div>
-              <div class="service-chip px-4 py-3 rounded-4 shadow-sm d-flex align-items-center gap-2">
-                <span class="fw-semibold">Servis ücreti</span>
-                <span class="badge bg-primary-subtle text-primary-emphasis fs-6">200 $</span>
-              </div>
-            </div>
-            <div id="categories" class="categories"></div>
-          </div>
-        </section>
       </div>
+    </nav>
 
-      <div class="col-12 col-lg-5 col-xxl-4">
-        <aside class="card shadow-lg border-0 rounded-4 sticky-top" style="top: 100px">
-          <div class="card-body p-4 p-md-5 d-flex flex-column gap-3">
-            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-              <div>
-                <p class="text-uppercase fw-semibold text-secondary small mb-1">Sipariş Özeti</p>
-                <h3 class="h4 mb-0 d-flex align-items-center gap-2">
-                  Canlı Sipariş Listesi
-                  <span class="live-dot"></span>
-                </h3>
-              </div>
-              <div class="total-chip text-end">
-                <small class="text-secondary d-block">Toplam</small>
-                <span id="totalPrice" class="fw-bold display-6">0</span>
-                <span class="text-secondary">$</span>
-              </div>
-            </div>
+    <!-- Main Content Area -->
+    <main class="app-content container-fluid px-0 px-md-4 pb-5 pb-lg-0">
+      <div class="row g-0 g-md-4 h-100">
 
-            <div class="mb-2">
-              <label for="calcName" class="form-label fw-semibold">Sipariş adı</label>
-              <input id="calcName" type="text" class="form-control form-control-lg"
-                placeholder="Örn: Masa 4 veya IC isimler" autocomplete="off" />
-            </div>
-            <button id="saveButton" class="btn btn-primary btn-lg w-100" type="button">
-              Siparişi Kaydet
-            </button>
+        <!-- Product Section (Left/Center) -->
+        <div class="col-12 col-lg-8 col-xl-9 h-100 overflow-y-auto no-scrollbar py-3 py-md-4">
 
-            <div class="border-top pt-3">
-              <div class="d-flex align-items-start justify-content-between mb-2 flex-wrap gap-2">
+          <!-- Dashboard Stats -->
+          <div class="row g-3 mb-4 px-3 px-md-0">
+            <div class="col-6 col-md-3">
+              <div class="stat-card glass-panel">
+                <div class="icon-box bg-primary-subtle text-primary">
+                  <i class="bi bi-receipt"></i>
+                </div>
                 <div>
-                  <h4 class="h6 mb-1">Kayıtlı Siparişler</h4>
-                  <p class="text-secondary small mb-0">Kaydedilen siparişler anında burada listelenir.</p>
+                  <p class="label mb-1">Toplam Sipariş</p>
+                  <h3 class="value mb-0" id="waiterOrderCount">0</h3>
                 </div>
               </div>
-              <ul id="calcList" class="calc-list list-unstyled d-flex flex-column gap-3 mb-0"></ul>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-card glass-panel">
+                <div class="icon-box bg-success-subtle text-success">
+                  <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                  <p class="label mb-1">Servis Payı</p>
+                  <h3 class="value mb-0" id="waiterServiceShare">0 $</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="stat-card glass-panel d-flex align-items-center justify-content-between">
+                <div>
+                  <p class="label mb-1">Liderlik Tablosu</p>
+                  <h3 class="value h6 mb-0 text-secondary">En iyi performanslar</h3>
+                </div>
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal"
+                  data-bs-target="#leaderboardModal">
+                  Görüntüle <i class="bi bi-trophy-fill ms-1"></i>
+                </button>
+              </div>
             </div>
           </div>
-        </aside>
+
+          <!-- Header for Products -->
+          <div class="d-flex align-items-center justify-content-between mb-4 px-3 px-md-0">
+            <h2 class="section-title">Menü & Ürünler</h2>
+            <div class="search-bar glass-panel d-none d-md-flex">
+              <i class="bi bi-search text-secondary"></i>
+              <input type="text" id="productSearch" placeholder="Ürün ara..." autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Categories & Products Container -->
+          <div id="categories" class="categories-container pb-5 px-3 px-md-0"></div>
+        </div>
+
+        <!-- Sidebar / Cart Section (Right) -->
+        <div class="col-12 col-lg-4 col-xl-3 sidebar-col">
+          <aside class="cart-sidebar glass-panel">
+            <div class="cart-header border-bottom p-4">
+              <h3 class="h5 fw-bold mb-0">Aktif Sipariş</h3>
+              <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                <span id="cartItemCount">0</span> Ürün
+              </span>
+            </div>
+
+            <div class="cart-body flex-grow-1 overflow-y-auto custom-scrollbar p-3" id="cartItemsContainer">
+              <div class="empty-cart-state text-center py-5">
+                <div class="mb-3 text-secondary opacity-50">
+                  <i class="bi bi-basket3 display-4"></i>
+                </div>
+                <p class="text-secondary fw-medium">Sepetiniz boş</p>
+                <small class="text-muted d-block px-4">Menüden ürün ekleyerek siparişi oluşturmaya başlayın.</small>
+              </div>
+              <!-- Dynamic Cart Items will be here -->
+              <ul id="liveCartList" class="list-unstyled d-none"></ul>
+            </div>
+
+            <div class="cart-footer border-top p-4 bg-white bg-opacity-50">
+              <div class="mb-3">
+                <label for="calcName" class="form-label small fw-bold text-uppercase text-secondary">Masa / Kişi
+                  Adı</label>
+                <input type="text" id="calcName" class="form-control form-control-lg bg-light border-0"
+                  placeholder="Örn: Masa 5">
+              </div>
+
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-secondary">Ara Toplam</span>
+                <span class="fw-bold" id="subTotal">0 $</span>
+              </div>
+              <div class="d-flex justify-content-between mb-4">
+                <span class="text-secondary">Servis Ücreti</span>
+                <span class="fw-bold text-success">+200 $</span>
+              </div>
+
+              <div
+                class="total-display p-3 rounded-3 bg-primary text-white d-flex justify-content-between align-items-center mb-3">
+                <span class="small opacity-75">TOPLAM TUTAR</span>
+                <span class="h4 mb-0 fw-bold" id="totalPrice">0 $</span>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button id="saveButton" class="btn btn-dark btn-lg fw-bold py-3 shadow-sm rounded-3">
+                  Siparişi Oluştur <i class="bi bi-arrow-right-short fs-4 align-middle"></i>
+                </button>
+                <button class="btn btn-link text-secondary text-decoration-none btn-sm" type="button"
+                  data-bs-toggle="modal" data-bs-target="#historyModal">
+                  <i class="bi bi-clock-history me-1"></i> Geçmiş Siparişler
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- Mobile Cart Toggle -->
+    <div class="mobile-cart-toggle d-lg-none glass-panel">
+      <div class="d-flex align-items-center justify-content-between w-100 px-4 py-3" data-bs-toggle="offcanvas"
+        data-bs-target="#mobileCartOffcanvas">
+        <div class="d-flex align-items-center gap-3">
+          <div class="cart-icon-wrapper position-relative">
+            <i class="bi bi-basket2-fill fs-4 text-primary"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
+              id="mobileCartCount">
+              0
+            </span>
+          </div>
+          <div>
+            <small class="text-secondary d-block">Toplam</small>
+            <strong class="text-dark" id="mobileCartTotal">0 $</strong>
+          </div>
+        </div>
+        <button class="btn btn-primary rounded-circle btn-icon shadow-sm">
+          <i class="bi bi-chevron-up"></i>
+        </button>
       </div>
     </div>
-  </main>
 
-  <canvas id="receiptCanvas" hidden></canvas>
-  <div class="modal fade" id="waiterModal" tabindex="-1" aria-labelledby="waiterModalLabel" aria-hidden="true">
+  </div>
+
+  <!-- Modals -->
+
+  <!-- User Profile Modal -->
+  <div class="modal fade" id="waiterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4">
-        <div class="modal-header border-0 pb-0">
-          <div>
-            <p class="text-uppercase fw-semibold text-secondary small mb-1">Garson adı</p>
-            <h2 class="h5 mb-0" id="waiterModalLabel">IC adınızı buraya girin.</h2>
+      <div class="modal-content glass-modal border-0">
+        <div class="modal-body p-5 text-center">
+          <div class="mb-4">
+            <div class="avatar xl mx-auto mb-3 bg-gradient-primary text-white">
+              <i class="bi bi-person-badge display-5"></i>
+            </div>
+            <h3 class="fw-bold">Kimlik Doğrulama</h3>
+            <p class="text-secondary">Sisteme giriş yapmak için lütfen adınızı girin.</p>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body pt-3">
-          <div class="input-group input-group-lg">
-            <span class="input-group-text bg-light">👤</span>
-            <input id="waiterModalInput" type="text" class="form-control" placeholder="Örn: Matteo Lamberti"
-              autocomplete="name" />
+          <div class="form-floating mb-4">
+            <input type="text" class="form-control" id="waiterModalInput" placeholder="Adınız">
+            <label for="waiterModalInput">Ad Soyad (IC)</label>
           </div>
-        </div>
-        <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Vazgeç</button>
-          <button type="button" class="btn btn-primary" id="waiterModalSave">Kaydet</button>
+          <button type="button" class="btn btn-primary btn-lg w-100 rounded-3 shadow-sm" id="waiterModalSave">
+            Giriş Yap
+          </button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Leaderboard Modal -->
+  <div class="modal fade" id="leaderboardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content glass-modal border-0">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-trophy text-warning me-2"></i>Liderlik Tablosu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <ul id="leaderboardList" class="list-group list-group-flush bg-transparent"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content glass-modal border-0">
+        <div class="modal-header border-0 pb-0">
+          <div>
+            <h5 class="modal-title fw-bold">Sipariş Geçmişi</h5>
+            <p class="text-secondary small mb-0">Son işlemlerinizi buradan takip edebilirsiniz.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-4">
+          <ul id="calcList" class="list-unstyled d-flex flex-column gap-3 mb-0"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Canvas for Receipt -->
+  <canvas id="receiptCanvas" hidden></canvas>
+
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
