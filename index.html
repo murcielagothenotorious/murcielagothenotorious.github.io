@@ -232,21 +232,21 @@
   </div>
 
   <!-- OFFCANVAS: Mobile Ticket -->
-  <div class="offcanvas offcanvas-bottom h-75 bg-dark text-white" tabindex="-1" id="ticketOffcanvas">
-    <div class="offcanvas-header border-bottom border-secondary">
+  <div class="offcanvas offcanvas-bottom h-75 surface-elevated text-main" tabindex="-1" id="ticketOffcanvas">
+    <div class="offcanvas-header border-theme">
       <h5 class="offcanvas-title fw-bold">Adisyon</h5>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body p-0 d-flex flex-column" id="mobileTicketBody">
       <!-- Content mirrored from desktop via JS -->
       <div class="p-3">
-        <input type="text" id="mobileCalcName" class="form-control bg-darker text-white border-secondary text-center"
+        <input type="text" id="mobileCalcName" class="form-control surface-ground text-main border-theme text-center"
           placeholder="Masa / Müşteri">
       </div>
       <div id="mobile-ticket-items" class="flex-grow-1 overflow-y-auto p-3">
         <!-- Clone of cart items -->
       </div>
-      <div class="p-3 bg-darker mt-auto">
+      <div class="p-3 surface-ground mt-auto">
         <div class="d-flex justify-content-between fs-4 fw-bold mb-3"><span>Toplam</span><span id="mobileTotalPrice">0
             $</span></div>
         <button id="mobileSaveButton" class="btn btn-gold w-100 fw-bold py-3">MUTFAĞA İLET <i
@@ -256,49 +256,49 @@
   </div>
 
   <!-- OFFCANVAS: More Menu -->
-  <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="moreMenuOffcanvas">
-    <div class="offcanvas-header border-bottom border-secondary">
+  <div class="offcanvas offcanvas-end surface-elevated text-main" tabindex="-1" id="moreMenuOffcanvas">
+    <div class="offcanvas-header border-theme">
       <h5 class="offcanvas-title">Menü</h5>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body p-0">
       <div class="list-group list-group-flush">
-        <button class="list-group-item list-group-item-action bg-dark text-white border-secondary p-3"
+        <button class="list-group-item list-group-item-action surface-panel text-main border-theme p-3"
           data-bs-toggle="modal" data-bs-target="#historyModal">
           <i class="bi bi-journal-check me-2"></i> Geçmiş İşlemler
         </button>
-        <button class="list-group-item list-group-item-action bg-dark text-white border-secondary p-3"
+        <button class="list-group-item list-group-item-action surface-panel text-main border-theme p-3"
           data-bs-toggle="modal" data-bs-target="#leaderboardModal">
           <i class="bi bi-trophy me-2"></i> Leaderboard
         </button>
         <!-- Dynamic Roles -->
         <button id="mobile-btn-kds"
-          class="list-group-item list-group-item-action bg-dark text-white border-secondary p-3 d-none"
+          class="list-group-item list-group-item-action surface-panel text-main border-theme p-3 d-none"
           onclick="switchView('kds'); bootstrap.Offcanvas.getInstance('#moreMenuOffcanvas').hide()">
           <i class="bi bi-display me-2"></i> Mutfak Ekranı
         </button>
         <button id="mobile-btn-cashier"
-          class="list-group-item list-group-item-action bg-dark text-white border-secondary p-3 d-none"
+          class="list-group-item list-group-item-action surface-panel text-main border-theme p-3 d-none"
           onclick="switchView('cashier'); bootstrap.Offcanvas.getInstance('#moreMenuOffcanvas').hide()">
           <i class="bi bi-cash-stack me-2"></i> Kasa Ekranı
         </button>
 
         <div class="p-3 mt-4">
-          <div class="bg-surface rounded p-3 border border-secondary">
+          <div class="surface-ground rounded p-3 border-theme">
             <div class="text-center mb-3">
-              <p class="text-muted small mb-1">Giriş Yapan</p>
+              <p class="text-sub small mb-1">Giriş Yapan</p>
               <h6 class="fw-bold text-gold mb-0" id="mobileActiveWaiter">-</h6>
             </div>
             <div class="row g-2">
               <div class="col-6">
-                <div class="bg-darker p-2 rounded text-center">
-                  <span class="d-block x-small text-white-50">SİPARİŞ</span>
-                  <strong id="mobileWaiterOrderCount" class="text-white">0</strong>
+                <div class="surface-panel p-2 rounded text-center">
+                  <span class="d-block x-small text-sub">SİPARİŞ</span>
+                  <strong id="mobileWaiterOrderCount" class="text-main">0</strong>
                 </div>
               </div>
               <div class="col-6">
-                <div class="bg-darker p-2 rounded text-center">
-                  <span class="d-block x-small text-white-50">SERVİS</span>
+                <div class="surface-panel p-2 rounded text-center">
+                  <span class="d-block x-small text-sub">SERVİS</span>
                   <strong id="mobileWaiterServiceShare" class="text-success">0 $</strong>
                 </div>
               </div>
@@ -314,9 +314,9 @@
   <!-- Active Orders -->
   <div class="modal fade" id="activeOrdersModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content bg-dark text-white border-secondary shadow-lg">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold">Açık Masalar</h5>
+      <div class="modal-content surface-elevated border-theme shadow-lg">
+        <div class="modal-header border-theme">
+          <h5 class="modal-title fw-bold text-main">Açık Masalar</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
@@ -329,9 +329,9 @@
   <!-- History -->
   <div class="modal fade" id="historyModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content bg-dark text-white border-secondary shadow-lg">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold">Geçmiş</h5>
+      <div class="modal-content surface-elevated border-theme shadow-lg">
+        <div class="modal-header border-theme">
+          <h5 class="modal-title fw-bold text-main">Geçmiş</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
@@ -344,9 +344,9 @@
   <!-- Leaderboard -->
   <div class="modal fade" id="leaderboardModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content bg-dark text-white border-secondary shadow-lg">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold">Leaderboard</h5>
+      <div class="modal-content surface-elevated border-theme shadow-lg">
+        <div class="modal-header border-theme">
+          <h5 class="modal-title fw-bold text-main">Leaderboard</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
@@ -359,10 +359,10 @@
   <!-- Login Modal -->
   <div class="modal fade" id="waiterModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content bg-dark text-white border-secondary shadow-lg">
+      <div class="modal-content surface-elevated border-theme shadow-lg">
         <div class="modal-body p-4 text-center">
           <div class="mb-4"><i class="bi bi-person-circle display-1" style="color: var(--accent);"></i></div>
-          <h5 class="fw-bold mb-3">Garson Girişi</h5>
+          <h5 class="fw-bold mb-3 text-main">Garson Girişi</h5>
           <input type="text" class="form-control form-control-lg text-center mb-3" id="waiterModalInput"
             placeholder="Garson Adınız">
           <button type="button" class="btn btn-gold w-100 py-2 fw-bold" id="waiterModalSave">GİRİŞ YAP</button>

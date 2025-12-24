@@ -58,7 +58,7 @@ let CASHIERS = [];
 
 // Audio for new orders
 const bellAudio = new Audio('./artifacts/bell.wav');
-bellAudio.volume = 0.7;
+bellAudio.volume = 0.5;
 
 // Sound and Theme settings
 let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
@@ -387,16 +387,16 @@ function addToCart(name, price) {
 }
 
 
-function setTime() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const timeString = `${hours}:${minutes}`;
+// function setTime() {
+//   const now = new Date();
+//   const hours = String(now.getHours()).padStart(2, '0');
+//   const minutes = String(now.getMinutes()).padStart(2, '0');
+//   const timeString = `${hours}:${minutes}`;
 
-  els.kdsClock.textContent = timeString;
-}
+//   els.kdsClock.textContent = timeString;
+// }
 
-setInterval(setTime, 1000);
+// setInterval(setTime, 1000);
 
 function updateCartItem(name, price, delta) {
   // Not used directly from card anymore in POS mode, but good for logic
@@ -828,7 +828,7 @@ function handleOrderAction(id, action) {
   else if (action === "deliver") {
     // Waiter marks as delivered (goes to cashier, NOT closed yet)
     orderDelivered(id);
-    showToast(`✅ "${order.name}" teslim edildi. Kasa'ya düştü.`);
+    showToast(`✅ "${order.name}" teslim edildi. Kasaya düştü.`);
   }
   else if (action === "paid") {
     // Cashier marks as paid (now it's truly closed)
@@ -930,29 +930,29 @@ function renderClosedHistory() {
   els.historyList.innerHTML = "";
 
   if (closed.length === 0) {
-    els.historyList.innerHTML = '<li class="text-center text-muted py-3">Henüz kapanan işlem yok.</li>';
+    els.historyList.innerHTML = '<li class="list-group-item text-center text-muted py-4">Henüz kapanan işlem yok.</li>';
     return;
   }
 
   closed.forEach(order => {
     const li = document.createElement("li");
-    li.className = "history-item bg-white border p-3 rounded";
+    li.className = "history-item";
 
     li.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-          <h6 class="mb-0 fw-bold text-dark">${order.name}</h6>
-          <small class="text-muted">${order.date} • ${order.waiterName}</small>
+          <h6 class="mb-0 fw-bold">${order.name}</h6>
+          <small>${order.date} • ${order.waiterName}</small>
         </div>
         <span class="badge bg-success">Ödendi</span>
       </div>
       <div class="d-flex justify-content-between align-items-center">
          <span class="fw-bold">${order.total} $</span>
          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-dark action-btn" data-id="${order.id}" data-action="download">
+            <button class="btn btn-sm action-btn" data-id="${order.id}" data-action="download">
                <i class="bi bi-receipt"></i>
             </button>
-            <button class="btn btn-sm btn-outline-danger action-btn" data-id="${order.id}" data-action="delete">
+            <button class="btn btn-sm action-btn" data-id="${order.id}" data-action="delete">
                <i class="bi bi-trash"></i>
             </button>
          </div>
@@ -1177,11 +1177,19 @@ function switchView(view) {
 let kdsClockInterval;
 function startKDSClock() {
   if (kdsClockInterval) clearInterval(kdsClockInterval);
-  kdsClockInterval = setInterval(() => {
+
+  // Her güncelleme için kullanılacak fonksiyon
+  function updateKDSDisplay() {
     const now = new Date();
     els.kdsClock.textContent = now.toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
-    renderKDS();
-  }, 60000);
+    renderKDS(); // dk göstergelerini de güncelle
+  }
+
+  // İlk çağrıda hemen güncelle
+  updateKDSDisplay();
+
+  // Her 30 saniyede bir güncelle (saat ve dk senkron kalır)
+  kdsClockInterval = setInterval(updateKDSDisplay, 30000);
 }
 
 function stopKDSClock() {

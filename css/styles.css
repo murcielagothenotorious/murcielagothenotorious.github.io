@@ -77,6 +77,64 @@ body.light-mode .product-card {
   background: var(--bg-elevated);
 }
 
+/* Light Mode - Modals Override */
+body.light-mode .modal-content.bg-dark {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+body.light-mode .modal-header.border-secondary {
+  border-color: var(--border-subtle) !important;
+}
+
+body.light-mode .modal-content .btn-close-white {
+  filter: invert(1);
+}
+
+body.light-mode .modal-content .text-white {
+  color: var(--text-primary) !important;
+}
+
+/* Light Mode - Offcanvas Override */
+body.light-mode .offcanvas.bg-dark {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .offcanvas .btn-close-white {
+  filter: invert(1);
+}
+
+body.light-mode .offcanvas .text-white,
+body.light-mode .offcanvas .text-white-50 {
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .offcanvas .bg-darker {
+  background: var(--bg-surface) !important;
+}
+
+body.light-mode .offcanvas .border-secondary {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Light Mode - List Group Items in Modals */
+body.light-mode .list-group-item.bg-dark {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+body.light-mode .list-group-item.text-white {
+  color: var(--text-primary) !important;
+}
+
+/* Light Mode - Mobile Navigation */
+body.light-mode .mobile-nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.95) 100%);
+}
+
 /* Action Divider */
 .action-divider {
   width: 1px;
@@ -785,12 +843,157 @@ body {
   border-color: var(--border-subtle);
 }
 
+/* === HISTORY ITEM (Theme Compatible) === */
+.history-item {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+}
+
+.history-item h6 {
+  color: var(--text-primary);
+}
+
+.history-item small {
+  color: var(--text-secondary);
+}
+
+.history-item .fw-bold {
+  color: var(--text-primary);
+}
+
+/* Theme-aware action buttons */
+.history-item .action-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.history-item .action-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.history-item .action-btn[data-action="delete"]:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
 .offcanvas {
   background: var(--bg-elevated);
 }
 
 .offcanvas-header {
   border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Light Mode Override Updates */
+body.light-mode .text-white,
+body.light-mode .text-white-50,
+body.light-mode .text-light,
+body.light-mode .text-muted {
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .text-white-50 {
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .bg-dark,
+body.light-mode .bg-black {
+  background-color: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .bg-darker {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .border-secondary {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Modal Content & Offcanvas Specifics */
+body.light-mode .modal-content,
+body.light-mode .offcanvas {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(0.1);
+}
+
+/* === SEMANTIC THEME CLASSES === */
+/* These classes automatically adapt to the current theme */
+.surface-elevated {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+.surface-panel {
+  background-color: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+.surface-ground {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.text-main {
+  color: var(--text-primary) !important;
+}
+
+.text-sub {
+  color: var(--text-secondary) !important;
+}
+
+.border-theme {
+  border-color: var(--border-subtle) !important;
+}
+
+.border-theme-strong {
+  border-color: var(--border-strong) !important;
+}
+
+/* === MODAL SCROLL FIX === */
+/* Proper scrollable modal setup */
+.modal-dialog-scrollable .modal-body {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  /* Add padding at bottom so last item isn't hidden behind mobile nav */
+  padding-bottom: 80px !important;
+}
+
+/* Ensure list container takes full height */
+.modal-body .list-group,
+#calcList,
+#activeOrdersList,
+#leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+/* Mobile specific fixes */
+@media (max-width: 768px) {
+  .modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 150px);
+    padding-bottom: 100px !important;
+    /* Extra space for mobile nav bar */
+  }
 }
 
 /* === BTN-GOLD EXPLICIT STYLING === */
