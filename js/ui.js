@@ -555,10 +555,16 @@ async function handleSaveOrder() {
       await updateOrder(state.editingOrderId, orderData);
       showToast("Sipariş güncellendi!");
     } else {
+      console.log('🔵 Calling addOrder...');
       const result = await addOrder(orderData);
+      console.log('🔵 addOrder result:', result);
+      console.log('🔵 result?.key:', result?.key);
       if (result?.key) {
+        console.log('🔵 Calling generateAndUploadReceipt...');
         // Generate and upload receipt to Firebase Storage
         generateAndUploadReceipt(result.key, orderData);
+      } else {
+        console.warn('⚠️ No result.key - skipping receipt generation');
       }
       flushText();
       showToast("Sipariş mutfağa iletildi!");
@@ -577,6 +583,7 @@ async function handleSaveOrder() {
 
 // Generate receipt PNG and upload to Cloudinary
 async function generateAndUploadReceipt(orderId, orderData) {
+  console.log('📄 Starting receipt generation for order:', orderId);
   try {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -773,15 +780,21 @@ async function generateAndUploadReceipt(orderId, orderData) {
     ctx.fillText('Bizi tercih ettiğiniz için teşekkür ederiz!', width / 2, y);
 
     // Convert to blob and upload
+    console.log('📄 Canvas ready, converting to blob...');
     return new Promise((resolve) => {
       canvas.toBlob(async (blob) => {
+        console.log('📄 Blob created:', blob ? `${blob.size} bytes` : 'null');
         if (blob) {
+          console.log('📄 Calling uploadReceipt...');
           const url = await uploadReceipt(orderId, blob);
           if (url) {
-            console.log('Receipt uploaded:', url);
+            console.log('✅ Receipt uploaded:', url);
+          } else {
+            console.warn('⚠️ uploadReceipt returned null');
           }
           resolve(url);
         } else {
+          console.error('❌ Blob creation failed');
           resolve(null);
         }
       }, 'image/png');
@@ -1006,120 +1019,247 @@ function wrapText(ctx, text, maxWidth) {
 }
 
 async function downloadReceipt(order) {
-  // If receiptUrl exists (uploaded to Cloudinary), copy to clipboard
+  // 1. If receiptUrl already exists (uploaded to Cloudinary), copy to clipboard
   if (order.receiptUrl) {
     try {
       await navigator.clipboard.writeText(order.receiptUrl);
       showToast("📋 Fiş URL'i panoya kopyalandı!");
       return;
     } catch (err) {
-      console.warn("Clipboard failed, falling back to download");
-      // Fall through to download
+      console.warn("Clipboard failed, will try to open URL");
+      window.open(order.receiptUrl, '_blank');
+      return;
     }
   }
 
-  // Fallback: Generate and download PNG locally
-  await ensureReceiptFont();
-  const canvas = document.getElementById("receiptCanvas");
-  const ctx = canvas.getContext("2d");
+  // 2. No receiptUrl - generate receipt with CDN design and try to upload
+  showToast("🔄 Fiş oluşturuluyor...");
 
-  const width = 480;
-  const padding = 32;
-  const lineHeight = 26;
-  const headerHeight = 220;
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
 
-  // Calculate height
-  let contentHeight = headerHeight;
-  const items = order.items.map(item => ({
-    ...item,
-    lines: wrapText(ctx, item.name, 200) // Estimate wrap
-  }));
+    // Receipt dimensions (same as CDN version)
+    const width = 480;
+    const padding = 32;
+    const itemCount = order.items.length;
+    const height = 520 + (itemCount * 28);
 
-  items.forEach(item => {
-    contentHeight += Math.max(item.lines.length * lineHeight, lineHeight) + 10;
-  });
-  contentHeight += 150; // Total area
+    canvas.width = width;
+    canvas.height = height;
 
-  canvas.width = width;
-  canvas.height = contentHeight;
+    // Background (cream/beige color)
+    ctx.fillStyle = '#f5f0e8';
+    ctx.fillRect(0, 0, width, height);
 
-  // Background
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, contentHeight);
+    // Add subtle paper texture (dotted pattern)
+    ctx.fillStyle = 'rgba(0,0,0,0.02)';
+    for (let i = 0; i < width; i += 4) {
+      for (let j = 0; j < height; j += 4) {
+        if (Math.random() > 0.7) {
+          ctx.fillRect(i, j, 1, 1);
+        }
+      }
+    }
 
-  // Header
-  ctx.font = `bold 24px ${RECEIPT_FONT_FAMILY}`;
-  ctx.fillStyle = "#000000";
-  ctx.textAlign = "center";
-  ctx.fillText("CASA CARMARETTI", width / 2, 60);
+    let y = 40;
+    ctx.fillStyle = '#2c3e50';
 
-  ctx.font = `16px ${RECEIPT_FONT_FAMILY}`;
-  ctx.fillText("Sipariş Fişi", width / 2, 90);
+    // Header - Restaurant Name
+    ctx.font = 'italic 28px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CASA CARMARETTI', width / 2, y);
 
-  ctx.font = `14px ${RECEIPT_FONT_FAMILY}`;
-  ctx.fillText(order.date, width / 2, 120);
+    // Subtitle
+    y += 30;
+    ctx.font = '14px Georgia, serif';
+    ctx.fillText('Fine Dining', width / 2, y);
 
-  ctx.textAlign = "left";
-  ctx.fillText(`Masa/Kişi: ${order.name}`, padding, 160);
-  ctx.fillText(`Garson: ${order.waiterName}`, padding, 185);
+    // Address
+    y += 20;
+    ctx.font = '12px Arial, sans-serif';
+    ctx.fillStyle = '#5a6a7a';
+    ctx.fillText('Downtown Vinewood Power St.', width / 2, y);
 
-  // Divider
-  ctx.beginPath();
-  ctx.moveTo(padding, 200);
-  ctx.lineTo(width - padding, 200);
-  ctx.strokeStyle = "#000000";
-  ctx.stroke();
+    // Phone
+    y += 16;
+    ctx.fillText('PH: 62618712', width / 2, y);
 
-  // Items
-  let y = 230;
-  ctx.font = RECEIPT_ITEM_FONT;
+    // Dotted separator
+    y += 20;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#95a5a6';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-  items.forEach(item => {
-    const qtyText = `x${item.qty}`;
-    const priceText = `${item.qty * item.price} $`;
+    // Receipt info
+    y += 25;
+    ctx.fillStyle = '#2c3e50';
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 13px Arial, sans-serif';
+    ctx.fillText(`Fiş: ${order.name}`, padding, y);
 
-    ctx.fillText(qtyText, padding, y);
-    ctx.fillText(priceText, width - padding - ctx.measureText(priceText).width, y);
+    y += 22;
+    ctx.font = '12px Arial, sans-serif';
+    ctx.fillStyle = '#5a6a7a';
+    const dateStr = order.date || new Date().toLocaleString('tr-TR');
+    ctx.fillText(`Tarih: ${dateStr}`, padding, y);
 
-    // Name wrapping
-    let nameY = y;
-    const nameX = padding + 50;
-    const nameWidth = width - padding - 150;
-    const wrappedName = wrapText(ctx, item.name, nameWidth);
+    y += 18;
+    ctx.fillText(`Garson: ${order.waiterName}`, padding, y);
 
-    wrappedName.forEach(line => {
-      ctx.fillText(line, nameX, nameY);
-      nameY += lineHeight;
+    // Dotted separator
+    y += 20;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#95a5a6';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Table Header
+    y += 30;
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 12px Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Ürün', padding, y);
+    ctx.fillText('Adet', 240, y);
+    ctx.fillText('Birim', 300, y);
+    ctx.textAlign = 'right';
+    ctx.fillText('Ara Toplam', width - padding, y);
+
+    // Items
+    y += 10;
+    ctx.font = '12px Arial, sans-serif';
+    let subtotal = 0;
+    let serviceItem = null;
+
+    order.items.forEach(item => {
+      if (item.name === 'Servis Hizmeti') {
+        serviceItem = item;
+        return;
+      }
+      y += 28;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#2c3e50';
+      ctx.fillText(item.name, padding, y);
+      ctx.fillText(`x${item.qty}`, 250, y);
+      ctx.fillText(`${item.price} $`, 300, y);
+      ctx.textAlign = 'right';
+      const itemTotal = item.qty * item.price;
+      ctx.fillText(`${itemTotal} $`, width - padding, y);
+      subtotal += itemTotal;
     });
 
-    y = Math.max(nameY, y + lineHeight) + 10;
-  });
+    // Dotted separator before totals
+    y += 25;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#95a5a6';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-  // Divider
-  y += 10;
-  ctx.beginPath();
-  ctx.moveTo(padding, y);
-  ctx.lineTo(width - padding, y);
-  ctx.stroke();
+    // Subtotal
+    y += 25;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#5a6a7a';
+    ctx.font = '12px Arial, sans-serif';
+    ctx.fillText('Ara toplam', padding, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${subtotal.toFixed(2)} $`, width - padding, y);
 
-  // Total
-  y += 40;
-  ctx.font = `bold 20px ${RECEIPT_FONT_FAMILY}`;
-  ctx.fillText("TOPLAM", padding, y);
-  const totalText = `${order.total} $`;
-  ctx.fillText(totalText, width - padding - ctx.measureText(totalText).width, y);
+    // Service fee
+    y += 22;
+    ctx.textAlign = 'left';
+    ctx.fillText('Servis', padding, y);
+    ctx.textAlign = 'right';
+    const serviceFee = serviceItem ? serviceItem.price : 200;
+    ctx.fillText(`${serviceFee.toFixed(2)} $`, width - padding, y);
 
-  // Footer
-  y += 60;
-  ctx.font = `12px ${RECEIPT_FONT_FAMILY}`;
-  ctx.textAlign = "center";
-  ctx.fillText("Teşekkür ederiz!", width / 2, y);
+    // Total
+    y += 28;
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 14px Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('TOPLAM', padding, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${order.total.toFixed(2)} $`, width - padding, y);
 
-  // Download
-  const link = document.createElement("a");
-  link.download = `Fiş-${order.name}-${Date.now()}.png`;
-  link.href = canvas.toDataURL();
-  link.click();
+    // Dotted separator
+    y += 25;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#95a5a6';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Payment info
+    y += 25;
+    ctx.font = '12px Arial, sans-serif';
+    ctx.fillStyle = '#5a6a7a';
+    ctx.textAlign = 'left';
+    ctx.fillText('Ödeme yöntemi: Kart', padding, y);
+
+    y += 20;
+    const receiptNo = Math.floor(1000000000000 + Math.random() * 9000000000000);
+    ctx.fillText(`Fiş No: ${receiptNo}`, padding, y);
+
+    // Dotted separator
+    y += 25;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#95a5a6';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Thank you message
+    y += 30;
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 13px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Bizi tercih ettiğiniz için teşekkür ederiz!', width / 2, y);
+
+    // Try to upload to Cloudinary
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+    if (blob) {
+      const url = await uploadReceipt(order.id, blob);
+      if (url) {
+        // Successfully uploaded - copy URL
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast("✅ Fiş yüklendi ve URL kopyalandı!");
+          return;
+        } catch (clipErr) {
+          window.open(url, '_blank');
+          showToast("✅ Fiş yüklendi! Yeni sekmede açıldı.");
+          return;
+        }
+      }
+    }
+
+    // 3. Last resort - download as blob
+    console.warn('Cloudinary upload failed, downloading locally...');
+    const link = document.createElement("a");
+    link.download = `Fiş-${order.name}-${Date.now()}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    showToast("📥 Fiş indirildi (çevrimdışı)");
+
+  } catch (err) {
+    console.error('Receipt generation failed:', err);
+    showToast("Fiş oluşturulamadı!", "danger");
+  }
 }
 
 

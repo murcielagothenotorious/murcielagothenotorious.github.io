@@ -45,6 +45,8 @@ const replacements = {
     '__FIREBASE_STORAGE_BUCKET__': process.env.FIREBASE_STORAGE_BUCKET || '',
     '__FIREBASE_MESSAGING_SENDER_ID__': process.env.FIREBASE_MESSAGING_SENDER_ID || '',
     '__FIREBASE_APP_ID__': process.env.FIREBASE_APP_ID || '',
+    '__CLOUDINARY_CLOUD_NAME__': process.env.CLOUDINARY_CLOUD_NAME || '',
+    '__CLOUDINARY_UPLOAD_PRESET__': process.env.CLOUDINARY_UPLOAD_PRESET || '',
 };
 
 for (const [placeholder, value] of Object.entries(replacements)) {
