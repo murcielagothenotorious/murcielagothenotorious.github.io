@@ -911,7 +911,7 @@ function renderActiveOrders() {
              <i class="bi bi-pencil-fill"></i> Düzelt
            </button>
          ` : `
-           <button class="btn btn-sm btn-success action-btn" data-id="${order.id}" data-action="deliver">
+           <button class="btn btn-sm btn-success btn-pulse action-btn" data-id="${order.id}" data-action="deliver">
              <i class="bi bi-bag-check-fill"></i> Teslim Edildi
            </button>
          `}
@@ -942,7 +942,6 @@ function renderClosedHistory() {
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
           <h6 class="mb-0 fw-bold">${order.name}</h6>
-          <small>${order.date} • ${order.waiterName}</small>
         </div>
         <span class="badge bg-success">Ödendi</span>
       </div>
