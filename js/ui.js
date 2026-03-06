@@ -4,46 +4,29 @@ import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, order
    CONSTANTS & CONFIG
    ========================================= */
 const PRODUCTS = {
-  Pizza: [
-    { name: "Margherita", price: 350, icon: "🍕", desc: "Taze mozzarella, San Marzano domates sosu, fesleğen" },
-    { name: "Pepperoni", price: 300, icon: "🍕", desc: "Baharatlı İtalyan pepperoni, mozzarella, domates sosu" },
-    { name: "Spicy Arrabbiata", price: 200, icon: "🌶️", desc: "Acı biber, sarımsak, domates, zeytinyağı" },
+  "ANA YEMEKLER": [
+    { name: "Branzino alla Griglia", price: 550, icon: "🐟", desc: "Izgara levrek, taze otlar, limon, sızma zeytinyağı" },
+    { name: "Osso Buco alla Milanese", price: 600, icon: "", desc: "Ağır ateşte pişmiş dana incik, safranlı risotto" },
+    { name: "Bistecca Tagliata", price: 600, icon: "🥩", desc: "Dilimlenmiş dana antrikot, taze roka, parmesan yaprakları" }
   ],
-  "Spesiyal Makarna": [
-    { name: "Trufa al Maretti", price: 250, icon: "🍝", desc: "Siyah trüf mantarı, parmesan, krema sosu" },
-    { name: "Mare", price: 290, icon: "🦐", desc: "Karides, midye, kalamar, beyaz şarap sosu" },
-    { name: "Shrimp Fra Diavolo", price: 260, icon: "🍤", desc: "Jumbo karides, acı domates sosu, sarımsak" },
-    { name: "Penne San Remo", price: 200, icon: "🍜", desc: "Güneşte kurutulmuş domates, zeytinyağı, fesleğen" },
+  "MAKARNALAR": [
+    { name: "Istakozlu ve Safranlı Ravioli", price: 500, icon: "🦞", desc: "El yapımı ravioli, taze ıstakoz dolgusu, safran sosu" },
+    { name: "Siyah Trüf Mantarlı Cacio e Pepe", price: 500, icon: "", desc: "Taze siyah trüf mantarı, pecorino romano peyniri, karabiber" }
   ],
-  "Ana Yemek": [
-    { name: "Rosso", price: 250, icon: "🥩", desc: "Dana bonfile, kırmızı şarap sosu, biberiye" },
-    { name: "Dolce Agnello", price: 240, icon: "🍖", desc: "Kuzu pirzola, nane sosu, fırınlanmış patates" },
-    { name: "Mozzarella Caprese", price: 230, icon: "🧀", desc: "Buffalo mozzarella, domates, fesleğen, balzamik" },
-    { name: "Fried Calamari", price: 220, icon: "🦑", desc: "Çıtır kalamar, limonlu aioli, maydanoz" },
+  "SALATALAR": [
+    { name: "Izgara Şeftali ve Burrata", price: 300, icon: "🥗", desc: "Taze burrata peyniri, ızgara şeftali, balzamik sirke, taze fesleğen" },
+    { name: "Rezene Salatası", price: 300, icon: "", desc: "İnce dilimlenmiş taze rezene, portakal dilimleri, siyah zeytin, nane" }
   ],
-  Tatlılar: [
-    { name: "Tiramì", price: 250, icon: "🍰", desc: "Mascarpone, espresso, kakao, savoiardi bisküvi" },
-    { name: "Panna", price: 200, icon: "🍮", desc: "İtalyan panna cotta, vanilya, orman meyveleri" },
-    { name: "Cannolì", price: 300, icon: "🥐", desc: "Çıtır hamur, ricotta kreması, fıstık" },
+  "TATLILAR": [
+    { name: "Dekonstrüktif Tiramisu", price: 200, icon: "", desc: "Mascarpone köpüğü, kahve havyarı, savoiardi kıtırı" },
+    { name: "Panna Cotta", price: 200, icon: "", desc: "Gerçek vanilya çubuğu ile hazırlanmış panna cotta, taze orman meyveleri sosu" },
+    { name: "Torta Caprese", price: 200, icon: "", desc: "Geleneksel unsuz bademli ve yoğun çikolatalı İtalyan keki" }
   ],
-  İçecekler: [
-    { name: "Arancìa", price: 250, icon: "🍊", desc: "Taze sıkılmış portakal suyu, buz" },
-    { name: "Sprìtz", price: 200, icon: "🍹", desc: "Aperol, prosecco, soda, portakal dilimi" },
-    { name: "Fresco", price: 190, icon: "🥤", desc: "Limonata, nane, buz, taze limon" },
-    { name: "Grappa", price: 160, icon: "🍇", desc: "İtalyan üzüm brendi, 40% alkol" },
-  ],
-  Salatalar: [
-    { name: "Capres", price: 180, icon: "🥗", desc: "Akdeniz salatası, kapari, zeytin, feta" },
-    { name: "Arugula", price: 200, icon: "🥬", desc: "Roka, parmesan, ceviz, balzamik sos" },
-    { name: "Insalata di Mare", price: 150, icon: "🥒", desc: "Deniz ürünleri, limon, zeytinyağı, maydanoz" },
-    { name: "Panzanella", price: 100, icon: "🍅", desc: "Toskana ekmeği, domates, soğan, fesleğen" },
-  ],
-  Noel: [
-    { name: "Hindi", price: 700, icon: "🦃", desc: "Fırınlanmış hindi, kestane dolması, cranberry sos" },
-    { name: "Sıcak Şarap", price: 300, icon: "🍷", desc: "Kırmızı şarap, tarçın, karanfil, portakal" },
-    { name: "Noel Kurabiyeleri", price: 300, icon: "🍪", desc: "Zencefilli kurabiye, krema süslemeli" },
-    { name: "Üzümlü Kek", price: 400, icon: "🍰", desc: "Geleneksel panettone, kuru üzüm, portakal kabuğu" },
-  ],
+  "İÇECEKLER": [
+    { name: "Negroni", price: 250, icon: "�", desc: "Cin, Campari, tatlı vermut, portakal kabuğu" },
+    { name: "Aperol Spritz", price: 250, icon: "🍹", desc: "Aperol, prosecco, soda, taze portakal dilimi" },
+    { name: "Kırmızı Şarap", price: 250, icon: "🍷", desc: "Kadeh, özel İtalyan şarap seçkisi" }
+  ]
 };
 
 const SERVICE_FEE = 200;
