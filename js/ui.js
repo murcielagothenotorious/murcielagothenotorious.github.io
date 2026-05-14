@@ -103,46 +103,29 @@ const networkMonitor = new NetworkMonitor();
    CONSTANTS & CONFIG
    ========================================= */
 const PRODUCTS = {
-  Pizza: [
-    { name: "Margherita", price: 350, icon: "🍕", desc: "Taze mozzarella, San Marzano domates sosu, fesleğen" },
-    { name: "Pepperoni", price: 300, icon: "🍕", desc: "Baharatlı İtalyan pepperoni, mozzarella, domates sosu" },
-    { name: "Spicy Arrabbiata", price: 200, icon: "🌶️", desc: "Acı biber, sarımsak, domates, zeytinyağı" },
+  "ANA YEMEKLER": [
+    { name: "Branzino alla Griglia", price: 550, image: "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?auto=format&fit=crop&w=400&q=80", desc: "Izgara levrek, taze otlar, limon, sızma zeytinyağı" },
+    { name: "Osso Buco alla Milanese", price: 600, image: "https://images.unsplash.com/photo-1544025162812-1a20f9c146db?auto=format&fit=crop&w=400&q=80", desc: "Ağır ateşte pişmiş dana incik, safranlı risotto" },
+    { name: "Bistecca Tagliata", price: 600, image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=400&q=80", desc: "Dilimlenmiş dana antrikot, taze roka, parmesan yaprakları" }
   ],
-  "Spesiyal Makarna": [
-    { name: "Trufa al Maretti", price: 250, icon: "🍝", desc: "Siyah trüf mantarı, parmesan, krema sosu" },
-    { name: "Mare", price: 290, icon: "🦐", desc: "Karides, midye, kalamar, beyaz şarap sosu" },
-    { name: "Shrimp Fra Diavolo", price: 260, icon: "🍤", desc: "Jumbo karides, acı domates sosu, sarımsak" },
-    { name: "Penne San Remo", price: 200, icon: "🍜", desc: "Güneşte kurutulmuş domates, zeytinyağı, fesleğen" },
+  "MAKARNALAR": [
+    { name: "Istakozlu ve Safranlı Ravioli", price: 500, image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80", desc: "El yapımı ravioli, taze ıstakoz dolgusu, safran sosu" },
+    { name: "Siyah Trüf Mantarlı Cacio e Pepe", price: 500, image: "https://images.unsplash.com/photo-1621510456681-2330135e5871?auto=format&fit=crop&w=400&q=80", desc: "Taze siyah trüf mantarı, pecorino romano peyniri, karabiber" }
   ],
-  "Ana Yemek": [
-    { name: "Rosso", price: 250, icon: "🥩", desc: "Dana bonfile, kırmızı şarap sosu, biberiye" },
-    { name: "Dolce Agnello", price: 240, icon: "🍖", desc: "Kuzu pirzola, nane sosu, fırınlanmış patates" },
-    { name: "Mozzarella Caprese", price: 230, icon: "🧀", desc: "Buffalo mozzarella, domates, fesleğen, balzamik" },
-    { name: "Fried Calamari", price: 220, icon: "🦑", desc: "Çıtır kalamar, limonlu aioli, maydanoz" },
+  "SALATALAR": [
+    { name: "Izgara Şeftali ve Burrata", price: 300, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80", desc: "Taze burrata peyniri, ızgara şeftali, balzamik sirke, taze fesleğen" },
+    { name: "Rezene Salatası", price: 300, image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&q=80", desc: "İnce dilimlenmiş taze rezene, portakal dilimleri, siyah zeytin, nane" }
   ],
-  Tatlılar: [
-    { name: "Tiramì", price: 250, icon: "🍰", desc: "Mascarpone, espresso, kakao, savoiardi bisküvi" },
-    { name: "Panna", price: 200, icon: "🍮", desc: "İtalyan panna cotta, vanilya, orman meyveleri" },
-    { name: "Cannolì", price: 300, icon: "🥐", desc: "Çıtır hamur, ricotta kreması, fıstık" },
+  "TATLILAR": [
+    { name: "Dekonstrüktif Tiramisu", price: 200, image: "https://images.unsplash.com/photo-1571115177098-24eb428aea8f?auto=format&fit=crop&w=400&q=80", desc: "Mascarpone köpüğü, kahve havyarı, savoiardi kıtırı" },
+    { name: "Panna Cotta", price: 200, image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=400&q=80", desc: "Gerçek vanilya çubuğu ile hazırlanmış panna cotta, taze orman meyveleri sosu" },
+    { name: "Torta Caprese", price: 200, image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80", desc: "Geleneksel unsuz bademli ve yoğun çikolatalı İtalyan keki" }
   ],
-  İçecekler: [
-    { name: "Arancìa", price: 250, icon: "🍊", desc: "Taze sıkılmış portakal suyu, buz" },
-    { name: "Sprìtz", price: 200, icon: "🍹", desc: "Aperol, prosecco, soda, portakal dilimi" },
-    { name: "Fresco", price: 190, icon: "🥤", desc: "Limonata, nane, buz, taze limon" },
-    { name: "Grappa", price: 160, icon: "🍇", desc: "İtalyan üzüm brendi, 40% alkol" },
-  ],
-  Salatalar: [
-    { name: "Capres", price: 180, icon: "🥗", desc: "Akdeniz salatası, kapari, zeytin, feta" },
-    { name: "Arugula", price: 200, icon: "🥬", desc: "Roka, parmesan, ceviz, balzamik sos" },
-    { name: "Insalata di Mare", price: 150, icon: "🥒", desc: "Deniz ürünleri, limon, zeytinyağı, maydanoz" },
-    { name: "Panzanella", price: 100, icon: "🍅", desc: "Toskana ekmeği, domates, soğan, fesleğen" },
-  ],
-  Noel: [
-    { name: "Hindi", price: 700, icon: "🦃", desc: "Fırınlanmış hindi, kestane dolması, cranberry sos" },
-    { name: "Sıcak Şarap", price: 300, icon: "🍷", desc: "Kırmızı şarap, tarçın, karanfil, portakal" },
-    { name: "Noel Kurabiyeleri", price: 300, icon: "🍪", desc: "Zencefilli kurabiye, krema süslemeli" },
-    { name: "Üzümlü Kek", price: 400, icon: "🍰", desc: "Geleneksel panettone, kuru üzüm, portakal kabuğu" },
-  ],
+  "İÇECEKLER": [
+    { name: "Negroni", price: 250, image: "https://images.unsplash.com/photo-1575037614876-c3859ea49d10?auto=format&fit=crop&w=400&q=80", desc: "Cin, Campari, tatlı vermut, portakal kabuğu" },
+    { name: "Aperol Spritz", price: 250, image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=400&q=80", desc: "Aperol, prosecco, soda, taze portakal dilimi" },
+    { name: "Kırmızı Şarap", price: 250, image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=400&q=80", desc: "Kadeh, özel İtalyan şarap seçkisi" }
+  ]
 };
 
 const SERVICE_FEE = 200;
@@ -453,8 +436,10 @@ function loadProducts() {
             <button class="product-info-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="${item.desc || ''}">
                <i class="bi bi-info-circle"></i>
             </button>
+            <div class="product-image-container">
+               <img src="${item.image || 'https://image.pollinations.ai/prompt/gourmet%20food%20plating?width=400&height=300&nologo=true'}" alt="${item.name}" class="product-img">
+            </div>
             <div class="product-content">
-               <span class="product-icon">${item.icon || '🍽️'}</span>
                <h4 class="product-name">${item.name}</h4>
                <span class="product-price">${item.price}$</span>
                <div class="badge-qty d-none">0</div>
@@ -566,13 +551,13 @@ function renderCart() {
       subTotal += item.qty * item.price;
 
       const itemHTML = `
-        <div class="d-flex align-items-center justify-content-between w-100">
-           <div class="me-2">
-              <span class="badge bg-gold text-dark rounded-pill me-2">${item.qty}x</span>
-              <span class="fw-bold">${name}</span>
+        <div class="d-flex align-items-center justify-content-between w-100 gap-2">
+           <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
+              <span class="badge bg-gold text-dark rounded-pill me-2 flex-shrink-0">${item.qty}x</span>
+              <span class="fw-bold text-truncate" style="font-size: 0.9rem;" title="${name}">${name}</span>
            </div>
-           <span class="fw-bold ms-auto me-3">${item.qty * item.price}$</span>
-           <button class="btn btn-sm btn-outline-danger border-0 p-1 remove-item-btn" data-name="${name}">
+           <span class="fw-bold flex-shrink-0">${item.qty * item.price}$</span>
+           <button class="btn btn-sm btn-outline-danger border-0 p-1 remove-item-btn flex-shrink-0" data-name="${name}">
               <i class="bi bi-trash-fill"></i>
            </button>
         </div>
@@ -992,7 +977,7 @@ function renderActiveOrders() {
     // Build items list HTML
     const itemsHtml = order.items
       .filter(i => i.name !== "Servis Hizmeti")
-      .map(i => `<span class="badge bg-light text-dark border me-1 mb-1">${i.qty}x ${i.name}</span>`)
+      .map(i => `<span class="badge bg-light text-dark border me-1 mb-1 text-wrap text-start" style="max-width: 100%;">${i.qty}x ${i.name}</span>`)
       .join("");
 
     const minsElapsed = Math.floor((Date.now() - order.timestamp) / 60000);
@@ -1006,10 +991,10 @@ function renderActiveOrders() {
     const li = document.createElement("li");
     li.className = `list-group-item p-3 ${isReady ? 'border-success border-2' : ''}`;
     li.innerHTML = `
-      <div class="d-flex justify-content-between align-items-start mb-2">
-         <div>
-            <h5 class="fw-bold mb-0">${order.name}</h5>
-            <small class="text-secondary">${order.waiterName} • ${minsElapsed} dk önce</small>
+      <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+         <div class="flex-grow-1" style="min-width: 0;">
+            <h5 class="fw-bold mb-0 text-truncate">${order.name}</h5>
+            <small class="text-secondary text-truncate d-block">${order.waiterName} • ${minsElapsed} dk önce</small>
          </div>
          <div class="d-flex flex-column align-items-end gap-1">
             ${statusBadge}
@@ -1051,11 +1036,11 @@ function renderClosedHistory() {
     li.className = "history-item";
 
     li.innerHTML = `
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <h6 class="mb-0 fw-bold">${order.name}</h6>
+      <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+        <div class="flex-grow-1" style="min-width: 0;">
+          <h6 class="mb-0 fw-bold text-truncate">${order.name}</h6>
         </div>
-        <span class="badge bg-success">Ödendi</span>
+        <span class="badge bg-success flex-shrink-0">Ödendi</span>
       </div>
       <div class="d-flex justify-content-between align-items-center">
          <span class="fw-bold">${order.total} $</span>
