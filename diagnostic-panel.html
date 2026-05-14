@@ -1,0 +1,230 @@
+<!-- Diagnostic Panel (hidden by default, toggle with Ctrl+Shift+D) -->
+<div id="diagnosticPanel" class="diagnostic-panel" style="display: none;">
+  <div class="diagnostic-header">
+    <h6>🔍 Diagnostic Panel</h6>
+    <button class="btn-close btn-sm" onclick="document.getElementById('diagnosticPanel').style.display='none'"></button>
+  </div>
+  <div class="diagnostic-body">
+    <!-- Tabs -->
+    <div class="nav nav-tabs nav-fill" role="tablist" style="margin-bottom: 10px;">
+      <button class="nav-link active" onclick="switchDiagTab(event, 'status')">Durum</button>
+      <button class="nav-link" onclick="switchDiagTab(event, 'logs')">Loglar</button>
+      <button class="nav-link" onclick="switchDiagTab(event, 'cache')">Cache</button>
+    </div>
+
+    <!-- Status Tab -->
+    <div id="diag-status" class="diagnostic-tab active">
+      <div style="font-size: 12px; line-height: 1.8;">
+        <div><strong>Network:</strong> <span id="diag-network">-</span></div>
+        <div><strong>Firebase:</strong> <span id="diag-firebase">-</span></div>
+        <div><strong>Service Worker:</strong> <span id="diag-sw">-</span></div>
+        <div><strong>Storage:</strong> <span id="diag-storage">-</span></div>
+        <button class="btn btn-sm btn-outline-primary mt-2" onclick="clearAllDiag()">Temizle</button>
+      </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="diag-logs" class="diagnostic-tab" style="display: none;">
+      <div id="logsList" style="font-size: 11px; max-height: 200px; overflow-y: auto; background: #1a1a1a; padding: 8px; border-radius: 4px;">
+        <em>Log yok</em>
+      </div>
+      <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearLogs()">Logları Sil</button>
+    </div>
+
+    <!-- Cache Tab -->
+    <div id="diag-cache" class="diagnostic-tab" style="display: none;">
+      <div id="cacheInfo" style="font-size: 12px;">
+        Kontrol ediliyor...
+      </div>
+      <button class="btn btn-sm btn-outline-warning mt-2" onclick="clearCache()">Cache Sil</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.diagnostic-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  background: #2a2a2a;
+  border: 2px solid #ff6b6b;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 9999;
+  color: #ddd;
+  font-family: monospace;
+}
+
+.diagnostic-header {
+  background: #ff6b6b;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 6px 6px 0 0;
+}
+
+.diagnostic-header h6 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.diagnostic-body {
+  padding: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.diagnostic-tab {
+  display: none;
+}
+
+.diagnostic-tab.active {
+  display: block;
+}
+
+.nav-tabs {
+  border-bottom: 1px solid #444;
+}
+
+.nav-link {
+  color: #aaa;
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.nav-link:hover {
+  color: #fff;
+}
+
+.nav-link.active {
+  color: #ff6b6b;
+  border-bottom: 2px solid #ff6b6b;
+}
+</style>
+
+<script>
+// Diagnostic Panel Logic
+const diagPanel = document.getElementById('diagnosticPanel');
+
+// Toggle panel with Ctrl+Shift+D
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.code === 'KeyD') {
+    e.preventDefault();
+    diagPanel.style.display = diagPanel.style.display === 'none' ? 'block' : 'none';
+    if (diagPanel.style.display === 'block') {
+      updateDiagStatus();
+      updateDiagLogs();
+      updateCacheInfo();
+    }
+  }
+});
+
+function switchDiagTab(e, tabName) {
+  e.preventDefault();
+  
+  // Hide all tabs
+  document.querySelectorAll('.diagnostic-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  
+  // Show selected
+  document.getElementById(`diag-${tabName}`).classList.add('active');
+  e.target.classList.add('active');
+}
+
+function updateDiagStatus() {
+  document.getElementById('diag-network').textContent = navigator.onLine ? '🟢 Online' : '🔴 Offline';
+  document.getElementById('diag-firebase').textContent = window.firebaseConnected ? '🟢 Connected' : '🟡 Connecting...';
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.controller 
+      ? document.getElementById('diag-sw').textContent = '🟢 Active'
+      : document.getElementById('diag-sw').textContent = '🟡 Registering...';
+  } else {
+    document.getElementById('diag-sw').textContent = '⚫ Not supported';
+  }
+  
+  const storageSize = new Blob(Object.values(localStorage)).size;
+  document.getElementById('diag-storage').textContent = `${(storageSize / 1024).toFixed(1)}KB`;
+}
+
+function updateDiagLogs() {
+  const logs = JSON.parse(localStorage.getItem('firebaseLogs') || '[]');
+  const logsList = document.getElementById('logsList');
+  
+  if (logs.length === 0) {
+    logsList.innerHTML = '<em>Log yok</em>';
+    return;
+  }
+  
+  logsList.innerHTML = logs.slice(-20).map(log => 
+    `<div style="margin-bottom: 4px; color: ${
+      log.level === 'ERROR' ? '#ff6b6b' : 
+      log.level === 'WARN' ? '#ffd93d' : 
+      '#69db7c'
+    }">
+      [${log.level}] ${log.message}
+    </div>`
+  ).join('');
+}
+
+function updateCacheInfo() {
+  if (!('caches' in window)) {
+    document.getElementById('cacheInfo').innerHTML = '⚫ Cache API not supported';
+    return;
+  }
+  
+  caches.keys().then(names => {
+    if (names.length === 0) {
+      document.getElementById('cacheInfo').innerHTML = '<em>Cache boş</em>';
+      return;
+    }
+    
+    let html = '';
+    names.forEach(name => {
+      html += `<div>📦 ${name}</div>`;
+    });
+    
+    document.getElementById('cacheInfo').innerHTML = html;
+  });
+}
+
+function clearLogs() {
+  localStorage.removeItem('firebaseLogs');
+  updateDiagLogs();
+  alert('Loglar temizlendi');
+}
+
+function clearCache() {
+  caches.keys().then(names => {
+    Promise.all(names.map(name => caches.delete(name))).then(() => {
+      updateCacheInfo();
+      alert('Cache temizlendi');
+    });
+  });
+}
+
+function clearAllDiag() {
+  if (confirm('Tüm veriler temizlenecek. Emin misiniz?')) {
+    localStorage.removeItem('firebaseLogs');
+    caches.keys().then(names => {
+      Promise.all(names.map(name => caches.delete(name)));
+    });
+    updateDiagStatus();
+    alert('Tüm veriler temizlendi');
+  }
+}
+
+// Auto-update status when panel is visible
+setInterval(() => {
+  if (diagPanel.style.display !== 'none') {
+    updateDiagStatus();
+  }
+}, 2000);
+</script>

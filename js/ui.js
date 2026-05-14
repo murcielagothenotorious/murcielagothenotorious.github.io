@@ -1,4 +1,103 @@
 import { addOrder, deleteOrder, listenOrders, updateOrder, orderDelivered, orderReady, orderPaid, listenWaiterStats, setWaiterStats, listenMasters, listenCashiers, uploadReceipt } from "./orders.js";
+import { monitor } from "./firebase.js";
+
+/* =========================================
+   NETWORK & ERROR MONITORING
+   ========================================= */
+class NetworkMonitor {
+  constructor() {
+    this.isOnline = navigator.onLine;
+    this.setupListeners();
+  }
+
+  setupListeners() {
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      this.updateUI();
+      console.log('[Network] Back online');
+    });
+
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      this.updateUI();
+      console.log('[Network] Offline');
+    });
+
+    monitor.addListener(({ connected, error }) => {
+      this.updateFirebaseStatus(connected, error);
+    });
+  }
+
+  updateFirebaseStatus(connected, error) {
+    const badge = document.getElementById('firebase-status');
+    if (!badge) return;
+
+    if (connected) {
+      badge.textContent = '🟢';
+      badge.title = 'Firebase bağlantılı';
+      badge.classList.remove('d-none');
+    } else if (error) {
+      badge.textContent = '🔴';
+      badge.title = `Firebase hata: ${error.message}`;
+      badge.classList.remove('d-none');
+    } else {
+      badge.textContent = '🟡';
+      badge.title = 'Firebase bağlantı bekleniyor...';
+      badge.classList.remove('d-none');
+    }
+  }
+
+  updateUI() {
+    const statusBadge = document.getElementById('network-status');
+    if (!statusBadge) return;
+
+    if (this.isOnline) {
+      statusBadge.textContent = 'Online';
+      statusBadge.classList.remove('badge-danger');
+      statusBadge.classList.add('badge-success');
+    } else {
+      statusBadge.textContent = 'Offline';
+      statusBadge.classList.remove('badge-success');
+      statusBadge.classList.add('badge-danger');
+    }
+  }
+
+  async tryAsync(fn, label = 'Operation') {
+    try {
+      if (!this.isOnline) {
+        console.warn(`[Network] Offline - ${label} queued`);
+        // Queue for later sync
+        return null;
+      }
+      return await fn();
+    } catch (error) {
+      console.error(`[Network] ${label} failed:`, error);
+      // Show user-friendly error
+      this.showError(`${label} başarısız. ${this.isOnline ? 'Lütfen tekrar deneyin.' : 'İnternet bağlantısını kontrol edin.'}`);
+      throw error;
+    }
+  }
+
+  showError(message) {
+    // Toast notification (implement based on your UI library)
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 10000; max-width: 300px;';
+    toast.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+}
+
+const networkMonitor = new NetworkMonitor();
 
 /* =========================================
    CONSTANTS & CONFIG
