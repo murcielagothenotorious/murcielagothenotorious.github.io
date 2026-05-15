@@ -56,6 +56,7 @@ export const useOrdersStore = defineStore('orders', () => {
   function initListeners(onNewOrderCallback) {
     _listenOrders((incoming) => {
       orders.value = incoming || []
+      console.table(incoming.map(o => ({ id: o.id, name: o.name, delivered: o.delivered, ready: o.ready, paid: o.paid })))
       onNewOrderCallback?.(incoming)
     })
     listenWaiterStats((stats) => {

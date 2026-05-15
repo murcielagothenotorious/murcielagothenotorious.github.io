@@ -1,6 +1,6 @@
 <template>
   <div class="modal fade" id="leaderboardModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content surface-elevated border-theme shadow-lg">
         <div class="modal-header border-theme">
           <h5 class="modal-title fw-bold text-main">Leaderboard</h5>
